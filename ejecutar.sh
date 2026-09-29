@@ -36,7 +36,6 @@
 #SBATCH -o logs/%x-%j.out
 #SBATCH -e logs/%x-%j.out
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mail-user=maria.garciaminarro@digitaldatafarm.com
 
 set -euo pipefail
 
