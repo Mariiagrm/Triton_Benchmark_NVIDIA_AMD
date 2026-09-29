@@ -1,0 +1,16 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{lrrlrrrrrl}
+    \toprule
+    variante & M & N & K & error\_rel & ms & ms\_p20 & ms\_p80 & tflops & kernel \\
+    \midrule
+    densa\_fp16 & 4096 & 4096 &  & 0 & 2.0489 & 2.0243 & 2.1009 & 67.08 & void at::native::vectorized\_elementwise\_kernel<4, at::native::float16\_copy\_kernel\_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16\_copy\_kernel\_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>) \\
+    sparse24\_fp16 & 4096 & 4096 &  & 4e-05 & 2.7698 & 2.6865 & 2.8506 & 49.62 & sm80\_xmma\_sparse\_gemm\_f16f16\_f16f32\_f32\_tt\_t\_tilesize128x128x64\_stage3\_warpsize2x2x1\_sptensor16x8x32\_execute\_kernel\_5x\_cusparselt \\
+    densa\_fp16 & 8192 & 8192 &  & 0 & 13.5557 & 13.0844 & 13.8432 & 81.11 & void at::native::vectorized\_elementwise\_kernel<4, at::native::float16\_copy\_kernel\_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16\_copy\_kernel\_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>) \\
+    sparse24\_fp16 & 8192 & 8192 &  & 6e-05 & 32.3276 & 32.2441 & 32.7116 & 34.01 & sm80\_xmma\_sparse\_gemm\_f16f16\_f16f32\_f32\_tt\_t\_tilesize128x128x64\_stage3\_warpsize2x2x1\_sptensor16x8x32\_execute\_kernel\_5x\_cusparselt \\
+    \bottomrule
+  \end{tabular}
+  \caption{experimento\_sparsity: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20401, 2026-09-29T21:39:34. Mediana de triton.testing.do\_bench.}
+  \label{tab:experimento-sparsity}
+\end{table}

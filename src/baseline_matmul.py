@@ -82,12 +82,9 @@ def main():
               f"en {mejor['M']}x{mejor['N']}x{mejor['K']} (cuBLAS: {mejor['cublas_tflops']} TFLOP/s) ***\n")
         filas += filas_dt
 
-    destino = comun.guardar(filas, parametros=vars(args), resumen={"baseline": baseline})
-    try:
-        informe_baseline_matmul.generar(destino)
-    except Exception as e:  # el informe nunca debe hacer perder las medidas
-        print(f"AVISO: no se pudo generar el informe ({type(e).__name__}: {e}). "
-              f"Regeneralo con: python3.11 src/informe_baseline_matmul.py {destino}")
+    # informe propio (grafica Triton vs cuBLAS); comun.guardar lo llama y captura errores.
+    comun.guardar(filas, parametros=vars(args), resumen={"baseline": baseline},
+                  informe=informe_baseline_matmul.generar)
 
 
 if __name__ == "__main__":

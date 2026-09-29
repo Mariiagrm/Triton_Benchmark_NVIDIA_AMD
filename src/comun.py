@@ -39,6 +39,11 @@ torch.backends.cudnn.allow_tf32 = True
 # Instrucciones MMA de tensor core en PTX: mma.sync (sm_80+, la que usa sm_121/GB10),
 # wgmma (sm_90a) y tcgen05.mma (sm_100a).
 _MMA = re.compile(r"\b(?:tcgen05\.mma|wgmma\.mma_async|mma\.sync)[\w.]*")
+# Instrucciones de copia asincrona en PTX:
+#   cp.async.bulk.tensor -> TMA (Tensor Memory Accelerator, sm_90+), bloques VRAM->SRAM.
+#   cp.async            -> copia asincrona "clasica" (sm_80+), el pipelining sin TMA.
+_TMA = re.compile(r"\bcp\.async\.bulk\.tensor[\w.]*")
+_CP_ASYNC = re.compile(r"\bcp\.async(?!\.bulk)[\w.]*")
 
 
 def version(paquete):
@@ -103,6 +108,39 @@ def exigir_tensor_cores(compilado, nombre="kernel"):
     return mma
 
 
+def _ptx(compilado):
+    asm = getattr(compilado, "asm", None)
+    if asm is None or "ptx" not in asm:
+        raise TypeError(f"se esperaba un kernel Triton compilado (con .asm['ptx']), no {type(compilado).__name__}")
+    return asm["ptx"]
+
+
+def instrucciones_tma(compilado):
+    """Instrucciones TMA (cp.async.bulk.tensor) en el PTX de un kernel compilado."""
+    return sorted(set(_TMA.findall(_ptx(compilado))))
+
+
+def usa_tma(compilado):
+    """True si el kernel emite TMA. Util para comprobar que la variante block-ptr
+    aprovecha el acelerador en esta GPU (en sm_121/GB10 hay que verificarlo)."""
+    return bool(instrucciones_tma(compilado))
+
+
+def copias_asincronas(compilado):
+    """Resumen de la estrategia de carga del kernel: TMA, cp.async clasico o sincrona.
+    Devuelve un dict con las instrucciones detectadas y una etiqueta legible."""
+    ptx = _ptx(compilado)
+    tma = sorted(set(_TMA.findall(ptx)))
+    cp = sorted(set(_CP_ASYNC.findall(ptx)))
+    if tma:
+        etiqueta = "TMA"
+    elif cp:
+        etiqueta = "cp.async"
+    else:
+        etiqueta = "sincrona"
+    return {"carga": etiqueta, "tma": tma, "cp_async": cp}
+
+
 def kernels_cuda(fn):
     """Nombres de los kernels CUDA que lanza fn, p. ej. el GEMM que elige cuBLAS (evidencia para la memoria)."""
     from torch.autograd import DeviceType
@@ -121,8 +159,13 @@ def nombre_experimento():
     return os.environ.get("TFM_EXPERIMENTO") or os.path.splitext(os.path.basename(sys.argv[0]))[0]
 
 
-def guardar(filas, parametros=None, resumen=None, nombre=None):
-    """Guarda filas (lista de dicts) en CSV y el contexto en JSON. Devuelve el directorio."""
+def guardar(filas, parametros=None, resumen=None, nombre=None, informe=None):
+    """Guarda filas (lista de dicts) en CSV y el contexto en JSON. Devuelve el directorio.
+
+    Al terminar genera tabla + grafica automaticamente: usa `informe` si se pasa
+    (callable que recibe el directorio de la ejecucion) o, si no, el informe generico
+    (informe.generar). Un fallo del informe nunca hace perder las medidas ya guardadas.
+    """
     nombre = nombre or nombre_experimento()
     base = os.path.join(RAIZ, "results", nombre)
     job = os.environ.get("SLURM_JOB_ID")
@@ -149,4 +192,15 @@ def guardar(filas, parametros=None, resumen=None, nombre=None):
     os.replace(tmp, ultimo)
 
     print(f"Resultados guardados en {os.path.relpath(destino, RAIZ)}/", flush=True)
+
+    # Informe automatico (tabla + grafica). No debe hacer perder las medidas.
+    try:
+        if informe is None:
+            import informe as _informe
+            informe = _informe.generar
+        informe(destino)
+    except Exception as e:
+        print(f"AVISO: no se pudo generar el informe ({type(e).__name__}: {e}). "
+              f"Regeneralo con: python3.11 src/informe.py {os.path.relpath(destino, RAIZ)}", flush=True)
+
     return destino
