@@ -1,0 +1,3 @@
+# El contexto de build solo necesita el Dockerfile: el codigo se monta con -v.
+*
+!Dockerfile
