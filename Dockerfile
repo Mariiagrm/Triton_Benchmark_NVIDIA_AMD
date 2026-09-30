@@ -28,6 +28,12 @@ RUN pip install pandas matplotlib jupyterlab pytest ninja
 
 RUN pip install huggingface_hub
 
+# Mismo Triton en TODAS las imagenes: triton-utlx exige triton~=3.8.0 y, al instalarlo,
+# pip sustituye el Triton de NGC por el de PyPI. Sin fijarlo aqui, triton-tlx compilaria
+# con Triton 3.8.0 y gluon/helion/cutlass con el de NGC (otra version): la comparacion
+# entre DSLs no seria justa. 3.8.0 es la version con la que se midieron los resultados.
+RUN pip install "triton~=3.8.0"
+
 
 # --- Triton estandar + TLX (Triton Language Extensions) -------------------------------
 FROM base AS triton-tlx

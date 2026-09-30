@@ -27,11 +27,14 @@ def rmsnorm_kernel(x_ptr, y_ptr, w_ptr, stride_x_row, stride_y_row, N, eps,
     cols = gl.arange(0, BLOCK_SIZE, layout=layout)
     mask = cols < N
 
-    x = gl.load(x_ptr + row * stride_x_row + cols, mask=mask, other=0.0).to(gl.float32)
+    # En Gluon el valor de relleno de una carga enmascarada debe ser un tensor con layout
+    # (no un escalar, que Triton si difunde solo): ceros con el mismo layout que cols.
+    ceros = gl.full([BLOCK_SIZE], 0, x_ptr.dtype.element_ty, layout)
+    x = gl.load(x_ptr + row * stride_x_row + cols, mask=mask, other=ceros).to(gl.float32)
     var = gl.sum(x * x, axis=0) / N
     rstd = gl.rsqrt(var + eps)
 
-    w_raw = gl.load(w_ptr + cols, mask=mask, other=0.0)
+    w_raw = gl.load(w_ptr + cols, mask=mask, other=ceros)
     y = x * rstd * w_raw.to(gl.float32)
     gl.store(y_ptr + row * stride_y_row + cols, y.to(w_raw.dtype), mask=mask)  # dtype de entrada
 

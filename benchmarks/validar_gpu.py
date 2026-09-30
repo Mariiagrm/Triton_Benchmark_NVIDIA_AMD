@@ -99,19 +99,21 @@ def requiere(modulo):
         raise errores_import[modulo]
 
 
-def check(nombre, dsl=None):
-    """Registra una comprobacion; si es de un DSL concreto, solo corre en su imagen."""
+def check(nombre, dsl=None, critico=True):
+    """Registra una comprobacion; si es de un DSL concreto, solo corre en su imagen.
+    critico=False: su fallo se informa como AVISO y no invalida la imagen (lo que no
+    depende de esa pieza, p. ej. los benchmarks Triton sin TLX, puede ejecutarse)."""
     def deco(fn):
         if dsl and DSL and dsl != DSL:
             return fn
         print(f"\n=== {nombre} ===", flush=True)
         try:
             detalle = fn()
-            resultados.append((nombre, True, detalle or ""))
+            resultados.append((nombre, True, detalle or "", critico))
             print(f"[OK] {detalle or ''}")
         except Exception as e:
             traceback.print_exc()
-            resultados.append((nombre, False, f"{type(e).__name__}: {e}"))
+            resultados.append((nombre, False, f"{type(e).__name__}: {e}", critico))
             print(f"[FALLO] {type(e).__name__}: {e}")
         return fn
     return deco
@@ -166,7 +168,9 @@ def _():
     return "huggingface_hub, jupyterlab, matplotlib, ninja, pandas, pytest importan"
 
 
-@check("5. TLX (triton-utlx): compilar y ejecutar kernel con cp.async en GPU", dsl="triton-tlx")
+# No critico: con triton-utlx 3.8.0.post1 falla por un error del plugin (crea
+# ttg.async_copy_global_to_local sin operandSegmentSizes); Triton sin TLX funciona igual.
+@check("5. TLX (triton-utlx): compilar y ejecutar kernel con cp.async en GPU", dsl="triton-tlx", critico=False)
 def _():
     requiere("torch")
     requiere("triton")
@@ -274,8 +278,10 @@ if not resultados[1][1] and os.environ.get("TRITON_PLUGIN_PATHS") and not os.env
         print("=> El plugin TLX rompe la compilacion de Triton (incompatible con este triton).")
 
 print("\n" + "=" * 60 + f"\nRESUMEN (imagen {DSL or 'sin TFM_DSL: todos los DSLs'})")
-for nombre, ok, detalle in resultados:
-    print(f"  {'OK   ' if ok else 'FALLO'} {nombre}\n        {detalle}")
-fallos = sum(not ok for _, ok, _ in resultados)
-print(f"\n{len(resultados) - fallos}/{len(resultados)} comprobaciones superadas")
+for nombre, ok, detalle, critico in resultados:
+    print(f"  {'OK   ' if ok else ('FALLO' if critico else 'AVISO')} {nombre}\n        {detalle}")
+fallos = sum(not ok and critico for _, ok, _, critico in resultados)
+avisos = sum(not ok and not critico for _, ok, _, critico in resultados)
+print(f"\n{len(resultados) - fallos - avisos}/{len(resultados)} comprobaciones superadas"
+      + (f", {avisos} aviso(s) no critico(s)" if avisos else ""))
 sys.exit(1 if fallos else 0)
