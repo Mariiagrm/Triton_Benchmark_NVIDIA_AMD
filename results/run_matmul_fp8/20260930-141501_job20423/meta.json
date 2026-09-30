@@ -1,0 +1,44 @@
+{
+  "experimento": "run_matmul_fp8",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:29f39b65a48242b544088084e8387a416d1ab090131470a555d38fa24cd9ec2e",
+    "host": "hennessy",
+    "slurm_job": "20423",
+    "fecha": "2026-09-30T14:15:01",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_matmul_fp8.py"
+  },
+  "parametros": {
+    "sizes": [
+      4096,
+      8192
+    ]
+  },
+  "resumen": {
+    "4096": {
+      "fp16_tflops": 97.94,
+      "fp8_tflops": 150.98,
+      "fp8_tma_tflops": 151.15,
+      "fp8_cublas_tflops": 175.0,
+      "fp8_tma_carga": "TMA",
+      "fp8_error_rel": 0.03752
+    },
+    "8192": {
+      "fp16_tflops": 93.16,
+      "fp8_tflops": 143.55,
+      "fp8_tma_tflops": 152.18,
+      "fp8_cublas_tflops": 187.26,
+      "fp8_tma_carga": "TMA",
+      "fp8_error_rel": 0.03755
+    }
+  }
+}

@@ -1,0 +1,13 @@
+variante,dtype,M,N,K,BLOCK_SIZE_M,BLOCK_SIZE_N,BLOCK_SIZE_K,GROUP_SIZE_M,num_warps,num_stages,carga,usa_tma,autotune_s,ms,ms_p20,ms_p80,tflops,gbs,mma
+baseline,fp16,4096,4096,4096,128,128,32,8,4,3,cp.async,False,7.8,1.4633,1.449,1.5669,93.92,68.8,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+blockptr,fp16,4096,4096,4096,128,128,32,8,4,3,cp.async,False,15.7,1.5167,1.5063,1.6018,90.62,66.4,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+tma,fp16,4096,4096,4096,128,128,32,8,8,3,TMA,True,19.3,1.4828,1.4711,1.4981,92.69,67.9,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+baseline,fp16,8192,8192,8192,128,256,64,8,8,3,cp.async,False,14.1,12.4058,12.1532,12.6472,88.63,32.5,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+blockptr,fp16,8192,8192,8192,128,256,64,8,8,3,cp.async,False,35.5,12.0192,11.8917,12.4887,91.48,33.5,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+tma,fp16,8192,8192,8192,128,128,32,8,4,4,TMA,True,65.3,11.7279,11.6951,12.3527,93.75,34.3,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+baseline,bf16,4096,4096,4096,128,128,32,8,4,3,cp.async,False,7.6,1.4556,1.4418,1.6877,94.42,69.2,mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32
+blockptr,bf16,4096,4096,4096,128,128,32,8,4,3,cp.async,False,59.2,1.4913,1.4809,1.5129,92.16,67.5,mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32
+tma,bf16,4096,4096,4096,128,128,32,8,8,3,TMA,True,50.8,1.4627,1.4518,1.6598,93.96,68.8,mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32
+baseline,bf16,8192,8192,8192,256,128,64,8,8,3,cp.async,False,13.2,11.6736,11.5922,12.2086,94.19,34.5,mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32
+blockptr,bf16,8192,8192,8192,128,256,64,8,8,3,cp.async,False,34.3,11.5574,11.5429,12.0956,95.13,34.8,mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32
+tma,bf16,8192,8192,8192,128,256,64,8,8,3,TMA,True,64.1,11.4912,11.477,12.0559,95.68,35.0,mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32

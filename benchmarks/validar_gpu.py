@@ -48,6 +48,22 @@ try:
 except Exception as e:
     errores_import["triton"] = e
 try:
+    import utlx_plugin as tlx  # API TLX (tambien queda registrada como triton.language.extra.tlx)
+
+    # Patron de triton-ext test_tlx.py::test_local_load: global -> compartida con cp.async.
+    @triton.jit
+    def tlx_add(x_ptr, y_ptr, out_ptr, n, BLOCK: tl.constexpr):
+        offs = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+        mask = offs < n
+        buffers = tlx.local_alloc((BLOCK,), tl.float32, 2)
+        tlx.async_load(x_ptr + offs, buffers[0], mask=mask)
+        tlx.async_load(y_ptr + offs, buffers[1], mask=mask)
+        tlx.async_load_commit_group()
+        tlx.async_load_wait_group(tl.constexpr(0))
+        tl.store(out_ptr + offs, tlx.local_load(buffers[0]) + tlx.local_load(buffers[1]), mask=mask)
+except Exception as e:
+    errores_import["tlx"] = e
+try:
     from triton.experimental import gluon
     from triton.experimental.gluon import language as gl
 
@@ -150,25 +166,24 @@ def _():
     return "huggingface_hub, jupyterlab, matplotlib, ninja, pandas, pytest importan"
 
 
-@check("5. triton-utlx (plugin TLX)", dsl="triton-tlx")
+@check("5. TLX (triton-utlx): compilar y ejecutar kernel con cp.async en GPU", dsl="triton-tlx")
 def _():
+    requiere("torch")
+    requiere("triton")
     version = md.version("triton-utlx")
     ruta = os.environ.get("TRITON_PLUGIN_PATHS", "")
-    assert ruta, "TRITON_PLUGIN_PATHS no esta definida"
-    for p in ruta.split(":"):
+    for p in filter(None, ruta.split(":")):
         assert os.path.isfile(os.path.realpath(p)), f"plugin no encontrado: {p} -> {os.path.realpath(p)}"
-    import ctypes
-    for p in ruta.split(":"):
-        ctypes.CDLL(p)  # falla si la .so no enlaza con esta arquitectura/libtriton
-    import utlx_plugin  # noqa: F401
-    # El check 2 ya compilo un kernel con el plugin cargado; si la .so rompiera
-    # el pipeline de Triton, habria fallado alli. Se intenta tambien la API TLX:
-    try:
-        import triton.language.extra.tlx as tlx  # noqa: F401
-        api = "API triton.language.extra.tlx disponible"
-    except ImportError as e:
-        api = f"AVISO: API tlx no importable ({e}); solo validado el plugin nativo"
-    return f"triton-utlx {version}, plugin {ruta} carga OK; {api}"
+    requiere("tlx")
+    n = 1000
+    x, y = torch.randn(n, device="cuda"), torch.randn(n, device="cuda")
+    out = torch.empty_like(x)
+    k = tlx_add[(triton.cdiv(n, 256),)](x, y, out, n, BLOCK=256)
+    torch.cuda.synchronize()
+    torch.testing.assert_close(out, x + y)
+    ttgir = k.asm["ttgir"]
+    assert "ttg.async_copy_global_to_local" in ttgir, "el kernel TLX no genera copias asincronas"
+    return f"triton-utlx {version} (plugin {ruta or 'autoregistrado'}): kernel TLX con async_copy OK"
 
 
 @check("5. Gluon: compilar y ejecutar kernel en GPU", dsl="gluon")

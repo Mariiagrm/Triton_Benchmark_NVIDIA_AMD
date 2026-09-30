@@ -163,7 +163,19 @@ asegurar_imagen() {
 # La GPU debe estar libre para que las medidas sean fiables.
 estado_gpu() {
     echo "== Estado de la GPU =="
-    nvidia-smi --query-gpu=name,utilization.gpu,memory.used,temperature.gpu --format=csv || true
+    local salida
+    # Si nvidia-smi no puede hablar con el driver, Docker tampoco podra usar la GPU: abortar ya.
+    if ! salida=$(nvidia-smi --query-gpu=name,utilization.gpu,memory.used,temperature.gpu --format=csv 2>&1); then
+        echo "${salida}"
+        echo "ERROR: la GPU no es utilizable en $(hostname) (nvidia-smi falla)."
+        if grep -qi "version mismatch" <<< "${salida}"; then
+            echo "       'Driver/library version mismatch': el driver NVIDIA se ha actualizado y el"
+            echo "       modulo del kernel cargado es el antiguo. Hay que reiniciar el nodo (o recargar"
+            echo "       los modulos nvidia); compara: cat /proc/driver/nvidia/version"
+        fi
+        exit 1
+    fi
+    echo "${salida}"
     local ocupada
     ocupada=$(nvidia-smi --query-compute-apps=pid,process_name --format=csv,noheader 2>/dev/null || true)
     if [ -n "${ocupada}" ]; then

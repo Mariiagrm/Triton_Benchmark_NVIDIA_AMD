@@ -32,6 +32,8 @@ find_package(CUDAToolkit REQUIRED)
 set(TFM_KERNELS_CUDA 0)
 foreach(familia CB MB)
     file(GLOB fuentes CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/${familia}Kernels/cutlass/*.cu")
+    # *_ext.cu son extensiones de PyTorch (se compilan desde Python), no ejecutables.
+    list(FILTER fuentes EXCLUDE REGEX "_ext\\.cu$")
     foreach(fuente ${fuentes})
         get_filename_component(nombre "${fuente}" NAME_WE)
         set(objetivo "${familia}_${nombre}")

@@ -1,0 +1,99 @@
+{
+  "experimento": "run_rmsnorm_triton",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:29f39b65a48242b544088084e8387a416d1ab090131470a555d38fa24cd9ec2e",
+    "host": "hennessy",
+    "slurm_job": "20423",
+    "fecha": "2026-09-30T14:23:53",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/triton/run_rmsnorm.py"
+  },
+  "parametros": {
+    "rows": [
+      4096,
+      16384
+    ],
+    "cols": [
+      2048,
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 273.0
+  },
+  "resumen": {
+    "fp16_4096x2048": {
+      "triton_gbs": 211.4,
+      "torch_gbs": 208.8,
+      "triton_vs_torch": 1.0125
+    },
+    "fp16_4096x4096": {
+      "triton_gbs": 224.4,
+      "torch_gbs": 217.8,
+      "triton_vs_torch": 1.0303
+    },
+    "fp16_4096x8192": {
+      "triton_gbs": 235.9,
+      "torch_gbs": 210.8,
+      "triton_vs_torch": 1.1191
+    },
+    "fp16_16384x2048": {
+      "triton_gbs": 236.5,
+      "torch_gbs": 233.6,
+      "triton_vs_torch": 1.0124
+    },
+    "fp16_16384x4096": {
+      "triton_gbs": 241.6,
+      "torch_gbs": 232.0,
+      "triton_vs_torch": 1.0414
+    },
+    "fp16_16384x8192": {
+      "triton_gbs": 250.5,
+      "torch_gbs": 223.0,
+      "triton_vs_torch": 1.1233
+    },
+    "bf16_4096x2048": {
+      "triton_gbs": 212.8,
+      "torch_gbs": 210.1,
+      "triton_vs_torch": 1.0129
+    },
+    "bf16_4096x4096": {
+      "triton_gbs": 226.6,
+      "torch_gbs": 218.5,
+      "triton_vs_torch": 1.0371
+    },
+    "bf16_4096x8192": {
+      "triton_gbs": 235.8,
+      "torch_gbs": 211.9,
+      "triton_vs_torch": 1.1128
+    },
+    "bf16_16384x2048": {
+      "triton_gbs": 235.9,
+      "torch_gbs": 234.5,
+      "triton_vs_torch": 1.006
+    },
+    "bf16_16384x4096": {
+      "triton_gbs": 241.6,
+      "torch_gbs": 232.2,
+      "triton_vs_torch": 1.0405
+    },
+    "bf16_16384x8192": {
+      "triton_gbs": 250.6,
+      "torch_gbs": 223.0,
+      "triton_vs_torch": 1.1238
+    }
+  }
+}

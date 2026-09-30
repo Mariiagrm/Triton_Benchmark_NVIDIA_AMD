@@ -46,7 +46,10 @@ tfm_entorno/
 │   │   └── helion/       Helion                              tfm-helion
 │   └── MBKernels/        memory-bound (RMSNorm, Softmax)
 │       ├── triton/       rmsnorm_baseline.py
-│       └── triton_tlx/  cutlass/  gluon/  helion/
+│       ├── gluon/        rmsnorm.py
+│       ├── cutlass/      rmsnorm_ext.cu + rmsnorm.py (compila la extension con nvcc)
+│       ├── helion/       rmsnorm.py
+│       └── triton_tlx/   rmsnorm.py
 │
 ├── benchmarks/           scripts que ejecutan los kernels y miden (misma division que src/)
 │   ├── CBKernels/        compute-bound (TFLOP/s)
@@ -59,9 +62,13 @@ tfm_entorno/
 │   │   ├── gluon/        (imagen gluon)
 │   │   ├── cutlass/      (imagen cutlass)
 │   │   └── helion/       (imagen helion)
-│   ├── MBKernels/        memory-bound (GB/s)
-│   │   ├── triton/       run_rmsnorm.py   RMSNorm Triton vs PyTorch, GB/s y % del pico
-│   │   └── gluon/  cutlass/  helion/
+│   ├── MBKernels/        memory-bound (GB/s): RMSNorm en cada DSL vs PyTorch
+│   │   ├── triton/       run_rmsnorm_triton.py    kernel propio (punteros, una fila por programa)
+│   │   │                 run_rmsnorm_tlx.py       TLX: persistente + prefetch cp.async a memoria compartida
+│   │   ├── gluon/        run_rmsnorm_gluon.py     mismo algoritmo con layout explicito
+│   │   ├── cutlass/      run_rmsnorm_cutlass.py   cutlass::rmsnorm oficial (extension de PyTorch)
+│   │   └── helion/       run_rmsnorm_helion.py    ejemplo oficial de Helion (autotune)
+│   ├── banco_rmsnorm.py        banco comun de RMSNorm (formas, validacion, medida, guardado)
 │   ├── validation.py           verificacion de la salida frente a PyTorch
 │   ├── plantilla.py            plantilla para un benchmark nuevo
 │   ├── comun.py                contexto, medida, guardado y deteccion PTX (MMA/TMA)
@@ -70,7 +77,7 @@ tfm_entorno/
 │
 ├── results/              datos crudos y metricas
 │   ├── matmul_metrics.csv      autogenerado: ultima ejecucion de cada run_matmul*
-│   ├── rmsnorm_metrics.csv     autogenerado: ultima ejecucion de run_rmsnorm
+│   ├── rmsnorm_metrics.csv     autogenerado: ultima ejecucion de cada run_rmsnorm_* (todos los DSLs)
 │   └── <benchmark>/<fecha>_job<JOBID>/   resultados.csv, meta.json, tabla.*, grafica.*
 │                                         (<benchmark>/ultimo -> la mas reciente)
 │
@@ -122,7 +129,7 @@ bash ~/hennessy/tfm_entorno/ejecutar.sh encolar imagen helion            # solo 
 bash ~/hennessy/tfm_entorno/ejecutar.sh encolar validar gluon            # solo validar
 bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul           # benchmark (imagen triton-tlx)
 bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp triton-tlx           # TODOS los benchmarks de un DSL
-bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_rmsnorm --dtypes bf16
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_rmsnorm_gluon --dtypes bf16   # imagen gluon
 bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_fp8 --sizes 4096 8192
 DSL=helion bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp benchmarks/otro.py   # imagen explicita
 VALIDAR=0 bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul  # sin validacion previa
@@ -146,9 +153,12 @@ Dentro de una sesión interactiva (`~/srun_hennessy.sh`), sin cola:
 - **Python (Triton, TLX, Gluon, Helion):** no hay paso de compilación; los kernels se compilan
   JIT al ejecutarse. `exp` construye la imagen si no existe (`REBUILD=1` para forzarlo).
   Caché de Triton persistente en `.cache/triton`.
-- **C++/CUDA (Cutlass/CuTe):** los `.cu` de `src/CBKernels/cutlass/` y
-  `src/MBKernels/cutlass/` se compilan con CMake (sm_121a por defecto) dentro de la imagen
-  cutlass, que ya define `CUTLASS_DIR`:
+- **C++/CUDA (Cutlass/CuTe):** dos formas, ambas dentro de la imagen cutlass (define `CUTLASS_DIR`):
+  - `*_ext.cu`: extensiones de PyTorch que se compilan solas desde Python la primera vez que
+    se usan (`torch.utils.cpp_extension`, caché en `.cache/torch_extensions/`); así se miden con
+    el mismo banco que los kernels Python. Ej.: `src/MBKernels/cutlass/rmsnorm_ext.cu`.
+  - El resto de `.cu` de `src/*Kernels/cutlass/` son programas independientes y se compilan
+    con CMake (sm_121a por defecto):
 
   ```bash
   ~/tfm_entorno/ejecutar.sh shell cutlass
