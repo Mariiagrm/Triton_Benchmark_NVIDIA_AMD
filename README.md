@@ -1,14 +1,16 @@
 # tfm_entorno
 
-Entorno de experimentos del TFM (kernels Triton / Gluon / TLX / Helion) en el nodo
-**hennessy** (aarch64, NVIDIA GB10). Todo se lanza con un único ejecutor: `ejecutar.sh`.
+Benchmarks de kernels del TFM (Triton / TLX / Cutlass-CuTe / Gluon / Helion) en el nodo
+**hennessy** (aarch64, NVIDIA GB10). Los kernels se dividen en **compute-bound** (`src/CBKernels/`,
+p. ej. matmul) y **memory-bound** (`src/MBKernels/`, p. ej. RMSNorm). Todo se lanza con un
+único ejecutor: `ejecutar.sh`.
 
 ## Resultados principales
 
 Optimización de matmul en tensor cores de **GB10 (sm_121)**; objetivo: superar la barrera
-de ~100 TFLOP/s del FP16 denso. Resumen completo en [docs/resumen.md](docs/resumen.md)
-(detalle por técnica en [docs/tma.md](docs/tma.md), [docs/fp8.md](docs/fp8.md),
-[docs/sparsity.md](docs/sparsity.md)).
+de ~100 TFLOP/s del FP16 denso. Resumen completo en [docs/TFM/resumen.md](docs/TFM/resumen.md)
+(detalle por técnica en [docs/TFM/tma.md](docs/TFM/tma.md), [docs/TFM/fp8.md](docs/TFM/fp8.md),
+[docs/TFM/sparsity.md](docs/TFM/sparsity.md)).
 
 | técnica | TFLOP/s (8192³) | vs FP16 | ¿sube el techo? | por qué |
 |:---|---:|---:|:---:|:---|
@@ -25,82 +27,156 @@ en GB10 (TMA porque el matmul no es memory-bound; 2:4 por falta de kernel sparse
 sm_121; y FP8+2:4 no está soportado, así que los ~838 TFLOPS del catálogo no son
 reproducibles aquí).
 
-## Uso
+## Estructura
+
+```
+tfm_entorno/
+├── README.md             este fichero
+├── requirements.txt      dependencias Python (en hennessy las instala el Dockerfile)
+├── CMakeLists.txt        compilacion de kernels C++/CUDA (src/*Kernels/cutlass/*.cu)
+├── Dockerfile            una imagen por DSL (targets triton-tlx / gluon / helion / cutlass)
+├── ejecutar.sh           ejecutor estandar (imagen / validar / exp / shell)
+│
+├── src/                  codigo fuente de los kernels, un subpaquete por DSL
+│   ├── CBKernels/        compute-bound (matmul)             imagen:
+│   │   ├── triton/       Triton estandar: matmul.py, ...     tfm-triton-tlx
+│   │   ├── triton_tlx/   Triton + extensiones TLX            tfm-triton-tlx
+│   │   ├── cutlass/      Cutlass/CuTe (.cu, CMake)           tfm-cutlass
+│   │   ├── gluon/        Gluon                               tfm-gluon
+│   │   └── helion/       Helion                              tfm-helion
+│   └── MBKernels/        memory-bound (RMSNorm, Softmax)
+│       ├── triton/       rmsnorm_baseline.py
+│       └── triton_tlx/  cutlass/  gluon/  helion/
+│
+├── benchmarks/           scripts que ejecutan los kernels y miden
+│   ├── run_matmul.py           matmul Triton (autotune tamanos/bloques/warps) vs cuBLAS, TFLOP/s
+│   ├── run_matmul_tma.py       baseline vs block-pointers vs descriptores TMA
+│   ├── run_matmul_fp8.py       FP16 vs FP8 (Triton) vs FP8+TMA vs FP8 cuBLASLt
+│   ├── run_matmul_sparsity.py  denso vs 2:4 sparse (cuSPARSELt)
+│   ├── run_rmsnorm.py          RMSNorm Triton vs PyTorch, GB/s y % del pico
+│   ├── validation.py           verificacion de la salida frente a PyTorch
+│   ├── plantilla.py            plantilla para un benchmark nuevo
+│   ├── comun.py                contexto, medida, guardado y deteccion PTX (MMA/TMA)
+│   ├── informe.py              tabla .md/.tex + grafica .png/.pdf + metricas consolidadas
+│   ├── informe_matmul.py       informe propio de run_matmul (Triton vs cuBLAS)
+│   └── validar_gpu.py          validacion de una imagen (base comun + su DSL) en GPU
+│
+├── results/              datos crudos y metricas
+│   ├── matmul_metrics.csv      autogenerado: ultima ejecucion de cada run_matmul*
+│   ├── rmsnorm_metrics.csv     autogenerado: ultima ejecucion de run_rmsnorm
+│   └── <benchmark>/<fecha>_job<JOBID>/   resultados.csv, meta.json, tabla.*, grafica.*
+│                                         (<benchmark>/ultimo -> la mas reciente)
+│
+├── docs/TFM/             memoria: resumen/tma/fp8/sparsity (.md y .tex) + resultados/ (tablas y figuras)
+└── logs/                 logs de Slurm (no versionados)
+```
+
+## Acceso al servidor (hennessy)
+
+- Se entra al login **ibsen**; el home de hennessy está montado en
+  `/machines/hennessy/home/mariag` (enlace `~/hennessy`), así que este repo se edita desde el
+  login en `~/hennessy/tfm_entorno` y en el nodo es `~/tfm_entorno`.
+- Docker y la GPU solo están disponibles **dentro** del nodo: se accede por Slurm
+  (particiones `hennessy-benchmark` y `hennessy-test`).
+  - En cola: `sbatch ~/hennessy/tfm_entorno/ejecutar.sh ...`
+  - Sesión interactiva: `~/srun_hennessy.sh` (en el login) abre una shell en hennessy;
+    `~/srun_hennessy.sh cola` muestra la cola.
+
+## Imágenes (una por DSL)
+
+Cada DSL tiene su propia imagen Docker, todas definidas como *targets* del mismo `Dockerfile`
+sobre una base común (NGC PyTorch 25.10: torch, Triton, CUDA, y las herramientas de análisis).
+La base se construye una vez y la reutilizan las cuatro.
+
+| DSL | imagen | añade sobre la base | kernels |
+|:---|:---|:---|:---|
+| Triton + TLX | `tfm-triton-tlx:ngc-arm64` | `triton-utlx` + `TRITON_PLUGIN_PATHS` | `src/*Kernels/triton/`, `triton_tlx/` |
+| Gluon | `tfm-gluon:ngc-arm64` | nada (Gluon viene con Triton; sin plugin TLX) | `src/*Kernels/gluon/` |
+| Helion | `tfm-helion:ngc-arm64` | Helion (`pip install -e`) | `src/*Kernels/helion/` |
+| Cutlass/CuTe | `tfm-cutlass:ngc-arm64` | CUTLASS v4.8.0 en `/opt/cutlass` + CMake | `src/*Kernels/cutlass/` |
+
+`ejecutar.sh validar <dsl>` comprueba en GPU la base (PyTorch, Triton, tensor cores) y el DSL de
+esa imagen. `exp` elige la imagen por el nombre del benchmark (`run_matmul_helion` → helion,
+`*_gluon` → gluon, `*_cutlass` → cutlass; el resto → triton-tlx) o por la variable `DSL=`.
+
+## Ejecución
 
 Desde el login (ibsen) o desde hennessy:
 
 ```bash
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh imagen                        # construir + validar la imagen
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh validar                       # solo validar
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp experimento_cero          # lanzar un experimento
-sbatch -J cero-bf16 ~/hennessy/tfm_entorno/ejecutar.sh exp experimento_cero --dtype bf16
-VALIDAR=0 sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp experimento_cero  # sin validacion previa
+sbatch ~/hennessy/tfm_entorno/ejecutar.sh imagen                   # construir + validar las 4 imagenes
+sbatch ~/hennessy/tfm_entorno/ejecutar.sh imagen helion            # solo una
+sbatch ~/hennessy/tfm_entorno/ejecutar.sh validar gluon            # solo validar
+sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul           # benchmark (imagen triton-tlx)
+sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_rmsnorm --dtypes bf16
+sbatch -J fp8 ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_fp8 --sizes 4096 8192
+DSL=helion sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp benchmarks/otro.py   # imagen explicita
+VALIDAR=0 sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul  # sin validacion previa
 ```
 
-Dentro de una sesión interactiva (`./srun_hennessy.sh`), sin cola:
+Dentro de una sesión interactiva (`~/srun_hennessy.sh`), sin cola:
 
 ```bash
-~/tfm_entorno/ejecutar.sh exp experimento_cero --sizes 1048576
-~/tfm_entorno/ejecutar.sh shell      # bash dentro del contenedor
+~/tfm_entorno/ejecutar.sh exp plantilla --sizes 1024
+~/tfm_entorno/ejecutar.sh shell cutlass   # bash dentro del contenedor de un DSL
 ```
 
 - Log: `logs/<nombre-job>-<JOBID>.out`
-- Resultados: `results/<experimento>/<fecha>_job<JOBID>/{resultados.csv,meta.json}`,
-  y `results/<experimento>/ultimo` apunta a la ejecución más reciente.
+- Resultados: `results/<benchmark>/<fecha>_job<JOBID>/{resultados.csv,meta.json}` (el
+  `meta.json` guarda el DSL y el id de la imagen usada), `results/<benchmark>/ultimo` apunta a
+  la ejecución más reciente, y `results/{matmul,rmsnorm}_metrics.csv` se regeneran con la
+  última de cada benchmark.
+
+## Compilación
+
+- **Python (Triton, TLX, Gluon, Helion):** no hay paso de compilación; los kernels se compilan
+  JIT al ejecutarse. `exp` construye la imagen si no existe (`REBUILD=1` para forzarlo).
+  Caché de Triton persistente en `.cache/triton`.
+- **C++/CUDA (Cutlass/CuTe):** los `.cu` de `src/CBKernels/cutlass/` y
+  `src/MBKernels/cutlass/` se compilan con CMake (sm_121a por defecto) dentro de la imagen
+  cutlass, que ya define `CUTLASS_DIR`:
+
+  ```bash
+  ~/tfm_entorno/ejecutar.sh shell cutlass
+  cmake -S . -B build && cmake --build build -j
+  ```
 
 ## Cómo funciona
 
-- Imagen `tfm:ngc-arm64` construida desde `Dockerfile` (NGC PyTorch 25.10 + TLX + Helion).
-  `exp` la construye si no existe (`REBUILD=1` para forzarlo).
 - Cada ejecución usa un contenedor **efímero** (`docker run --rm`) con este directorio
-  montado en `/workspace/tfm`: no hace falta reconstruir al cambiar código.
-- `exp` avisa si la GPU está ocupada y, por defecto, ejecuta antes `src/validar_gpu.py`.
-- Caché de Triton persistente en `.cache/triton`.
+  montado en `/workspace/tfm` (en la imagen de su DSL) y `PYTHONPATH=src:benchmarks`: no hace falta reconstruir al
+  cambiar código. Los kernels se importan como paquetes:
+  `from CBKernels.triton.matmul import matmul`, `from MBKernels.triton.rmsnorm_baseline import rmsnorm`.
+- `exp` avisa si la GPU está ocupada y, por defecto, ejecuta antes `benchmarks/validar_gpu.py`.
 
-## Añadir un experimento
+## Añadir un kernel / benchmark
 
-1. Copiar `src/experimento_cero.py` como `src/<nombre>.py`.
-2. Kernels a nivel de módulo; validar contra la referencia con `torch.testing.assert_close`.
+1. Kernel en `src/<CB|MB>Kernels/<dsl>/<nombre>.py` (a nivel de módulo).
+2. Benchmark: copiar `benchmarks/plantilla.py` como `benchmarks/run_<familia>[_<variante>].py`.
+   El prefijo decide la tabla consolidada: `run_matmul_*` → `results/matmul_metrics.csv`,
+   `run_rmsnorm*` → `results/rmsnorm_metrics.csv`, `run_softmax*` → `results/softmax_metrics.csv`...
+3. Validar la salida frente a PyTorch con `benchmarks/validation.py`
+   (`comprobar_matmul`, `comprobar_rmsnorm`, `comprobar`, `error_rel`).
    **Todo cálculo matricial va en tensor cores** (`tl.dot`): llamar a
    `comun.exigir_tensor_cores(kernel_compilado)`, que aborta si el PTX no tiene
    `mma.sync`/`wgmma`/`tcgen05.mma`. Importar `comun` activa TF32 para fp32 en cuBLAS.
-3. Medir con `comun.medir(fn, flops=..., bytes_movidos=...)` y terminar con
+   Excepción: operadores sin producto matricial (p. ej. RMSNorm) no llevan MMA y se miden en GB/s.
+4. Medir con `comun.medir(fn, flops=..., bytes_movidos=...)` y terminar con
    `comun.guardar(filas, parametros=vars(args), resumen=...)`.
-4. `sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp <nombre> [args]`.
+5. `sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_<...> [args]`.
 
 ## Informes para la memoria
 
-**Todo experimento** genera al terminar `tabla.md`, `tabla.tex`, `grafica.png` y `grafica.pdf`
-en su carpeta de resultados, y copia la última a `docs/resultados/<experimento>.{md,tex}` (+
-`figuras/`): lo hace `comun.guardar()` automáticamente vía `src/informe.py` (informe genérico).
-`baseline_matmul` usa su propio informe (`informe_baseline_matmul.py`, gráfica Triton vs cuBLAS).
+**Todo benchmark** genera al terminar `tabla.md`, `tabla.tex`, `grafica.png` y `grafica.pdf`
+en su carpeta de resultados, copia la última a `docs/TFM/resultados/<benchmark>.{md,tex}` (+
+`figuras/`) y regenera `results/<familia>_metrics.csv`: lo hace `comun.guardar()` vía
+`benchmarks/informe.py`. `run_matmul` usa su propio informe (`informe_matmul.py`, Triton vs cuBLAS).
 
 Regenerar cualquier ejecución (en el login, sin GPU):
 
 ```bash
-python3.11 src/informe.py results/<experimento>/ultimo
+python3.11 benchmarks/informe.py results/<benchmark>/ultimo
 ```
 
-Las secciones redactadas para la memoria del TFM están en `docs/*.md` y `docs/*.tex`
+Las secciones redactadas para la memoria del TFM están en `docs/TFM/*.md` y `docs/TFM/*.tex`
 (includables con `\input`): `resumen`, `tma`, `fp8`, `sparsity`.
-
-## Estructura
-
-```
-ejecutar.sh           ejecutor estándar (imagen / validar / exp / shell)
-Dockerfile            imagen del entorno
-src/comun.py          contexto, medida, guardado y detección PTX (MMA/TMA) comunes
-src/informe.py        informe genérico (tabla .md/.tex + gráfica .png/.pdf) de cualquier experimento
-src/validar_gpu.py    validación PyTorch/Triton/TLX/Helion en GPU
-src/experimento_cero.py       plantilla: GEMM en tensor cores (Triton fijo) vs cuBLAS
-src/baseline_matmul.py        baseline: matmul Triton autotune vs cuBLAS
-src/informe_baseline_matmul.py  informe propio del baseline (Triton vs cuBLAS)
-src/experimento_tma.py        baseline vs block-pointers vs descriptores TMA
-src/experimento_fp8.py        FP16 vs FP8 (Triton) vs FP8+TMA vs FP8 cuBLASLt
-src/experimento_sparsity.py   denso vs 2:4 sparse (cuSPARSELt)
-src/triton_kernels/   matmul.py (baseline), matmul_blockptr.py, matmul_tma.py,
-                      matmul_fp8.py, matmul_fp8_tma.py
-src/gluon_kernels/    kernels Gluon
-docs/                 secciones de la memoria: resumen/tma/fp8/sparsity (.md y .tex) + resultados/
-results/  logs/  analysis/
-```

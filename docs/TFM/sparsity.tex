@@ -1,0 +1,62 @@
+% Seccion consolidada del TFM sobre sparsity 2:4. Incluir con \input{docs/TFM/sparsity.tex}.
+% Requiere: \usepackage{graphicx,booktabs}. Ajusta rutas si compilas desde otro dir.
+% Datos: results/run_matmul_sparsity/ultimo (job 20402). GB10 (sm_121), torch 2.9.
+
+\section{Estructura dispersa 2:4 en los tensor cores}
+\label{sec:sparsity}
+
+La cifra de catálogo de esta clase de GPU ($\sim$838~TFLOPS) es un número \emph{con
+sparsity 2:4}: de cada 4 valores, 2 son cero, la matriz se comprime a la mitad más
+metadatos, y el circuito sparse del tensor core duplica el throughput saltándose los
+ceros. Es, en teoría, la única técnica capaz de superar el techo denso. Se estudia si en
+GB10, con el \emph{stack} disponible, ese $2\times$ es alcanzable.
+
+\subsection{Implementación}
+
+Triton no soporta 2:4 en \texttt{tl.dot} (no acepta los metadatos de sparsity), así que se
+usa la ruta de PyTorch: se poda A al patrón 2:4 (en cada grupo de 4 a lo largo de K se
+conservan los 2 de mayor magnitud), se comprime con
+\texttt{torch.sparse.to\_sparse\_semi\_structured} (backend cuSPARSELt) y se mide
+\texttt{A\_sp @ B}, comparándolo con el denso \texttt{torch.matmul}. El rendimiento se da
+en convención \emph{dense-equivalent} ($2MNK/t$): un $2\times$ real aparecería como
+$\sim 2\times$~TFLOP/s.
+
+\subsection{Resultados}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{resultados/figuras/run_matmul_sparsity.pdf}
+  \caption{Matmul en GB10: denso FP16 vs 2:4 sparse FP16 (cuSPARSELt).}
+  \label{fig:sparsity}
+\end{figure}
+
+\input{resultados/run_matmul_sparsity.tex}
+
+En $8192^3$: denso 94{,}6 (kernel nativo \texttt{nvjet\_sm121\_\dots\_tmaAB}) vs 2:4 sparse
+32{,}3~TFLOP/s (kernel \texttt{sm80\_xmma\_sparse\_gemm}), un 34\,\% del denso. FP8+2:4 da
+\texttt{NotImplementedError} (no soportado por la API).
+
+\subsection{Análisis crítico}
+
+\begin{enumerate}
+  \item \textbf{El 2:4 no acelera; ralentiza.} El GEMM sparse rinde solo el 34--62\,\% del
+  denso, lo contrario del $2\times$ teórico.
+  \item \textbf{Falta un kernel sparse nativo de Blackwell.} cuSPARSELt despacha a
+  \texttt{sm80\_xmma\_sparse\_gemm} (Ampère), que no explota sm\_121, mientras el denso usa
+  un kernel nativo \texttt{nvjet\_sm121\_\dots\_tmaAB} (Blackwell + TMA): el sparse compite
+  con hardware de dos generaciones atrás y pierde.
+  \item \textbf{FP8 + 2:4 no es accesible} por la API de semi-structured; exigiría bajar a
+  cuSPARSELt directamente.
+  \item \textbf{El número de catálogo no es reproducible aquí:} los $\sim$838~TFLOPS
+  presuponen kernels sparse específicos de la arquitectura (y FP8/FP4) que este \emph{stack}
+  todavía no expone para sm\_121.
+\end{enumerate}
+
+\subsection{Conclusión}
+
+En GB10 con el \emph{stack} actual, la estructura dispersa 2:4 es una regresión de
+rendimiento, no una mejora, por falta de kernel sparse nativo de Blackwell; y la variante
+FP8+2:4 no está soportada. La mejor palanca real sigue siendo el FP8 denso
+(§~\ref{sec:fp8}): 150~TFLOP/s en Triton y hasta 192 en cuBLASLt, frente a $\sim$92 en FP16.
+La sparsity 2:4 queda como línea a revisar cuando el \emph{stack} incorpore kernels sparse
+para sm\_121.

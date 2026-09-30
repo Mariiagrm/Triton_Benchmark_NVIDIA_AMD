@@ -1,0 +1,37 @@
+{
+  "experimento": "run_matmul_sparsity",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": "1.4.1.dev349+g256f2c8c5",
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "imagen": "tfm:ngc-arm64@sha256:202e6ba1ee16f373c2462a466713cf24bb5d70d48977a5e0e1866abdfd8b47c9",
+    "host": "hennessy",
+    "slurm_job": "20401",
+    "fecha": "2026-09-29T21:39:34",
+    "comando": "/workspace/tfm/benchmarks/run_matmul_sparsity.py --sizes 4096 8192"
+  },
+  "parametros": {
+    "sizes": [
+      4096,
+      8192
+    ]
+  },
+  "resumen": {
+    "4096": {
+      "densa_tflops": 67.08,
+      "sparse24_fp16_tflops": 49.62,
+      "speedup": 0.7397
+    },
+    "8192": {
+      "densa_tflops": 81.11,
+      "sparse24_fp16_tflops": 34.01,
+      "speedup": 0.4193
+    }
+  }
+}
