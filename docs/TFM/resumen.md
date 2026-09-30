@@ -50,8 +50,8 @@ En GB10 con el *stack* actual (torch 2.9 / triton 3.8 / cuSPARSELt), la única t
 Cada experimento genera automáticamente tabla + gráfica (`docs/TFM/resultados/`) y guarda contexto (GPU, versiones, job de Slurm) en `meta.json`.
 
 ```bash
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_tma
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_fp8
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_sparsity
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_tma
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_fp8
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_sparsity
 ```

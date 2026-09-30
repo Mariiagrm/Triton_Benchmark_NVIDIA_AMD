@@ -13,7 +13,7 @@ Para cada dtype y tamano ejecuta las tres variantes, valida contra cuBLAS
     - el speedup de cada variante frente al baseline
 
 Uso:
-    sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_tma [--sizes 4096 8192] [--dtypes fp16 bf16]
+    bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_tma [--sizes 4096 8192] [--dtypes fp16 bf16]
 Resultados: results/run_matmul_tma/<fecha>_job<JOBID>/{resultados.csv,meta.json}
 """
 import argparse

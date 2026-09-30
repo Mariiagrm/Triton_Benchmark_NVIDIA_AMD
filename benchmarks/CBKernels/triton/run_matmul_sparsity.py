@@ -15,7 +15,7 @@ El error se mide como sparse(A_p)@B vs denso(A_p)@B (correccion del camino spars
 poda 2:4 en si cambia el resultado y su impacto en exactitud es dependiente de la app).
 
 Uso:
-    sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_sparsity [--sizes 4096 8192]
+    bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_sparsity [--sizes 4096 8192]
 Resultados: results/run_matmul_sparsity/<fecha>_job<JOBID>/ + tabla/grafica automaticas
 """
 import argparse

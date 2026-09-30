@@ -14,7 +14,7 @@ Reporta TFLOP/s, GB/s, la estrategia de carga y MMA (del PTX) y el ERROR RELATIV
 cada variante frente al resultado exacto en FP32 (coste de precision, clave para la memoria).
 
 Uso:
-    sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_fp8 [--sizes 4096 8192]
+    bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_fp8 [--sizes 4096 8192]
 Resultados: results/run_matmul_fp8/<fecha>_job<JOBID>/{resultados.csv,meta.json} + tabla/grafica
 """
 import argparse

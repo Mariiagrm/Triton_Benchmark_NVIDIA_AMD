@@ -12,7 +12,7 @@ Las formas por defecto son de LLM (M = tokens, N = dimension oculta) y superan l
 L2, para medir la memoria principal y no la cache.
 
 Uso:
-    sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_rmsnorm [--rows ...] [--cols ...] [--dtypes ...]
+    bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_rmsnorm [--rows ...] [--cols ...] [--dtypes ...]
 Resultados: results/run_rmsnorm/<fecha>_job<JOBID>/{resultados.csv,meta.json}
 """
 import argparse

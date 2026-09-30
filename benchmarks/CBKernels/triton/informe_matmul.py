@@ -2,8 +2,8 @@
 
 Lo llama run_matmul.py al terminar. Tambien se puede regenerar a mano para
 cualquier ejecucion (no necesita GPU ni torch; basta matplotlib):
-    python3.11 benchmarks/informe_matmul.py                       # la ultima
-    python3.11 benchmarks/informe_matmul.py results/run_matmul/<ejecucion>
+    python3.11 benchmarks/CBKernels/triton/informe_matmul.py                       # la ultima
+    python3.11 benchmarks/CBKernels/triton/informe_matmul.py results/run_matmul/<ejecucion>
 
 Salida:
     <ejecucion>/tabla.md, tabla.tex, grafica.png, grafica.pdf
@@ -20,7 +20,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-RAIZ = os.environ.get("TFM_RAIZ", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Raiz del repo: TFM_RAIZ o, si no, el directorio padre de benchmarks/.
+_AQUI = os.path.abspath(__file__)
+RAIZ = os.environ.get("TFM_RAIZ", _AQUI[:_AQUI.rindex(os.sep + "benchmarks" + os.sep)])
 
 # Paleta categorica de referencia (slots 1 y 2, validados en modo claro) y tintas de texto.
 COLOR = {"triton": "#2a78d6", "cublas": "#eb6834"}

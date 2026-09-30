@@ -57,4 +57,4 @@ especialización de warps, epílogo optimizado), fuera del alcance del kernel de
 
 La reducción a FP8 e4m3 es la técnica que **efectivamente sube el techo** de los tensor cores en GB10 (+57–62 %), a cambio de un error relativo acotado del ~3.75 %. Es coherente con que la MMA fuese el cuello en FP16. El kernel Triton llega a ~83 % de cuBLASLt y el hueco **no** se cierra con TMA (es un problema de *scheduling*, no de datos): cerrarlo requeriría un kernel persistente, línea que se deja indicada. La vía con mayor recorrido para subir el techo es la **estructura dispersa 2:4**, única que puede acercarse a la cifra de catálogo (§ sparsity).
 
-**Reproducir:** `sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_fp8 --sizes 4096 8192`
+**Reproducir:** `bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_fp8 --sizes 4096 8192`

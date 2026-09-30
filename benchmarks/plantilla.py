@@ -6,7 +6,7 @@ kernel usa TENSOR CORES (comun.exigir_tensor_cores), medida con comun.medir() y
 guardado con comun.guardar().
 
 Uso:
-    sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp plantilla [--sizes ...] [--dtypes ...]
+    bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp plantilla [--sizes ...] [--dtypes ...]
 Resultados: results/plantilla/<fecha>_job<JOBID>/{resultados.csv,meta.json}
 """
 import argparse

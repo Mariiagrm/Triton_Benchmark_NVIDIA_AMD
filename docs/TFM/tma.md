@@ -48,4 +48,4 @@ La API que sí emite TMA es la de **descriptores de tensor**, creados dentro del
 
 TMA queda **correctamente activado y verificado** en el kernel de descriptores, pero es una condición **necesaria y no suficiente**: no acelera el matmul denso fp16 porque el límite no es la memoria sino la unidad MMA. Se conserva como infraestructura para los experimentos de menor precisión / *sparsity*, donde el kernel sí puede volverse *memory-bound* y el transporte por TMA sí puede rendir. El intento fallido con *block-pointers* se documenta y conserva (`src/CBKernels/triton/matmul_blockptr.py`) como evidencia de que las abstracciones del compilador no garantizan el uso del hardware.
 
-**Reproducir:** `sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_tma --sizes 8192 --dtypes fp16`
+**Reproducir:** `bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_tma --sizes 8192 --dtypes fp16`

@@ -32,4 +32,4 @@ Triton **no** soporta 2:4 en `tl.dot` (no acepta los metadatos de sparsity), as�
 
 En GB10 con el *stack* actual, la estructura dispersa 2:4 es una **regresión de rendimiento**, no una mejora, por falta de kernel sparse nativo de Blackwell; y la variante FP8+2:4 —la que daría la cifra de catálogo— no está soportada. La mejor palanca real sigue siendo el **FP8 denso** (§ [docs/TFM/fp8.md](fp8.md)): 150 TFLOP/s en Triton y hasta 192 en cuBLASLt, frente a ~92 en FP16. La sparsity 2:4 queda como línea a revisar cuando el *stack* incorpore kernels sparse para sm_121.
 
-**Reproducir:** `sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_sparsity --sizes 4096 8192`
+**Reproducir:** `bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_sparsity --sizes 4096 8192`

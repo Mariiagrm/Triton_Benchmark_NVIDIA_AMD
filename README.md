@@ -48,17 +48,24 @@ tfm_entorno/
 │       ├── triton/       rmsnorm_baseline.py
 │       └── triton_tlx/  cutlass/  gluon/  helion/
 │
-├── benchmarks/           scripts que ejecutan los kernels y miden
-│   ├── run_matmul.py           matmul Triton (autotune tamanos/bloques/warps) vs cuBLAS, TFLOP/s
-│   ├── run_matmul_tma.py       baseline vs block-pointers vs descriptores TMA
-│   ├── run_matmul_fp8.py       FP16 vs FP8 (Triton) vs FP8+TMA vs FP8 cuBLASLt
-│   ├── run_matmul_sparsity.py  denso vs 2:4 sparse (cuSPARSELt)
-│   ├── run_rmsnorm.py          RMSNorm Triton vs PyTorch, GB/s y % del pico
+├── benchmarks/           scripts que ejecutan los kernels y miden (misma division que src/)
+│   ├── CBKernels/        compute-bound (TFLOP/s)
+│   │   ├── triton/       Triton + TLX (imagen triton-tlx)
+│   │   │   ├── run_matmul.py           matmul Triton (autotune tamanos/bloques/warps) vs cuBLAS
+│   │   │   ├── run_matmul_tma.py       baseline vs block-pointers vs descriptores TMA
+│   │   │   ├── run_matmul_fp8.py       FP16 vs FP8 (Triton) vs FP8+TMA vs FP8 cuBLASLt
+│   │   │   ├── run_matmul_sparsity.py  denso vs 2:4 sparse (cuSPARSELt)
+│   │   │   └── informe_matmul.py       informe propio de run_matmul (Triton vs cuBLAS)
+│   │   ├── gluon/        (imagen gluon)
+│   │   ├── cutlass/      (imagen cutlass)
+│   │   └── helion/       (imagen helion)
+│   ├── MBKernels/        memory-bound (GB/s)
+│   │   ├── triton/       run_rmsnorm.py   RMSNorm Triton vs PyTorch, GB/s y % del pico
+│   │   └── gluon/  cutlass/  helion/
 │   ├── validation.py           verificacion de la salida frente a PyTorch
 │   ├── plantilla.py            plantilla para un benchmark nuevo
 │   ├── comun.py                contexto, medida, guardado y deteccion PTX (MMA/TMA)
 │   ├── informe.py              tabla .md/.tex + grafica .png/.pdf + metricas consolidadas
-│   ├── informe_matmul.py       informe propio de run_matmul (Triton vs cuBLAS)
 │   └── validar_gpu.py          validacion de una imagen (base comun + su DSL) en GPU
 │
 ├── results/              datos crudos y metricas
@@ -78,7 +85,13 @@ tfm_entorno/
   login en `~/hennessy/tfm_entorno` y en el nodo es `~/tfm_entorno`.
 - Docker y la GPU solo están disponibles **dentro** del nodo: se accede por Slurm
   (particiones `hennessy-benchmark` y `hennessy-test`).
-  - En cola: `sbatch ~/hennessy/tfm_entorno/ejecutar.sh ...`
+  - En cola: `bash ~/hennessy/tfm_entorno/ejecutar.sh encolar ...`. `encolar` deduce el nodo de
+    la ruta del repo (`/machines/<nodo>/...` en el login, o el nodo actual) y llama a `sbatch`
+    con `-p <nodo>-benchmark` (o `PARTICION=...`), `--chdir` y el log en rutas del nodo.
+    Desde el login hay que usar `bash ...`: `/machines/*/home` está montado con `noexec`.
+  - En otro nodo (p. ej. patterson), con el repo clonado allí, es lo mismo:
+    `bash /machines/patterson/home/mariag/<repo>/ejecutar.sh encolar ...` desde el login, o
+    `./ejecutar.sh ...` directamente dentro del nodo.
   - Sesión interactiva: `~/srun_hennessy.sh` (en el login) abre una shell en hennessy;
     `~/srun_hennessy.sh cola` muestra la cola.
 
@@ -96,22 +109,23 @@ La base se construye una vez y la reutilizan las cuatro.
 | Cutlass/CuTe | `tfm-cutlass:ngc-arm64` | CUTLASS v4.8.0 en `/opt/cutlass` + CMake | `src/*Kernels/cutlass/` |
 
 `ejecutar.sh validar <dsl>` comprueba en GPU la base (PyTorch, Triton, tensor cores) y el DSL de
-esa imagen. `exp` elige la imagen por el nombre del benchmark (`run_matmul_helion` → helion,
-`*_gluon` → gluon, `*_cutlass` → cutlass; el resto → triton-tlx) o por la variable `DSL=`.
+esa imagen. `exp` elige la imagen por la carpeta del benchmark
+(`benchmarks/<CB|MB>Kernels/<dsl>/`) o por la variable `DSL=`.
 
 ## Ejecución
 
 Desde el login (ibsen) o desde hennessy:
 
 ```bash
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh imagen                   # construir + validar las 4 imagenes
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh imagen helion            # solo una
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh validar gluon            # solo validar
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul           # benchmark (imagen triton-tlx)
-sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_rmsnorm --dtypes bf16
-sbatch -J fp8 ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul_fp8 --sizes 4096 8192
-DSL=helion sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp benchmarks/otro.py   # imagen explicita
-VALIDAR=0 sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_matmul  # sin validacion previa
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar imagen                   # construir + validar las 4 imagenes
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar imagen helion            # solo una
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar validar gluon            # solo validar
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul           # benchmark (imagen triton-tlx)
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp triton-tlx           # TODOS los benchmarks de un DSL
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_rmsnorm --dtypes bf16
+bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul_fp8 --sizes 4096 8192
+DSL=helion bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp benchmarks/otro.py   # imagen explicita
+VALIDAR=0 bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul  # sin validacion previa
 ```
 
 Dentro de una sesión interactiva (`~/srun_hennessy.sh`), sin cola:
@@ -152,7 +166,10 @@ Dentro de una sesión interactiva (`~/srun_hennessy.sh`), sin cola:
 ## Añadir un kernel / benchmark
 
 1. Kernel en `src/<CB|MB>Kernels/<dsl>/<nombre>.py` (a nivel de módulo).
-2. Benchmark: copiar `benchmarks/plantilla.py` como `benchmarks/run_<familia>[_<variante>].py`.
+2. Benchmark: copiar `benchmarks/plantilla.py` como
+   `benchmarks/<CB|MB>Kernels/<dsl>/run_<familia>[_<variante>].py`. Se lanza por su nombre y
+   la **carpeta decide la imagen** (triton → triton-tlx, gluon, cutlass, helion). El nombre
+   debe ser único en todo `benchmarks/` (identifica sus resultados): p. ej. `run_matmul_helion.py`.
    El prefijo decide la tabla consolidada: `run_matmul_*` → `results/matmul_metrics.csv`,
    `run_rmsnorm*` → `results/rmsnorm_metrics.csv`, `run_softmax*` → `results/softmax_metrics.csv`...
 3. Validar la salida frente a PyTorch con `benchmarks/validation.py`
@@ -163,7 +180,7 @@ Dentro de una sesión interactiva (`~/srun_hennessy.sh`), sin cola:
    Excepción: operadores sin producto matricial (p. ej. RMSNorm) no llevan MMA y se miden en GB/s.
 4. Medir con `comun.medir(fn, flops=..., bytes_movidos=...)` y terminar con
    `comun.guardar(filas, parametros=vars(args), resumen=...)`.
-5. `sbatch ~/hennessy/tfm_entorno/ejecutar.sh exp run_<...> [args]`.
+5. `bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_<...> [args]`.
 
 ## Informes para la memoria
 
