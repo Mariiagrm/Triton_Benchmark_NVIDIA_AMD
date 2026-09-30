@@ -1,0 +1,98 @@
+% Seccion del TFM: procedencia de cada kernel. Incluir con \input{docs/TFM/procedencia_kernels.tex}.
+% Requiere: \usepackage{booktabs,tabularx}. Version Markdown: docs/TFM/procedencia_kernels.md.
+
+\section{Procedencia de los kernels}
+\label{sec:procedencia}
+
+Esta sección indica el origen de cada kernel: si es código oficial sin modificar, una
+adaptación de un ejemplo público o una implementación propia sobre una API documentada.
+La procedencia se ha verificado comparando el código con la fuente citada, en la versión
+indicada en la tabla~\ref{tab:fuentes}. Se distinguen tres tipos de elaboración:
+\textbf{oficial sin modificar} (se llama al algoritmo de la fuente tal cual, con la
+envoltura mínima para medirlo), \textbf{adaptado} (parte de un ejemplo público, con los
+cambios que se detallan) y \textbf{propio} (diseño propio sobre la API documentada).
+
+\subsection{Kernels compute-bound}
+
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabularx}{\linewidth}{llX}
+    \toprule
+    kernel (\texttt{src/CBKernels/triton/}) & elaboración & fuente \\
+    \midrule
+    \texttt{matmul.py} (baseline) & adaptado & tutorial de Triton \texttt{03-matrix-multiplication}~[1] \\
+    \texttt{matmul\_blockptr.py} & adaptado & baseline + \texttt{tl.make\_block\_ptr}~[1] \\
+    \texttt{matmul\_tma.py} & adaptado & tutorial de Triton \texttt{09-persistent-matmul} (variantes TMA)~[1] \\
+    \texttt{matmul\_fp8.py} & adaptado & baseline con entradas FP8 e4m3~[1] \\
+    \texttt{matmul\_fp8\_tma.py} & propio & combinación de \texttt{matmul\_fp8} y \texttt{matmul\_tma} \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Procedencia de los kernels de matmul (Triton).}
+  \label{tab:procedencia-cb}
+\end{table}
+
+El baseline \texttt{matmul.py} comparte 27 de sus 36 líneas distintas con el
+\texttt{matmul\_kernel} del tutorial~03. Coinciden el orden de programas agrupado para la
+L2 (\texttt{GROUP\_SIZE\_M}), la aritmética de punteros y el bucle en K con
+\texttt{tl.dot} y acumulación en fp32. Son propios el espacio de autotuning y la
+comprobación en el PTX de que se usan tensor cores. \texttt{matmul\_tma.py} toma del
+tutorial~09 los descriptores de tensor creados dentro del kernel
+(\texttt{tl.make\_tensor\_descriptor}) y el \emph{allocator} obligatorio
+(\texttt{triton.set\_allocator}). A diferencia del tutorial, no es persistente: conserva
+la rejilla del baseline para aislar el efecto de TMA. \texttt{matmul\_blockptr.py} se
+mantiene como intento documentado de activar TMA con \emph{block pointers}, que en
+sm\_121 bajan a \texttt{cp.async} clásico (sección~\ref{sec:tma}).
+
+\subsection{Kernels memory-bound: RMSNorm}
+
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabularx}{\linewidth}{lllX}
+    \toprule
+    kernel (\texttt{src/MBKernels/}) & DSL & elaboración & fuente \\
+    \midrule
+    \texttt{triton/rmsnorm\_baseline.py} & Triton & adaptado & tutorial de Triton \texttt{05-layer-norm}~[1] \\
+    \texttt{triton\_tlx/rmsnorm.py} & Triton + TLX & propio & API de µTLX (\texttt{triton-ext})~[4] \\
+    \texttt{gluon/rmsnorm.py} & Gluon & propio & API de Gluon, tutorial \texttt{gluon/02-layouts}~[1] \\
+    \texttt{helion/rmsnorm.py} & Helion & adaptado & ejemplo oficial \texttt{examples/rms\_norm.py}~[3] \\
+    \texttt{cutlass/rmsnorm\_ext.cu} & CUTLASS & oficial sin modificar & \texttt{cutlass::rmsnorm} (\texttt{device\_rmsnorm.h})~[2] \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Procedencia de las implementaciones de RMSNorm.}
+  \label{tab:procedencia-mb}
+\end{table}
+
+El RMSNorm en Triton adapta el LayerNorm del tutorial~05: un programa por fila,
+\texttt{MAX\_FUSED\_SIZE}~$=65536$ y la heurística de warps \texttt{BLOCK\_SIZE // 256}
+(hasta 16 warps en lugar de 8). Se elimina la resta de la media. La versión Gluon repite
+el algoritmo, pero fija el reparto de la fila entre hilos con un \texttt{BlockedLayout}
+explícito. La de Helion es el \texttt{rms\_norm\_fwd} oficial sin la salida
+\texttt{inv\_rms}, que solo necesita el \emph{backward}. La de CUTLASS invoca la función
+oficial \texttt{cutlass::rmsnorm} sin modificarla: en fp16 usa el kernel vectorizado con
+\texttt{float4} y en bf16 el escalar. Solo la envoltura como extensión de PyTorch es
+propia. La versión TLX es un diseño propio (kernel persistente con \emph{prefetch} de
+filas a memoria compartida mediante \texttt{cp.async}) que sigue el patrón de los tests y
+tutoriales de triton-ext. Con \texttt{triton-utlx}~3.8.0.post1 no compila por un error del
+plugin: crea \texttt{ttg.async\_copy\_global\_to\_local} sin \texttt{operandSegmentSizes},
+y el fallo se reproduce también con el ejemplo mínimo del propio repositorio.
+
+Como referencia de rendimiento y de corrección se usan implementaciones de PyTorch, no
+kernels propios: \texttt{torch.matmul} (cuBLAS), \texttt{torch.\_scaled\_mm} (cuBLASLt,
+FP8), \texttt{to\_sparse\_semi\_structured} (cuSPARSELt 2:4, con poda 2:4 propia) y
+\texttt{torch.nn.functional.rms\_norm}.
+
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabularx}{\linewidth}{lXll}
+    \toprule
+    & proyecto & versión & licencia \\
+    \midrule
+    {[1]} & Triton (\texttt{triton-lang/triton}, \texttt{python/tutorials/}) & v3.8.0 (\texttt{c01b677}) & MIT \\
+    {[2]} & CUTLASS (\texttt{NVIDIA/cutlass}) & v4.8.0 (\texttt{098de2a}) & BSD-3-Clause \\
+    {[3]} & Helion (\texttt{pytorch/helion}) & \texttt{main} (\texttt{0f3b242}) & BSD-3-Clause \\
+    {[4]} & µTLX (\texttt{triton-lang/triton-ext}, \texttt{triton-utlx} 3.8.0.post1) & \texttt{main} (\texttt{3c2bb3c}) & MIT \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Fuentes de los kernels. Todas las licencias permiten reutilizar y modificar el código conservando el aviso de copyright.}
+  \label{tab:fuentes}
+\end{table}

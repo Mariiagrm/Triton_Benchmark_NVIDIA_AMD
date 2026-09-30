@@ -206,4 +206,4 @@ python3.11 benchmarks/informe.py results/<benchmark>/ultimo
 ```
 
 Las secciones redactadas para la memoria del TFM están en `docs/TFM/*.md` y `docs/TFM/*.tex`
-(includables con `\input`): `resumen`, `tma`, `fp8`, `sparsity`.
+(includables con `\input`): `resumen`, `tma`, `fp8`, `sparsity` y `procedencia_kernels` (origen de cada kernel).

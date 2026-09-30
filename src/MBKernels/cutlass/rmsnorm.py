@@ -30,7 +30,13 @@ def extension():
             sources=[os.path.join(_AQUI, "rmsnorm_ext.cu")],
             extra_include_paths=[os.path.join(cutlass, "include"),
                                  os.path.join(cutlass, "tools", "util", "include")],
-            extra_cuda_cflags=["-O3", "-std=c++17", "--expt-relaxed-constexpr"],
+            # PyTorch pasa por defecto -D__CUDA_NO_HALF_CONVERSIONS__ (y afines), que quitan
+            # la conversion implicita __half -> float de la que depende device_rmsnorm.h
+            # ("no suitable conversion function from const __half to float"). Se anulan
+            # aqui (-U va despues de los -D de PyTorch); la cabecera de CUTLASS no se toca.
+            extra_cuda_cflags=["-O3", "-std=c++17", "--expt-relaxed-constexpr",
+                               "-U__CUDA_NO_HALF_OPERATORS__", "-U__CUDA_NO_HALF_CONVERSIONS__",
+                               "-U__CUDA_NO_HALF2_OPERATORS__", "-U__CUDA_NO_BFLOAT16_CONVERSIONS__"],
             build_directory=build,
             verbose=False,
         )
