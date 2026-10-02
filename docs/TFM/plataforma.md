@@ -11,6 +11,18 @@ Las pruebas se han hecho en dos nodos con **el mismo hardware**: un sistema NVID
 | hennessy | todos los matmul (`run_matmul`, `_tma`, `_fp8`, `_sparsity`) y RMSNorm en Triton (`run_rmsnorm_triton`) |
 | patterson | RMSNorm en Gluon, Helion y CUTLASS (`run_rmsnorm_gluon`, `_helion`, `_cutlass`) |
 
+## Entornos de ejecución
+
+Los resultados se guardan por **entorno** en `results/<entorno>/` y `docs/TFM/resultados/<entorno>/`. Las tablas consolidadas `results/*_metrics.csv` llevan la columna `maquina`. Cada entorno es una combinación de nodo y software de sistema:
+
+| entorno | nodo | driver / kernel | periodo |
+|:---|:---|:---|:---|
+| `hennessy-580` | hennessy | 580.159.03 / Linux 6.17.0-1021-nvidia | 29–30 sep 2026 (resultados de esta memoria) |
+| `hennessy` | hennessy | 610.57.04 / Linux 7.0.0-1019-nvidia | desde el 2 oct 2026 |
+| `patterson` | patterson | 580.126.09 / Linux 6.17.0-1008-nvidia | desde el 30 sep 2026 |
+
+Por defecto el entorno es el nombre del nodo. Con `TFM_MAQUINA=<nombre>` se separa otro entorno en el mismo nodo; así se hizo `hennessy-580`, para las ejecuciones anteriores al cambio de driver. Desde el 2 de octubre cada `meta.json` registra también `driver_nvidia` y `kernel_linux`.
+
 ## GPU
 
 Valores del runtime de CUDA (`torch.cuda.get_device_properties` y Triton) y de `nvidia-smi`, idénticos en los dos nodos:

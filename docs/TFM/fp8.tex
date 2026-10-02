@@ -1,6 +1,6 @@
 % Seccion consolidada del TFM sobre FP8. Incluir con \input{docs/TFM/fp8.tex}.
 % Requiere: \usepackage{graphicx,booktabs}. Ajusta rutas si compilas desde otro dir.
-% Datos: results/run_matmul_fp8/ultimo (job 20399). GB10 (sm_121), torch 2.9, triton 3.8.0.
+% Datos: results/hennessy-580/run_matmul_fp8/ultimo (job 20399). GB10 (sm_121), torch 2.9, triton 3.8.0.
 
 \section{Reducción de precisión: FP8 en los tensor cores}
 \label{sec:fp8}
@@ -26,12 +26,12 @@ cuantifica como error relativo de Frobenius frente al resultado exacto en FP32.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{resultados/figuras/run_matmul_fp8.pdf}
+  \includegraphics[width=\linewidth]{resultados/hennessy-580/figuras/run_matmul_fp8.pdf}
   \caption{Matmul en GB10: FP16 baseline vs FP8 (Triton) vs FP8 (cuBLASLt).}
   \label{fig:fp8}
 \end{figure}
 
-\input{resultados/run_matmul_fp8.tex}
+\input{resultados/hennessy-580/run_matmul_fp8.tex}
 
 Resumen ($8192^3$): FP16 92{,}4; FP8 Triton 150{,}0 ($+62\,\%$); FP8 cuBLASLt
 192{,}3~TFLOP/s. Error relativo FP8 $3{,}75\,\%$ frente a $0{,}02\,\%$ en FP16.

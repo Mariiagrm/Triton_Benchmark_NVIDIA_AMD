@@ -1,6 +1,6 @@
 % Seccion consolidada del TFM sobre sparsity 2:4. Incluir con \input{docs/TFM/sparsity.tex}.
 % Requiere: \usepackage{graphicx,booktabs}. Ajusta rutas si compilas desde otro dir.
-% Datos: results/run_matmul_sparsity/ultimo (job 20402). GB10 (sm_121), torch 2.9.
+% Datos: results/hennessy-580/run_matmul_sparsity/ultimo (job 20402). GB10 (sm_121), torch 2.9.
 
 \section{Estructura dispersa 2:4 en los tensor cores}
 \label{sec:sparsity}
@@ -25,12 +25,12 @@ $\sim 2\times$~TFLOP/s.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{resultados/figuras/run_matmul_sparsity.pdf}
+  \includegraphics[width=\linewidth]{resultados/hennessy-580/figuras/run_matmul_sparsity.pdf}
   \caption{Matmul en GB10: denso FP16 vs 2:4 sparse FP16 (cuSPARSELt).}
   \label{fig:sparsity}
 \end{figure}
 
-\input{resultados/run_matmul_sparsity.tex}
+\input{resultados/hennessy-580/run_matmul_sparsity.tex}
 
 En $8192^3$: denso 94{,}6 (kernel nativo \texttt{nvjet\_sm121\_\dots\_tmaAB}) vs 2:4 sparse
 32{,}3~TFLOP/s (kernel \texttt{sm80\_xmma\_sparse\_gemm}), un 34\,\% del denso. FP8+2:4 da

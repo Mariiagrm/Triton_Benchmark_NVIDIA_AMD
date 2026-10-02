@@ -2,12 +2,11 @@
 
 Lo llama run_matmul.py al terminar. Tambien se puede regenerar a mano para
 cualquier ejecucion (no necesita GPU ni torch; basta matplotlib):
-    python3.11 benchmarks/CBKernels/triton/informe_matmul.py                       # la ultima
-    python3.11 benchmarks/CBKernels/triton/informe_matmul.py results/run_matmul/<ejecucion>
+    python3.11 benchmarks/CBKernels/triton/informe_matmul.py results/<maquina>/run_matmul/<ejecucion|ultimo>
 
 Salida:
     <ejecucion>/tabla.md, tabla.tex, grafica.png, grafica.pdf
-    docs/TFM/resultados/run_matmul.md (+ figuras/)  -> copia de la ultima, para la memoria
+    docs/TFM/resultados/<maquina>/run_matmul.md (+ figuras/)  -> copia, para la memoria
 """
 import csv
 import json
@@ -143,9 +142,12 @@ def grafica(filas, meta, destino):
     plt.close(fig)
 
 
-def generar(ejecucion=None):
-    ejecucion = os.path.realpath(ejecucion or os.path.join(RAIZ, "results", "run_matmul", "ultimo"))
+def generar(ejecucion):
+    from informe import maquina_de  # benchmarks/ esta en PYTHONPATH
+
+    ejecucion = os.path.realpath(ejecucion)
     filas, meta = leer(ejecucion)
+    maquina = maquina_de(meta, ejecucion)
     md = tabla_md(filas, meta)
     with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
         f.write(md)
@@ -154,7 +156,7 @@ def generar(ejecucion=None):
     grafica(filas, meta, ejecucion)
 
     # Copia para la memoria del TFM (siempre la ejecucion pedida, normalmente la ultima).
-    docs = os.path.join(RAIZ, "docs", "TFM", "resultados")
+    docs = os.path.join(RAIZ, "docs", "TFM", "resultados", maquina)
     figs = os.path.join(docs, "figuras")
     os.makedirs(figs, exist_ok=True)
     for ext in ("png", "pdf"):
@@ -162,10 +164,13 @@ def generar(ejecucion=None):
     shutil.copy(os.path.join(ejecucion, "tabla.tex"), os.path.join(docs, "run_matmul.tex"))
     origen = os.path.relpath(ejecucion, RAIZ)
     with open(os.path.join(docs, "run_matmul.md"), "w") as f:
-        f.write(f"# Baseline matmul\n\nGenerado automáticamente desde `{origen}/`.\n\n"
+        f.write(f"# Baseline matmul ({maquina})\n\nGenerado automáticamente desde `{origen}/`.\n\n"
                 f"![Baseline matmul](figuras/run_matmul.png)\n\n{md}")
-    print(f"Informe generado en {origen}/ y docs/TFM/resultados/run_matmul.md", flush=True)
+    print(f"Informe generado en {origen}/ y docs/TFM/resultados/{maquina}/run_matmul.md", flush=True)
 
 
 if __name__ == "__main__":
-    generar(sys.argv[1] if len(sys.argv) > 1 else None)
+    if len(sys.argv) < 2:
+        sys.exit("uso: python3.11 benchmarks/CBKernels/triton/informe_matmul.py results/<maquina>/run_matmul/<ejecucion|ultimo>")
+    sys.path.insert(0, os.path.join(RAIZ, "benchmarks"))
+    generar(sys.argv[1])

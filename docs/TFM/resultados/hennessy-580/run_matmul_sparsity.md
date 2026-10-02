@@ -1,6 +1,6 @@
-# run_matmul_sparsity
+# run_matmul_sparsity (hennessy-580)
 
-Generado automáticamente desde `results/run_matmul_sparsity/20260930-141629_job20423/`.
+Generado automáticamente desde `results/hennessy-580/run_matmul_sparsity/20260930-141629_job20423/`.
 
 ![run_matmul_sparsity](figuras/run_matmul_sparsity.png)
 

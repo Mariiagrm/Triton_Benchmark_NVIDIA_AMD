@@ -39,13 +39,15 @@
 #
 # Variables opcionales:
 #   PARTICION=...     'encolar': particion (por defecto <nodo>-benchmark)
+#   TFM_MAQUINA=...   nombre del entorno en results/<maquina>/ (por defecto el nodo); p. ej.
+#                     TFM_MAQUINA=hennessy-drv610 para separar otro driver en el mismo nodo
 #   DSL=...           imagen para 'exp' (triton-tlx | gluon | helion | cutlass)
 #   VALIDAR=0         'exp' no ejecuta la validacion previa (por defecto 1)
 #   REBUILD=1         'exp' reconstruye la imagen antes (por defecto solo si falta)
 #   IMAGE=...         otra etiqueta de imagen (por defecto tfm-<dsl>:ngc-arm64)
 #
 # Log (con 'encolar'): <repo>/logs/<nombre-job>-<JOBID>.out
-# Resultados:         <repo>/results/<experimento>/<fecha>_job<JOBID>/
+# Resultados:         <repo>/results/<maquina>/<experimento>/<fecha>_job<JOBID>/
 # ---------------------------------------------------------------------------
 
 # Solo opciones independientes del nodo; particion, --chdir y log los pone 'encolar'.
@@ -201,6 +203,7 @@ en_contenedor() {
         -e TFM_RAIZ=/workspace/tfm \
         -e TFM_IMAGEN="${IMAGE}@$(docker image inspect -f '{{.Id}}' "${IMAGE}")" \
         -e TFM_HOST="$(hostname)" \
+        -e TFM_MAQUINA="${TFM_MAQUINA:-$(hostname -s)}" \
         -e TFM_KERNEL="$(uname -r)" \
         -e TFM_DRIVER="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -1)" \
         -e TFM_DSL="${DSL}" \

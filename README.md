@@ -75,13 +75,16 @@ tfm_entorno/
 │   ├── informe.py              tabla .md/.tex + grafica .png/.pdf + metricas consolidadas
 │   └── validar_gpu.py          validacion de una imagen (base comun + su DSL) en GPU
 │
-├── results/              datos crudos y metricas
-│   ├── matmul_metrics.csv      autogenerado: ultima ejecucion de cada run_matmul*
-│   ├── rmsnorm_metrics.csv     autogenerado: ultima ejecucion de cada run_rmsnorm_* (todos los DSLs)
-│   └── <benchmark>/<fecha>_job<JOBID>/   resultados.csv, meta.json, tabla.*, grafica.*
-│                                         (<benchmark>/ultimo -> la mas reciente)
+├── results/              datos crudos y metricas, SEPARADOS POR ENTORNO (maquina)
+│   ├── matmul_metrics.csv      autogenerado: ultima de cada run_matmul* en cada entorno (columna maquina)
+│   ├── rmsnorm_metrics.csv     idem para run_rmsnorm_* (todos los DSLs)
+│   └── <maquina>/              hennessy, hennessy-580, patterson... (TFM_MAQUINA, por defecto el nodo)
+│       ├── <familia>_metrics.csv           solo ese entorno
+│       └── <benchmark>/<fecha>_job<JOBID>/  resultados.csv, meta.json, tabla.*, grafica.*
+│                                            (<benchmark>/ultimo -> la mas reciente)
 │
-├── docs/TFM/             memoria: resumen/tma/fp8/sparsity (.md y .tex) + resultados/ (tablas y figuras)
+├── docs/TFM/             memoria: resumen/plataforma/tma/fp8/sparsity/procedencia (.md y .tex)
+│                         + resultados/<maquina>/ (tablas y figuras de cada entorno)
 └── logs/                 logs de Slurm (no versionados)
 ```
 
@@ -142,9 +145,12 @@ Dentro de una sesión interactiva (`~/srun_hennessy.sh`), sin cola:
 ~/tfm_entorno/ejecutar.sh shell cutlass   # bash dentro del contenedor de un DSL
 ```
 
+- Entorno: `<maquina>` es el nodo, o `TFM_MAQUINA=<nombre>` para separar otro entorno en el
+  mismo nodo (p. ej. tras cambiar el driver): `TFM_MAQUINA=hennessy-drv620 ./ejecutar.sh exp ...`.
+  Resultados en el formato antiguo (`results/<benchmark>/`): `python3.11 benchmarks/migrar_resultados.py`.
 - Log: `logs/<nombre-job>-<JOBID>.out`
-- Resultados: `results/<benchmark>/<fecha>_job<JOBID>/{resultados.csv,meta.json}` (el
-  `meta.json` guarda el DSL, el id de la imagen, el driver NVIDIA y el kernel del nodo), `results/<benchmark>/ultimo` apunta a
+- Resultados: `results/<maquina>/<benchmark>/<fecha>_job<JOBID>/{resultados.csv,meta.json}` (el
+  `meta.json` guarda el DSL, el id de la imagen, el driver NVIDIA y el kernel del nodo), `results/<maquina>/<benchmark>/ultimo` apunta a
   la ejecución más reciente, y `results/{matmul,rmsnorm}_metrics.csv` se regeneran con la
   última de cada benchmark.
 
@@ -202,7 +208,7 @@ en su carpeta de resultados, copia la última a `docs/TFM/resultados/<benchmark>
 Regenerar cualquier ejecución (en el login, sin GPU):
 
 ```bash
-python3.11 benchmarks/informe.py results/<benchmark>/ultimo
+python3.11 benchmarks/informe.py results/<maquina>/<benchmark>/ultimo
 ```
 
 Las secciones redactadas para la memoria del TFM están en `docs/TFM/*.md` y `docs/TFM/*.tex`

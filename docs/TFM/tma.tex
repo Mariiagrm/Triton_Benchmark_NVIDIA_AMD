@@ -1,7 +1,7 @@
 % Seccion consolidada del TFM sobre TMA. Incluir con \input{docs/TFM/tma.tex}.
 % Requiere: \usepackage{graphicx,booktabs,listings o texttt}. Ajusta \graphicspath
 % o las rutas si compilas desde otro directorio.
-% Datos: results/run_matmul_tma/20260929-205626_job20398 (job 20398).
+% Datos: results/hennessy-580/run_matmul_tma/20260929-205626_job20398 (job 20398).
 % GB10 (sm_121), torch 2.9, triton 3.8.0, CUDA 13.0.
 
 \section{Aceleración de la carga de datos: TMA en Triton}
@@ -44,12 +44,12 @@ fuera-de-rango con ceros, eliminando las máscaras manuales.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{resultados/figuras/run_matmul_tma.pdf}
+  \includegraphics[width=\linewidth]{resultados/hennessy-580/figuras/run_matmul_tma.pdf}
   \caption{Matmul $8192^3$ (fp16) en GB10: baseline vs \emph{block-pointers} vs TMA.}
   \label{fig:tma}
 \end{figure}
 
-\input{resultados/run_matmul_tma.tex}
+\input{resultados/hennessy-580/run_matmul_tma.tex}
 
 Las tres variantes emiten la misma MMA (\texttt{mma.sync.aligned.m16n8k16}). Solo la
 variante de descriptores reporta \texttt{carga=TMA}; baseline y \emph{block-pointers}

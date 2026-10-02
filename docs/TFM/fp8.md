@@ -1,6 +1,6 @@
 # Reducción de precisión: FP8 en los tensor cores
 
-*Sección consolidada para la memoria del TFM. Datos: `results/run_matmul_fp8/ultimo/` (job 20399). Hardware: NVIDIA GB10 (sm_121), torch 2.9, triton 3.8.0, CUDA 13.0.*
+*Sección consolidada para la memoria del TFM. Datos: `results/hennessy-580/run_matmul_fp8/ultimo/` (job 20399). Hardware: NVIDIA GB10 (sm_121), torch 2.9, triton 3.8.0, CUDA 13.0.*
 
 ## Motivación
 
@@ -18,14 +18,14 @@ El error se cuantifica como error relativo de Frobenius frente al resultado **ex
 
 ## Resultados
 
-![Matmul FP8 vs FP16 en GB10](resultados/figuras/run_matmul_fp8.png)
+![Matmul FP8 vs FP16 en GB10](resultados/hennessy-580/figuras/run_matmul_fp8.png)
 
 | tamaño | fp16 (TFLOP/s) | fp8 Triton | fp8 cuBLASLt | speedup fp8/fp16 | error fp8 |
 |:---|---:|---:|---:|---:|---:|
 | 4096³ | 93.8 | 147.7 | 172.3 | +57 % | 3.75 % |
 | 8192³ | 92.4 | 150.0 | 192.3 | +62 % | 3.75 % |
 
-*Error FP16 de referencia: 0.02 %. Tabla completa: `resultados/run_matmul_fp8.md`.*
+*Error FP16 de referencia: 0.02 %. Tabla completa: `resultados/hennessy-580/run_matmul_fp8.md`.*
 
 ## Análisis
 

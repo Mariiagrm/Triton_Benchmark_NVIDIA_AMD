@@ -1,6 +1,6 @@
 # Estructura dispersa 2:4 en los tensor cores
 
-*Sección consolidada para la memoria del TFM. Datos: `results/run_matmul_sparsity/ultimo/` (job 20402). Hardware: NVIDIA GB10 (sm_121), torch 2.9, triton 3.8.0, CUDA 13.0.*
+*Sección consolidada para la memoria del TFM. Datos: `results/hennessy-580/run_matmul_sparsity/ultimo/` (job 20402). Hardware: NVIDIA GB10 (sm_121), torch 2.9, triton 3.8.0, CUDA 13.0.*
 
 ## Motivación
 
@@ -12,7 +12,7 @@ Triton **no** soporta 2:4 en `tl.dot` (no acepta los metadatos de sparsity), as�
 
 ## Resultados
 
-![Matmul denso vs 2:4 sparse en GB10](resultados/figuras/run_matmul_sparsity.png)
+![Matmul denso vs 2:4 sparse en GB10](resultados/hennessy-580/figuras/run_matmul_sparsity.png)
 
 | tamaño | denso fp16 | 2:4 sparse fp16 | sparse/denso | kernel denso | kernel sparse |
 |:---|---:|---:|---:|:---|:---|

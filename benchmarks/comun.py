@@ -8,10 +8,10 @@ Estandar: toda operacion matricial se ejecuta en TENSOR CORES, no en CUDA cores.
 
 Todo experimento deberia:
     1. medir con medir()   -> misma metodologia (triton.testing.do_bench, mediana)
-    2. guardar con guardar() -> results/<experimento>/<fecha>_job<JOBID>/
+    2. guardar con guardar() -> results/<maquina>/<experimento>/<fecha>_job<JOBID>/
                                   resultados.csv  (una fila por medida)
                                   meta.json       (contexto + parametros + resumen)
-       y results/<experimento>/ultimo -> la ejecucion mas reciente; ademas regenera
+       y results/<maquina>/<experimento>/ultimo -> la mas reciente; ademas regenera
        results/<familia>_metrics.csv (p. ej. matmul_metrics.csv) con la ultima de cada una.
 
 El contexto (GPU, versiones, imagen, job de Slurm) lo rellenan las variables de
@@ -30,6 +30,9 @@ import torch
 import triton
 
 RAIZ = os.environ.get("TFM_RAIZ", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Entorno de ejecucion: separa los resultados por maquina (results/<maquina>/...). Por defecto
+# el nodo; TFM_MAQUINA permite distinguir entornos distintos en el mismo nodo.
+MAQUINA = os.environ.get("TFM_MAQUINA") or os.environ.get("TFM_HOST") or platform.node().split(".")[0]
 # tf32: tensores fp32 que los tensor cores multiplican en TF32 (tl.dot y cuBLAS).
 DTYPES = {"fp16": torch.float16, "bf16": torch.bfloat16, "tf32": torch.float32}
 
@@ -69,6 +72,7 @@ def contexto():
         "cublas_tf32": torch.backends.cuda.matmul.allow_tf32,
         "dsl": os.environ.get("TFM_DSL"),
         "imagen": os.environ.get("TFM_IMAGEN"),
+        "maquina": MAQUINA,
         "host": os.environ.get("TFM_HOST", platform.node()),
         # Del nodo, no del contenedor: el driver y el kernel pueden cambiar entre ejecuciones.
         "driver_nvidia": os.environ.get("TFM_DRIVER") or None,
@@ -172,7 +176,7 @@ def guardar(filas, parametros=None, resumen=None, nombre=None, informe=None):
     (informe.generar). Un fallo del informe nunca hace perder las medidas ya guardadas.
     """
     nombre = nombre or nombre_experimento()
-    base = os.path.join(RAIZ, "results", nombre)
+    base = os.path.join(RAIZ, "results", MAQUINA, nombre)
     job = os.environ.get("SLURM_JOB_ID")
     ejecucion = datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + (f"_job{job}" if job else "")
     destino = os.path.join(base, ejecucion)

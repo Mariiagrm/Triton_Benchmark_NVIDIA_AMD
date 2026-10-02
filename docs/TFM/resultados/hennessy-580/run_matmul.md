@@ -1,6 +1,6 @@
-# Baseline matmul
+# Baseline matmul (hennessy-580)
 
-Generado automáticamente desde `results/run_matmul/20260930-141608_job20423/`.
+Generado automáticamente desde `results/hennessy-580/run_matmul/20260930-141608_job20423/`.
 
 ![Baseline matmul](figuras/run_matmul.png)
 

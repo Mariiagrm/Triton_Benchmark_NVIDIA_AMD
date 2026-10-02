@@ -1,6 +1,6 @@
 # Aceleración de la carga de datos: TMA en Triton
 
-*Sección consolidada para la memoria del TFM. Datos: `results/run_matmul_tma/20260929-205626_job20398/` (job 20398). Hardware: NVIDIA GB10 (sm_121), torch 2.9, triton 3.8.0, CUDA 13.0.*
+*Sección consolidada para la memoria del TFM. Datos: `results/hennessy-580/run_matmul_tma/20260929-205626_job20398/` (job 20398). Hardware: NVIDIA GB10 (sm_121), torch 2.9, triton 3.8.0, CUDA 13.0.*
 
 ## Motivación
 
@@ -28,7 +28,7 @@ La API que sí emite TMA es la de **descriptores de tensor**, creados dentro del
 
 ## Resultados
 
-![Comparación baseline / block-pointers / TMA](resultados/figuras/run_matmul_tma.png)
+![Comparación baseline / block-pointers / TMA](resultados/hennessy-580/figuras/run_matmul_tma.png)
 
 | variante | TFLOP/s | GB/s | `carga=` | vs baseline |
 |:---|---:|---:|:---|---:|
@@ -36,7 +36,7 @@ La API que sí emite TMA es la de **descriptores de tensor**, creados dentro del
 | blockptr | 92.82 | 34.0 | cp.async | +2.2 % |
 | **tma** | 92.71 | 34.0 | **TMA** | +2.1 % |
 
-*`8192×8192×8192`, fp16. MMA en las tres: `mma.sync.aligned.m16n8k16`. Tabla completa: `resultados/run_matmul_tma.md`.*
+*`8192×8192×8192`, fp16. MMA en las tres: `mma.sync.aligned.m16n8k16`. Tabla completa: `resultados/hennessy-580/run_matmul_tma.md`.*
 
 ## Análisis crítico
 

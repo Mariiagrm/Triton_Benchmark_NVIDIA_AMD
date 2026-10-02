@@ -1,0 +1,16 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{lrrlrrrrrl}
+    \toprule
+    variante & M & N & K & error\_rel & ms & ms\_p20 & ms\_p80 & tflops & kernel \\
+    \midrule
+    densa\_fp16 & 4096 & 4096 &  & 0 & 1.7992 & 1.749 & 1.8408 & 76.39 & void cutlass::Kernel2<cutlass\_80\_tensorop\_f16\_s16816gemm\_relu\_f16\_128x256\_32x3\_nn\_align8>(cutlass\_80\_tensorop\_f16\_s16816gemm\_relu\_f16\_128x256\_32x3\_nn\_align8::Params) \\
+    sparse24\_fp16 & 4096 & 4096 &  & 4e-05 & 1.0998 & 1.0937 & 1.108 & 124.96 & sm80\_xmma\_sparse\_gemm\_f16f16\_f16f32\_f32\_tt\_t\_tilesize128x128x64\_stage3\_warpsize2x2x1\_sptensor16x8x32\_execute\_kernel\_5x\_cusparselt \\
+    densa\_fp16 & 8192 & 8192 &  & 0 & 11.7422 & 11.7161 & 11.7791 & 93.64 & nvjet\_sm121\_hsh\_mma\_128x208x64\_2\_32x104x64\_tmaAB\_bz\_NNNN \\
+    sparse24\_fp16 & 8192 & 8192 &  & 6e-05 & 34.2184 & 33.8592 & 34.4101 & 32.13 & sm80\_xmma\_sparse\_gemm\_f16f16\_f16f32\_f32\_tt\_t\_tilesize128x128x64\_stage3\_warpsize2x2x1\_sptensor16x8x32\_execute\_kernel\_5x\_cusparselt \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_matmul\_sparsity: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20500, 2026-10-02T09:15:14. Mediana de triton.testing.do\_bench.}
+  \label{tab:run-matmul-sparsity}
+\end{table}

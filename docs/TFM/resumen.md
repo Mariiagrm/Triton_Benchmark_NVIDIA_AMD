@@ -47,7 +47,7 @@ En GB10 con el *stack* actual (torch 2.9 / triton 3.8 / cuSPARSELt), la única t
 
 ## Reproducibilidad
 
-Cada experimento genera automáticamente tabla + gráfica (`docs/TFM/resultados/`) y guarda contexto (GPU, versiones, job de Slurm) en `meta.json`.
+Cada experimento genera automáticamente tabla + gráfica (`docs/TFM/resultados/<entorno>/`; los resultados de esta memoria son del entorno `hennessy-580`) y guarda contexto (GPU, versiones, job de Slurm) en `meta.json`.
 
 ```bash
 bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul

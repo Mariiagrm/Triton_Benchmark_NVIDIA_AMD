@@ -1,6 +1,6 @@
-# run_rmsnorm_triton
+# run_rmsnorm_triton (hennessy-580)
 
-Generado automáticamente desde `results/run_rmsnorm_triton/20260930-142353_job20423/`.
+Generado automáticamente desde `results/hennessy-580/run_rmsnorm_triton/20260930-142353_job20423/`.
 
 ![run_rmsnorm_triton](figuras/run_rmsnorm_triton.png)
 

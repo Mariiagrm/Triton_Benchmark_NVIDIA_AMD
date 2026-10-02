@@ -6,11 +6,14 @@ grafica sin escribir codigo extra. Funciona a partir del resultados.csv + meta.j
 no necesita GPU ni torch (solo matplotlib).
 
 Regenerar a mano cualquier ejecucion:
-    python3.11 benchmarks/informe.py results/<experimento>/<ejecucion>
-    python3.11 benchmarks/informe.py results/<experimento>/ultimo
+    python3.11 benchmarks/informe.py results/<maquina>/<experimento>/<ejecucion>
+    python3.11 benchmarks/informe.py results/<maquina>/<experimento>/ultimo
 
 Salida en la ejecucion: tabla.md, tabla.tex, grafica.png, grafica.pdf
-Copia para la memoria: docs/TFM/resultados/<experimento>.{md,tex} (+ figuras/<experimento>.{png,pdf})
+Copia para la memoria: docs/TFM/resultados/<maquina>/<experimento>.{md,tex} (+ figuras/)
+
+Los resultados se separan por MAQUINA (entorno de ejecucion: por defecto el nodo; se
+puede fijar con TFM_MAQUINA para distinguir entornos en el mismo nodo).
 
 La grafica usa la metrica de rendimiento disponible: "tflops" (compute-bound) o, si no
 la hay, "gbs" (memory-bound, p. ej. RMSNorm). Sin ninguna de las dos, solo tablas.
@@ -160,10 +163,21 @@ def grafica(filas, meta, destino, nombre):
     return True
 
 
-def generar(ejecucion=None):
-    ejecucion = os.path.realpath(ejecucion or os.path.join(RAIZ, "results", "ultimo"))
+def maquina_de(meta, ejecucion):
+    """Maquina de una ejecucion: la registrada en meta.json o, si no, la de su ruta
+    results/<maquina>/<experimento>/<ejecucion>."""
+    c = meta.get("contexto", {})
+    if c.get("maquina"):
+        return c["maquina"]
+    padre = os.path.basename(os.path.dirname(os.path.dirname(os.path.realpath(ejecucion))))
+    return padre if padre != "results" else (c.get("host") or "desconocida")
+
+
+def generar(ejecucion):
+    ejecucion = os.path.realpath(ejecucion)
     filas, meta = leer(ejecucion)
     nombre = meta.get("experimento") or os.path.basename(os.path.dirname(ejecucion))
+    maquina = maquina_de(meta, ejecucion)
     columnas = list(dict.fromkeys(k for f in filas for k in f))  # union en orden de aparicion
 
     md = tabla_md(filas, meta, columnas)
@@ -173,8 +187,8 @@ def generar(ejecucion=None):
         f.write(tabla_tex(filas, meta, columnas, nombre))
     hay_grafica = grafica(filas, meta, ejecucion, nombre)
 
-    # Copia para la memoria del TFM.
-    docs = os.path.join(RAIZ, "docs", "TFM", "resultados")
+    # Copia para la memoria del TFM, separada por maquina.
+    docs = os.path.join(RAIZ, "docs", "TFM", "resultados", maquina)
     figs = os.path.join(docs, "figuras")
     os.makedirs(figs, exist_ok=True)
     with open(os.path.join(docs, f"{nombre}.tex"), "w") as f:
@@ -186,8 +200,8 @@ def generar(ejecucion=None):
         cabecera_img = f"![{nombre}](figuras/{nombre}.png)\n\n"
     origen = os.path.relpath(ejecucion, RAIZ)
     with open(os.path.join(docs, f"{nombre}.md"), "w") as f:
-        f.write(f"# {nombre}\n\nGenerado automáticamente desde `{origen}/`.\n\n{cabecera_img}{md}")
-    print(f"Informe generado en {origen}/ y docs/TFM/resultados/{nombre}.md", flush=True)
+        f.write(f"# {nombre} ({maquina})\n\nGenerado automáticamente desde `{origen}/`.\n\n{cabecera_img}{md}")
+    print(f"Informe generado en {origen}/ y docs/TFM/resultados/{maquina}/{nombre}.md", flush=True)
 
 
 def familia(nombre):
@@ -197,36 +211,58 @@ def familia(nombre):
     return partes[1] if len(partes) > 1 and partes[0] == "run" else None
 
 
-def actualizar_metricas(fam):
-    """Regenera results/<fam>_metrics.csv con la ULTIMA ejecucion de cada experimento de esa
-    familia (results/run_<fam>*/ultimo). Idempotente: no acumula duplicados. Es la tabla
-    consolidada para la memoria; los datos crudos siguen en cada ejecucion."""
+def ultimas_ejecuciones():
+    """(maquina, experimento, ruta de 'ultimo') de cada results/<maquina>/<experimento>/ultimo."""
     base = os.path.join(RAIZ, "results")
-    filas = []
-    for exp in sorted(os.listdir(base)):
-        ultimo = os.path.join(base, exp, "ultimo")
-        if familia(exp) != fam or not os.path.isfile(os.path.join(ultimo, "resultados.csv")):
+    for maquina in sorted(os.listdir(base)):
+        dir_maquina = os.path.join(base, maquina)
+        if not os.path.isdir(dir_maquina):
             continue
-        with open(os.path.join(ultimo, "resultados.csv")) as f:
-            medidas = list(csv.DictReader(f))
-        with open(os.path.join(ultimo, "meta.json")) as f:
-            c = json.load(f).get("contexto", {})
-        origen = {"experimento": exp, "ejecucion": os.path.basename(os.path.realpath(ultimo)),
-                  "gpu": c.get("gpu"), "fecha": c.get("fecha")}
-        filas += [{**origen, **m} for m in medidas]
-    if not filas:
-        return None
-    destino = os.path.join(base, f"{fam}_metrics.csv")
+        for exp in sorted(os.listdir(dir_maquina)):
+            ultimo = os.path.join(dir_maquina, exp, "ultimo")
+            if os.path.isfile(os.path.join(ultimo, "resultados.csv")):
+                yield maquina, exp, ultimo
+
+
+def _escribir_csv(destino, filas):
     columnas = list(dict.fromkeys(k for f in filas for k in f))  # union en orden de aparicion
     with open(destino, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=columnas)
         w.writeheader()
         w.writerows(filas)
     print(f"Metricas consolidadas en {os.path.relpath(destino, RAIZ)}", flush=True)
+
+
+def actualizar_metricas(fam):
+    """Regenera las tablas consolidadas de una familia con la ULTIMA ejecucion de cada
+    experimento EN CADA MAQUINA (results/<maquina>/run_<fam>*/ultimo):
+        results/<fam>_metrics.csv            todas las maquinas (columna 'maquina')
+        results/<maquina>/<fam>_metrics.csv  solo esa maquina
+    Idempotente: no acumula duplicados. Los datos crudos siguen en cada ejecucion."""
+    por_maquina = {}
+    for maquina, exp, ultimo in ultimas_ejecuciones():
+        if familia(exp) != fam:
+            continue
+        with open(os.path.join(ultimo, "resultados.csv")) as f:
+            medidas = list(csv.DictReader(f))
+        with open(os.path.join(ultimo, "meta.json")) as f:
+            c = json.load(f).get("contexto", {})
+        origen = {"maquina": maquina, "experimento": exp,
+                  "ejecucion": os.path.basename(os.path.realpath(ultimo)),
+                  "gpu": c.get("gpu"), "driver_nvidia": c.get("driver_nvidia"), "fecha": c.get("fecha")}
+        por_maquina.setdefault(maquina, []).extend({**origen, **m} for m in medidas)
+    if not por_maquina:
+        return None
+    for maquina, filas in por_maquina.items():
+        _escribir_csv(os.path.join(RAIZ, "results", maquina, f"{fam}_metrics.csv"), filas)
+    destino = os.path.join(RAIZ, "results", f"{fam}_metrics.csv")
+    _escribir_csv(destino, [f for filas in por_maquina.values() for f in filas])
     return destino
 
 
 if __name__ == "__main__":
-    generar(sys.argv[1] if len(sys.argv) > 1 else None)
-    for fam in sorted({familia(e) for e in os.listdir(os.path.join(RAIZ, "results"))} - {None}):
+    if len(sys.argv) < 2:
+        sys.exit("uso: python3.11 benchmarks/informe.py results/<maquina>/<experimento>/<ejecucion|ultimo>")
+    generar(sys.argv[1])
+    for fam in sorted({familia(e) for _, e, _ in ultimas_ejecuciones()} - {None}):
         actualizar_metricas(fam)

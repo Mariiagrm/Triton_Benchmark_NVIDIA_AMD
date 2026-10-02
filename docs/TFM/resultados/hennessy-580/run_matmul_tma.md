@@ -1,6 +1,6 @@
-# run_matmul_tma
+# run_matmul_tma (hennessy-580)
 
-Generado automáticamente desde `results/run_matmul_tma/20260930-142322_job20423/`.
+Generado automáticamente desde `results/hennessy-580/run_matmul_tma/20260930-142322_job20423/`.
 
 ![run_matmul_tma](figuras/run_matmul_tma.png)
 

@@ -1,6 +1,6 @@
-# run_matmul_fp8
+# run_matmul_fp8 (hennessy-580)
 
-Generado automáticamente desde `results/run_matmul_fp8/20260930-141501_job20423/`.
+Generado automáticamente desde `results/hennessy-580/run_matmul_fp8/20260930-141501_job20423/`.
 
 ![run_matmul_fp8](figuras/run_matmul_fp8.png)
 

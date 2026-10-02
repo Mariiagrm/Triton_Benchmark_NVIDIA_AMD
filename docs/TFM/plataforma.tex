@@ -13,6 +13,12 @@ el RMSNorm en Gluon, Helion y CUTLASS. Los datos se han leído de los propios no
 runtime de CUDA dentro del contenedor. Cada ejecución guarda además su contexto (GPU,
 versiones, imagen y job de Slurm) en un \texttt{meta.json}.
 
+Los resultados se guardan por \emph{entorno} (combinación de nodo y software de sistema)
+en \texttt{results/<entorno>/}: \texttt{hennessy-580} (hennessy con el driver 580.159.03,
+29--30 sep; son los resultados de esta memoria), \texttt{hennessy} (driver 610.57.04, desde el
+2 oct) y \texttt{patterson} (driver 580.126.09). Las tablas consolidadas indican el entorno de
+cada medida en la columna \texttt{maquina}.
+
 \begin{table}[htbp]
   \centering\small
   \begin{tabularx}{\linewidth}{lX}
