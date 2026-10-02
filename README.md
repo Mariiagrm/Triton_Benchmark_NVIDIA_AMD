@@ -41,9 +41,9 @@ tfm_entorno/
 │   ├── CBKernels/        compute-bound (matmul)             imagen:
 │   │   ├── triton/       Triton estandar: matmul.py, ...     tfm-triton-tlx
 │   │   ├── triton_tlx/   Triton + extensiones TLX            tfm-triton-tlx
-│   │   ├── cutlass/      Cutlass/CuTe (.cu, CMake)           tfm-cutlass
+│   │   ├── cutlass/      matmul_cute.py (CuTe DSL)           tfm-cutlass
 │   │   ├── gluon/        Gluon                               tfm-gluon
-│   │   └── helion/       Helion                              tfm-helion
+│   │   └── helion/       matmul.py                           tfm-helion
 │   └── MBKernels/        memory-bound (RMSNorm, Softmax)
 │       ├── triton/       rmsnorm_baseline.py
 │       ├── gluon/        rmsnorm.py
@@ -60,8 +60,8 @@ tfm_entorno/
 │   │   │   ├── run_matmul_sparsity.py  denso vs 2:4 sparse (cuSPARSELt)
 │   │   │   └── informe_matmul.py       informe propio de run_matmul (Triton vs cuBLAS)
 │   │   ├── gluon/        (imagen gluon)
-│   │   ├── cutlass/      (imagen cutlass)
-│   │   └── helion/       (imagen helion)
+│   │   ├── cutlass/      run_matmul_cutlass.py  CuTe DSL oficial (Sm120GemmKernel), solo fp16
+│   │   └── helion/       run_matmul_helion.py   ejemplo oficial de Helion (autotune)
 │   ├── MBKernels/        memory-bound (GB/s): RMSNorm en cada DSL vs PyTorch
 │   │   ├── triton/       run_rmsnorm_triton.py    kernel propio (punteros, una fila por programa)
 │   │   │                 run_rmsnorm_tlx.py       TLX: persistente + prefetch cp.async a memoria compartida
@@ -69,6 +69,7 @@ tfm_entorno/
 │   │   ├── cutlass/      run_rmsnorm_cutlass.py   cutlass::rmsnorm oficial (extension de PyTorch)
 │   │   └── helion/       run_rmsnorm_helion.py    ejemplo oficial de Helion (autotune)
 │   ├── banco_rmsnorm.py        banco comun de RMSNorm (formas, validacion, medida, guardado)
+│   ├── banco_matmul.py         banco comun de matmul (idem, frente a cuBLAS en TFLOP/s)
 │   ├── validation.py           verificacion de la salida frente a PyTorch
 │   ├── plantilla.py            plantilla para un benchmark nuevo
 │   ├── comun.py                contexto, medida, guardado y deteccion PTX (MMA/TMA)

@@ -25,9 +25,12 @@ cambios que se detallan) y \textbf{propio} (diseño propio sobre la API document
     \texttt{matmul\_tma.py} & adaptado & tutorial de Triton \texttt{09-persistent-matmul} (variantes TMA)~[1] \\
     \texttt{matmul\_fp8.py} & adaptado & baseline con entradas FP8 e4m3~[1] \\
     \texttt{matmul\_fp8\_tma.py} & propio & combinación de \texttt{matmul\_fp8} y \texttt{matmul\_tma} \\
+    \midrule
+    \texttt{helion/matmul.py}$^\dagger$ & adaptado & ejemplo oficial de Helion \texttt{examples/matmul.py}~[3] \\
+    \texttt{cutlass/matmul\_cute.py}$^\dagger$ & oficial sin modificar & CuTe DSL \texttt{blackwell\_geforce/kernel/dense\_gemm/dense\_gemm.py}~[2] \\
     \bottomrule
   \end{tabularx}
-  \caption{Procedencia de los kernels de matmul (Triton).}
+  \caption{Procedencia de los kernels de matmul. $^\dagger$Ruta relativa a \texttt{src/CBKernels/}.}
   \label{tab:procedencia-cb}
 \end{table}
 
@@ -41,7 +44,11 @@ tutorial~09 los descriptores de tensor creados dentro del kernel
 (\texttt{triton.set\_allocator}). A diferencia del tutorial, no es persistente: conserva
 la rejilla del baseline para aislar el efecto de TMA. \texttt{matmul\_blockptr.py} se
 mantiene como intento documentado de activar TMA con \emph{block pointers}, que en
-sm\_121 bajan a \texttt{cp.async} clásico (sección~\ref{sec:tma}).
+sm\_121 bajan a \texttt{cp.async} clásico (sección~\ref{sec:tma}). El matmul de Helion
+es el del ejemplo oficial sin el \emph{epilogue}. El de CUTLASS ejecuta sin modificar el
+ejemplo de CuTe DSL para Blackwell GeForce (\texttt{Sm120GemmKernel}: fp16, TMA y pipeline de
+varias etapas). Solo es propia la envoltura que le pasa las matrices de PyTorch sin copiarlas.
+No admite bf16.
 
 \subsection{Kernels memory-bound: RMSNorm}
 

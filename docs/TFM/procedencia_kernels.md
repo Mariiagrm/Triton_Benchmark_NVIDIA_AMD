@@ -17,6 +17,8 @@
 | `triton/matmul_tma.py` | Triton | Adaptado | Tutorial oficial de Triton `09-persistent-matmul.py`, variantes con TMA [1] |
 | `triton/matmul_fp8.py` | Triton | Adaptado | Esqueleto de `matmul.py`; el tutorial 03 ya muestra entradas FP8 [1] |
 | `triton/matmul_fp8_tma.py` | Triton | Propio (combinación) | `matmul_fp8.py` + descriptores TMA de `matmul_tma.py` |
+| `helion/matmul.py` | Helion | Adaptado | Ejemplo oficial de Helion `examples/matmul.py` (`matmul`) [3] |
+| `cutlass/matmul_cute.py` | CUTLASS (CuTe DSL) | Oficial sin modificar | `examples/python/CuTeDSL/cute/blackwell_geforce/kernel/dense_gemm/dense_gemm.py` (`Sm120GemmKernel`) [2] |
 
 **`matmul.py`.** 27 de las 36 líneas distintas del kernel son idénticas a `matmul_kernel` del tutorial 03. Coinciden el orden de programas agrupado para la L2 (`GROUP_SIZE_M`), la aritmética de punteros y el bucle en K con `tl.dot` y acumulación en fp32. Es propio el espacio de autotuning (producto cartesiano de BLOCK_SIZE_M/N/K, GROUP_SIZE_M, num_warps y num_stages). También lo es la comprobación en el PTX de que se usan tensor cores (`comun.exigir_tensor_cores`).
 
@@ -27,6 +29,10 @@
 **`matmul_fp8.py`.** Mismo esqueleto que el baseline, con A y B en FP8 e4m3 (`torch.float8_e4m3fn`). El tutorial 03 usa e5m2 como ejemplo.
 
 **`matmul_fp8_tma.py`.** Une las dos variantes anteriores y amplía el espacio de autotuning (num_stages 3–5, BLOCK_K hasta 256).
+
+**`helion/matmul.py`.** Es el `matmul` del ejemplo oficial con el mismo decorador (`static_shapes=True` y los `autotune_config_overrides` del ejemplo), pero sin el parámetro `epilogue`, que aquí es la identidad. El ejemplo tiene test en el CI de Helion (`test_examples.py::test_matmul`).
+
+**`cutlass/matmul_cute.py`.** Carga el ejemplo oficial de CuTe DSL para Blackwell GeForce desde `$CUTLASS_DIR` **sin modificarlo**: fp16 con acumulación en fp32, TMA y pipeline de varias etapas. Solo la envoltura es propia: pasa las matrices de PyTorch como tensores CuTe sin copiarlas (A con K contigua, B y C con N contigua) y compila el kernel con `cute.compile`, siguiendo la función `run()` del propio ejemplo. El kernel no admite bf16. Paquete `nvidia-cutlass-dsl` 4.8.0, la misma versión que CUTLASS.
 
 ## Kernels memory-bound (`src/MBKernels/`): RMSNorm
 

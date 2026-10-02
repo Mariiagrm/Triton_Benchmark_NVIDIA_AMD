@@ -263,7 +263,15 @@ def _():
         r = subprocess.run([binario], capture_output=True, text=True)
         assert r.returncode == 0, f"el binario fallo: {r.stdout}{r.stderr}"
     nvcc = subprocess.run(["nvcc", "--version"], capture_output=True, text=True).stdout.strip().splitlines()[-1]
-    return f"CUTLASS {os.path.basename(cutlass.rstrip('/'))} en {cutlass}, {arch}; {nvcc}"
+    # CuTe DSL (nvidia-cutlass-dsl), lo usa el matmul de CUTLASS. Sin "import cutlass": aqui
+    # `cutlass` es la ruta de CUTLASS_DIR y el import la sobrescribiria.
+    import importlib
+    importlib.import_module("cutlass.cute")
+    ejemplo = os.path.join(cutlass, "examples", "python", "CuTeDSL", "cute", "blackwell_geforce",
+                           "kernel", "dense_gemm", "dense_gemm.py")
+    assert os.path.isfile(ejemplo), f"falta el ejemplo de CuTe DSL: {ejemplo}"
+    return (f"CUTLASS {os.path.basename(cutlass.rstrip('/'))} en {cutlass}, {arch}; {nvcc}; "
+            f"CuTe DSL {md.version('nvidia-cutlass-dsl')} importa")
 
 
 # Si Triton fallo, repetir sin el plugin para saber si la culpa es de la .so.

@@ -61,5 +61,9 @@ FROM base AS cutlass
 ARG CUTLASS_VERSION=v4.8.0
 RUN git clone --depth 1 --branch ${CUTLASS_VERSION} https://github.com/NVIDIA/cutlass.git /opt/cutlass
 RUN pip install "cmake>=3.24"
+# CuTe DSL (Python) en la MISMA version que el CUTLASS clonado, con las librerias de CUDA 13
+# (la de NGC 25.10). No depende de torch: no toca el PyTorch de NGC. Lo usa el matmul
+# CBKernels/cutlass/matmul_cute.py (ejemplo oficial blackwell_geforce/dense_gemm.py).
+RUN pip install "nvidia-cutlass-dsl[cu13]==${CUTLASS_VERSION#v}"
 ENV CUTLASS_DIR=/opt/cutlass
 ENV TFM_DSL=cutlass
