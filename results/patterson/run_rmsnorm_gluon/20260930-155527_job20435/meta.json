@@ -1,0 +1,100 @@
+{
+  "experimento": "run_rmsnorm_gluon",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "gluon",
+    "imagen": "tfm-gluon:ngc-arm64@sha256:6fbc8b6f4ec17c294c9f0d7b7efdffe0ed8f363d34c749c529e3486b51acfdf8",
+    "host": "patterson",
+    "slurm_job": "20435",
+    "fecha": "2026-09-30T15:55:27",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/gluon/run_rmsnorm_gluon.py"
+  },
+  "parametros": {
+    "rows": [
+      4096,
+      16384
+    ],
+    "cols": [
+      2048,
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 273.0,
+    "dsl": "gluon"
+  },
+  "resumen": {
+    "fp16_4096x2048": {
+      "gluon_gbs": 191.7,
+      "torch_gbs": 188.3,
+      "gluon_vs_torch": 1.0181
+    },
+    "fp16_4096x4096": {
+      "gluon_gbs": 207.4,
+      "torch_gbs": 204.2,
+      "gluon_vs_torch": 1.0157
+    },
+    "fp16_4096x8192": {
+      "gluon_gbs": 216.0,
+      "torch_gbs": 194.2,
+      "gluon_vs_torch": 1.1123
+    },
+    "fp16_16384x2048": {
+      "gluon_gbs": 216.3,
+      "torch_gbs": 214.2,
+      "gluon_vs_torch": 1.0098
+    },
+    "fp16_16384x4096": {
+      "gluon_gbs": 221.2,
+      "torch_gbs": 216.8,
+      "gluon_vs_torch": 1.0203
+    },
+    "fp16_16384x8192": {
+      "gluon_gbs": 224.2,
+      "torch_gbs": 200.3,
+      "gluon_vs_torch": 1.1193
+    },
+    "bf16_4096x2048": {
+      "gluon_gbs": 191.7,
+      "torch_gbs": 188.3,
+      "gluon_vs_torch": 1.0181
+    },
+    "bf16_4096x4096": {
+      "gluon_gbs": 207.4,
+      "torch_gbs": 204.2,
+      "gluon_vs_torch": 1.0157
+    },
+    "bf16_4096x8192": {
+      "gluon_gbs": 219.2,
+      "torch_gbs": 195.1,
+      "gluon_vs_torch": 1.1235
+    },
+    "bf16_16384x2048": {
+      "gluon_gbs": 220.3,
+      "torch_gbs": 218.0,
+      "gluon_vs_torch": 1.0106
+    },
+    "bf16_16384x4096": {
+      "gluon_gbs": 221.0,
+      "torch_gbs": 216.5,
+      "gluon_vs_torch": 1.0208
+    },
+    "bf16_16384x8192": {
+      "gluon_gbs": 223.9,
+      "torch_gbs": 200.1,
+      "gluon_vs_torch": 1.1189
+    }
+  }
+}

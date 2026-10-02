@@ -1,0 +1,101 @@
+{
+  "experimento": "run_rmsnorm_helion",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": "1.4.1.dev368+g0f3b2423e",
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "helion",
+    "imagen": "tfm-helion:ngc-arm64@sha256:365cc5ee2a5f5dda5d29cf547b0d72dce0f90f8d13afd2901916fb172bb35b0f",
+    "host": "patterson",
+    "slurm_job": "20435",
+    "fecha": "2026-09-30T16:17:34",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/helion/run_rmsnorm_helion.py"
+  },
+  "parametros": {
+    "rows": [
+      4096,
+      16384
+    ],
+    "cols": [
+      2048,
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 273.0,
+    "autotune": "quick",
+    "dsl": "helion"
+  },
+  "resumen": {
+    "fp16_4096x2048": {
+      "helion_gbs": 206.1,
+      "torch_gbs": 189.4,
+      "helion_vs_torch": 1.0882
+    },
+    "fp16_4096x4096": {
+      "helion_gbs": 218.5,
+      "torch_gbs": 201.7,
+      "helion_vs_torch": 1.0833
+    },
+    "fp16_4096x8192": {
+      "helion_gbs": 218.1,
+      "torch_gbs": 193.9,
+      "helion_vs_torch": 1.1248
+    },
+    "fp16_16384x2048": {
+      "helion_gbs": 227.2,
+      "torch_gbs": 212.4,
+      "helion_vs_torch": 1.0697
+    },
+    "fp16_16384x4096": {
+      "helion_gbs": 225.2,
+      "torch_gbs": 215.0,
+      "helion_vs_torch": 1.0474
+    },
+    "fp16_16384x8192": {
+      "helion_gbs": 230.3,
+      "torch_gbs": 200.0,
+      "helion_vs_torch": 1.1515
+    },
+    "bf16_4096x2048": {
+      "helion_gbs": 202.4,
+      "torch_gbs": 188.3,
+      "helion_vs_torch": 1.0749
+    },
+    "bf16_4096x4096": {
+      "helion_gbs": 216.3,
+      "torch_gbs": 204.2,
+      "helion_vs_torch": 1.0593
+    },
+    "bf16_4096x8192": {
+      "helion_gbs": 223.3,
+      "torch_gbs": 194.5,
+      "helion_vs_torch": 1.1481
+    },
+    "bf16_16384x2048": {
+      "helion_gbs": 222.2,
+      "torch_gbs": 215.6,
+      "helion_vs_torch": 1.0306
+    },
+    "bf16_16384x4096": {
+      "helion_gbs": 232.4,
+      "torch_gbs": 216.5,
+      "helion_vs_torch": 1.0734
+    },
+    "bf16_16384x8192": {
+      "helion_gbs": 226.6,
+      "torch_gbs": 197.9,
+      "helion_vs_torch": 1.145
+    }
+  }
+}

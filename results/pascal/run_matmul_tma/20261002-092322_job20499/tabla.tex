@@ -1,0 +1,24 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrrrrrrllrrrrrrl}
+    \toprule
+    variante & dtype & M & N & K & BLOCK\_SIZE\_M & BLOCK\_SIZE\_N & BLOCK\_SIZE\_K & GROUP\_SIZE\_M & num\_warps & num\_stages & carga & usa\_tma & autotune\_s & ms & ms\_p20 & ms\_p80 & tflops & gbs & mma \\
+    \midrule
+    baseline & fp16 & 4096 & 4096 & 4096 & 128 & 64 & 32 & 8 & 4 & 3 & cp.async & False & 7.3 & 0.6639 & 0.6625 & 0.6688 & 207.01 & 151.6 & mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    blockptr & fp16 & 4096 & 4096 & 4096 & 64 & 128 & 32 & 8 & 4 & 3 & cp.async & False & 57.4 & 0.6539 & 0.6513 & 0.6591 & 210.2 & 154 & mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    tma & fp16 & 4096 & 4096 & 4096 & 64 & 128 & 64 & 8 & 4 & 2 & TMA & True & 47.3 & 0.6431 & 0.639 & 0.6461 & 213.72 & 156.5 & mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    baseline & fp16 & 8192 & 8192 & 8192 & 256 & 128 & 64 & 8 & 8 & 3 & cp.async & False & 8.9 & 5.036 & 5.034 & 5.0381 & 218.33 & 80 & mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    blockptr & fp16 & 8192 & 8192 & 8192 & 128 & 128 & 64 & 8 & 4 & 2 & cp.async & False & 18 & 5.0529 & 5.0504 & 5.0545 & 217.6 & 79.7 & mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    tma & fp16 & 8192 & 8192 & 8192 & 128 & 128 & 64 & 8 & 4 & 2 & TMA & True & 23.1 & 4.9172 & 4.9121 & 4.9213 & 223.6 & 81.9 & mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    baseline & bf16 & 4096 & 4096 & 4096 & 128 & 64 & 32 & 8 & 4 & 3 & cp.async & False & 7.1 & 0.6559 & 0.6534 & 0.6596 & 209.53 & 153.5 & mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 \\
+    blockptr & bf16 & 4096 & 4096 & 4096 & 64 & 128 & 32 & 8 & 4 & 3 & cp.async & False & 69 & 0.6441 & 0.641 & 0.6461 & 213.39 & 156.3 & mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 \\
+    tma & bf16 & 4096 & 4096 & 4096 & 64 & 128 & 64 & 8 & 4 & 2 & TMA & True & 54 & 0.6287 & 0.6271 & 0.6312 & 218.6 & 160.1 & mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 \\
+    baseline & bf16 & 8192 & 8192 & 8192 & 128 & 128 & 32 & 8 & 4 & 3 & cp.async & False & 8.8 & 4.9562 & 4.9534 & 4.9582 & 221.85 & 81.2 & mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 \\
+    blockptr & bf16 & 8192 & 8192 & 8192 & 128 & 128 & 64 & 8 & 4 & 2 & cp.async & False & 17.9 & 4.9545 & 4.9499 & 4.9603 & 221.92 & 81.3 & mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 \\
+    tma & bf16 & 8192 & 8192 & 8192 & 128 & 128 & 64 & 8 & 4 & 2 & TMA & True & 23 & 4.8128 & 4.8058 & 4.8169 & 228.46 & 83.7 & mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_matmul\_tma: NVIDIA GeForce RTX 5090 (sm\_120), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20499, 2026-10-02T09:23:22. Mediana de triton.testing.do\_bench.}
+  \label{tab:run-matmul-tma}
+\end{table}

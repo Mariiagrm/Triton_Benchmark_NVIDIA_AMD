@@ -1,0 +1,12 @@
+| variante | M | N | K | BLOCK_SIZE_M | BLOCK_SIZE_N | BLOCK_SIZE_K | GROUP_SIZE_M | num_warps | num_stages | carga | error_rel | ms | ms_p20 | ms_p80 | tflops | gbs | mma |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| fp16 | 4096 | 4096 | 4096 | 128 | 64 | 64 | 8 | 4 | 3 | cp.async | 0.00021 | 0.6477 | 0.6454 | 0.6498 | 212.19 | 155.4 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 |
+| fp8 | 4096 | 4096 | 4096 | 64 | 128 | 64 | 8 | 4 | 3 | cp.async | 0.03753 | 0.3687 | 0.3667 | 0.3718 | 372.79 | 182 | mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 |
+| fp8_tma | 4096 | 4096 | 4096 | 128 | 128 | 64 | 8 | 4 | 4 | TMA | 0.03753 | 0.3687 | 0.3686 | 0.3706 | 372.76 | 182 | mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 |
+| fp8_cublas | 4096 | 4096 | 4096 |  |  |  |  |  |  | cublasLt | 0.03753 | 0.2201 | 0.2176 | 0.2237 | 624.45 | 304.9 | cublasLt |
+| fp16 | 8192 | 8192 | 8192 | 256 | 128 | 64 | 8 | 8 | 3 | cp.async | 0.00021 | 5.0033 | 5.0002 | 5.0053 | 219.76 | 80.5 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 |
+| fp8 | 8192 | 8192 | 8192 | 128 | 256 | 128 | 8 | 8 | 3 | cp.async | 0.03753 | 2.7853 | 2.7833 | 2.7884 | 394.76 | 96.4 | mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 |
+| fp8_tma | 8192 | 8192 | 8192 | 256 | 128 | 128 | 8 | 8 | 3 | TMA | 0.03753 | 2.7873 | 2.7787 | 2.7896 | 394.47 | 96.3 | mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 |
+| fp8_cublas | 8192 | 8192 | 8192 |  |  |  |  |  |  | cublasLt | 0.03753 | 1.8366 | 1.8304 | 1.8494 | 598.67 | 146.2 | cublasLt |
+
+*NVIDIA GeForce RTX 5090 (sm_120), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20499, 2026-10-02T09:16:23. Mediana de triton.testing.do_bench.*

@@ -1,0 +1,34 @@
+# run_rmsnorm_tlx (pascal)
+
+Generado automáticamente desde `results/pascal/run_rmsnorm_tlx/20261002-092338_job20499/`.
+
+![run_rmsnorm_tlx](figuras/run_rmsnorm_tlx.png)
+
+| variante | dtype | M | N | ms | ms_p20 | ms_p80 | gbs | pct_pico | t_compilacion_s | detalle |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| tlx | fp16 | 4096 | 2048 | 0.0245 | 0.0225 | 0.0266 | 1367.3 | 76.3 | 0.26 | carga=cp.async stages=3 num_warps=8 grid=680 |
+| torch | fp16 | 4096 | 2048 | 0.0251 | 0.025 | 0.0271 | 1339.3 | 74.7 |  |  |
+| tlx | fp16 | 4096 | 4096 | 0.0512 | 0.0512 | 0.0532 | 1310.1 | 73.1 | 0.09 | carga=cp.async stages=3 num_warps=16 grid=680 |
+| torch | fp16 | 4096 | 4096 | 0.0487 | 0.0467 | 0.0496 | 1379 | 77 |  |  |
+| tlx | fp16 | 4096 | 8192 | 0.0942 | 0.0922 | 0.0942 | 1425.4 | 79.5 | 0.09 | carga=cp.async stages=3 num_warps=16 grid=340 |
+| torch | fp16 | 4096 | 8192 | 0.104 | 0.1029 | 0.106 | 1290.7 | 72 |  |  |
+| tlx | fp16 | 16384 | 2048 | 0.0963 | 0.0962 | 0.0983 | 1394.4 | 77.8 | 0 | carga=cp.async stages=3 num_warps=8 grid=680 |
+| torch | fp16 | 16384 | 2048 | 0.0908 | 0.0897 | 0.0926 | 1479 | 82.5 |  |  |
+| tlx | fp16 | 16384 | 4096 | 0.1946 | 0.1945 | 0.1966 | 1379.7 | 77 | 0 | carga=cp.async stages=3 num_warps=16 grid=680 |
+| torch | fp16 | 16384 | 4096 | 0.1828 | 0.1818 | 0.1848 | 1468.6 | 82 |  |  |
+| tlx | fp16 | 16384 | 8192 | 0.3686 | 0.3686 | 0.3707 | 1456.4 | 81.3 | 0 | carga=cp.async stages=3 num_warps=16 grid=340 |
+| torch | fp16 | 16384 | 8192 | 0.3875 | 0.3845 | 0.3896 | 1385.4 | 77.3 |  |  |
+| tlx | bf16 | 4096 | 2048 | 0.0246 | 0.0245 | 0.0266 | 1365.5 | 76.2 | 0.08 | carga=cp.async stages=3 num_warps=8 grid=680 |
+| torch | bf16 | 4096 | 2048 | 0.0261 | 0.0241 | 0.0262 | 1285.2 | 71.7 |  |  |
+| tlx | bf16 | 4096 | 4096 | 0.0512 | 0.0512 | 0.0532 | 1310.9 | 73.2 | 0.08 | carga=cp.async stages=3 num_warps=16 grid=680 |
+| torch | bf16 | 4096 | 4096 | 0.0486 | 0.0466 | 0.0487 | 1379.9 | 77 |  |  |
+| tlx | bf16 | 4096 | 8192 | 0.0942 | 0.0942 | 0.0963 | 1424.9 | 79.5 | 0.09 | carga=cp.async stages=3 num_warps=16 grid=340 |
+| torch | bf16 | 4096 | 8192 | 0.1048 | 0.1029 | 0.106 | 1280.5 | 71.5 |  |  |
+| tlx | bf16 | 16384 | 2048 | 0.0983 | 0.0963 | 0.1004 | 1365.4 | 76.2 | 0 | carga=cp.async stages=3 num_warps=8 grid=680 |
+| torch | bf16 | 16384 | 2048 | 0.0926 | 0.0916 | 0.0927 | 1449.4 | 80.9 |  |  |
+| tlx | bf16 | 16384 | 4096 | 0.1945 | 0.1925 | 0.1946 | 1380 | 77 | 0 | carga=cp.async stages=3 num_warps=16 grid=680 |
+| torch | bf16 | 16384 | 4096 | 0.1819 | 0.1807 | 0.1828 | 1476.1 | 82.4 |  |  |
+| tlx | bf16 | 16384 | 8192 | 0.3686 | 0.3684 | 0.3707 | 1456.4 | 81.3 | 0 | carga=cp.async stages=3 num_warps=16 grid=340 |
+| torch | bf16 | 16384 | 8192 | 0.3855 | 0.3834 | 0.3876 | 1392.7 | 77.7 |  |  |
+
+*NVIDIA GeForce RTX 5090 (sm_120), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20499, 2026-10-02T09:23:38. Mediana de triton.testing.do_bench.*

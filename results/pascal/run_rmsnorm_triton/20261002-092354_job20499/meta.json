@@ -1,0 +1,103 @@
+{
+  "experimento": "run_rmsnorm_triton",
+  "contexto": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "sm": "120",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post2",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:fff8b0bdd32b1127220e4cd0ecff21b2e4e2e2deb697e06390a2ca9cad0bcf0b",
+    "host": "pascal",
+    "slurm_job": "20499",
+    "fecha": "2026-10-02T09:23:54",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/triton/run_rmsnorm_triton.py"
+  },
+  "parametros": {
+    "rows": [
+      4096,
+      16384
+    ],
+    "cols": [
+      2048,
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 1792.0,
+    "dsl": "triton"
+  },
+  "resumen": {
+    "fp16_4096x2048": {
+      "triton_gbs": 1392.7,
+      "torch_gbs": 1390.9,
+      "triton_vs_torch": 1.0013
+    },
+    "fp16_4096x4096": {
+      "triton_gbs": 1475.0,
+      "torch_gbs": 1379.0,
+      "triton_vs_torch": 1.0696
+    },
+    "fp16_4096x8192": {
+      "triton_gbs": 1515.5,
+      "torch_gbs": 1279.7,
+      "triton_vs_torch": 1.1843
+    },
+    "fp16_16384x2048": {
+      "triton_gbs": 1513.7,
+      "torch_gbs": 1478.5,
+      "triton_vs_torch": 1.0238
+    },
+    "fp16_16384x4096": {
+      "triton_gbs": 1510.4,
+      "torch_gbs": 1468.6,
+      "triton_vs_torch": 1.0285
+    },
+    "fp16_16384x8192": {
+      "triton_gbs": 1521.4,
+      "torch_gbs": 1389.0,
+      "triton_vs_torch": 1.0953
+    },
+    "bf16_4096x2048": {
+      "triton_gbs": 1524.3,
+      "torch_gbs": 1285.2,
+      "triton_vs_torch": 1.186
+    },
+    "bf16_4096x4096": {
+      "triton_gbs": 1505.7,
+      "torch_gbs": 1379.0,
+      "triton_vs_torch": 1.0919
+    },
+    "bf16_4096x8192": {
+      "triton_gbs": 1499.2,
+      "torch_gbs": 1279.7,
+      "triton_vs_torch": 1.1715
+    },
+    "bf16_16384x2048": {
+      "triton_gbs": 1482.1,
+      "torch_gbs": 1449.4,
+      "triton_vs_torch": 1.0226
+    },
+    "bf16_16384x4096": {
+      "triton_gbs": 1519.2,
+      "torch_gbs": 1476.7,
+      "triton_vs_torch": 1.0288
+    },
+    "bf16_16384x8192": {
+      "triton_gbs": 1513.4,
+      "torch_gbs": 1392.6,
+      "triton_vs_torch": 1.0867
+    }
+  },
+  "correcciones": [
+    "2026-10-02: pct_pico recalculado con 1792 GB/s (RTX 5090); se midio con pico_gbs=273.0 (el del GB10). Las medidas (ms, gbs) no cambian."
+  ]
+}

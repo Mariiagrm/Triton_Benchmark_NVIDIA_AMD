@@ -4,7 +4,7 @@
 
 ## Nodos
 
-Las pruebas se han hecho en dos nodos con **el mismo hardware**: un sistema NVIDIA GB10 (Grace Blackwell) con memoria unificada. Ambos tienen instalados los paquetes de sistema `nvidia-spark-*` de NVIDIA DGX Spark. Se usan mediante Slurm (particiones `<nodo>-benchmark` y `<nodo>-test`) y Docker.
+Las pruebas de esta memoria se han hecho en dos nodos con **el mismo hardware**: un sistema NVIDIA GB10 (Grace Blackwell) con memoria unificada. Ambos tienen instalados los paquetes de sistema `nvidia-spark-*` de NVIDIA DGX Spark. Se usan mediante Slurm (particiones `<nodo>-benchmark` y `<nodo>-test`) y Docker.
 
 | nodo | pruebas |
 |:---|:---|
@@ -20,6 +20,7 @@ Los resultados se guardan por **entorno** en `results/<entorno>/` y `docs/TFM/re
 | `hennessy-580` | hennessy | 580.159.03 / Linux 6.17.0-1021-nvidia | 29–30 sep 2026 (resultados de esta memoria) |
 | `hennessy` | hennessy | 610.57.04 / Linux 7.0.0-1019-nvidia | desde el 2 oct 2026 |
 | `patterson` | patterson | 580.126.09 / Linux 6.17.0-1008-nvidia | desde el 30 sep 2026 |
+| `pascal` | pascal | **NVIDIA GeForce RTX 5090** (sm_120), no un GB10; driver y kernel no registrados (ejecuciones del job 20499, anteriores al registro) | 2 oct 2026 |
 
 Por defecto el entorno es el nombre del nodo. Con `TFM_MAQUINA=<nombre>` se separa otro entorno en el mismo nodo; así se hizo `hennessy-580`, para las ejecuciones anteriores al cambio de driver. Desde el 2 de octubre cada `meta.json` registra también `driver_nvidia` y `kernel_linux`.
 

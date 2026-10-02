@@ -1,0 +1,76 @@
+{
+  "experimento": "run_matmul_tma",
+  "contexto": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "sm": "120",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post2",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:fff8b0bdd32b1127220e4cd0ecff21b2e4e2e2deb697e06390a2ca9cad0bcf0b",
+    "host": "pascal",
+    "slurm_job": "20499",
+    "fecha": "2026-10-02T09:23:22",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_matmul_tma.py"
+  },
+  "parametros": {
+    "sizes": [
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ]
+  },
+  "resumen": {
+    "fp16_4096": {
+      "baseline_tflops": 207.01,
+      "blockptr_tflops": 210.2,
+      "tma_tflops": 213.72,
+      "blockptr_carga": "cp.async",
+      "tma_carga": "TMA",
+      "speedups": {
+        "blockptr": 1.0154,
+        "tma": 1.0324
+      }
+    },
+    "fp16_8192": {
+      "baseline_tflops": 218.33,
+      "blockptr_tflops": 217.6,
+      "tma_tflops": 223.6,
+      "blockptr_carga": "cp.async",
+      "tma_carga": "TMA",
+      "speedups": {
+        "blockptr": 0.9967,
+        "tma": 1.0241
+      }
+    },
+    "bf16_4096": {
+      "baseline_tflops": 209.53,
+      "blockptr_tflops": 213.39,
+      "tma_tflops": 218.6,
+      "blockptr_carga": "cp.async",
+      "tma_carga": "TMA",
+      "speedups": {
+        "blockptr": 1.0184,
+        "tma": 1.0433
+      }
+    },
+    "bf16_8192": {
+      "baseline_tflops": 221.85,
+      "blockptr_tflops": 221.92,
+      "tma_tflops": 228.46,
+      "blockptr_carga": "cp.async",
+      "tma_carga": "TMA",
+      "speedups": {
+        "blockptr": 1.0003,
+        "tma": 1.0298
+      }
+    }
+  }
+}

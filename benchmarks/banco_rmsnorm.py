@@ -18,6 +18,13 @@ import torch.nn.functional as F
 import comun
 import validation
 
+# Ancho de banda pico de la memoria (GB/s) por GPU, para el "% del pico". De la especificacion:
+# ancho de bus x velocidad de transferencia. Otra GPU: anadirla aqui o pasar --pico-gbs.
+PICO_GBS = {
+    "NVIDIA GB10": 273.0,               # LPDDR5X, 256 bits a 8533 MT/s
+    "NVIDIA GeForce RTX 5090": 1792.0,  # GDDR7, 512 bits a 28 Gb/s por pin
+}
+
 
 def parser(descripcion):
     p = argparse.ArgumentParser(description=descripcion, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -25,8 +32,8 @@ def parser(descripcion):
     p.add_argument("--cols", type=int, nargs="+", default=[2048, 4096, 8192], help="N: dimension oculta")
     p.add_argument("--dtypes", nargs="+", choices=["fp16", "bf16"], default=["fp16", "bf16"])
     p.add_argument("--eps", type=float, default=1e-5)
-    # GB10: LPDDR5X de 256 bits a 8533 MT/s -> ~273 GB/s nominales. Cambialo para otra GPU.
-    p.add_argument("--pico-gbs", type=float, default=273.0, help="ancho de banda pico de la GPU (GB/s)")
+    p.add_argument("--pico-gbs", type=float, default=None,
+                   help="ancho de banda pico de la GPU (GB/s); por defecto, el de PICO_GBS para la GPU actual")
     return p
 
 
@@ -38,6 +45,13 @@ def ejecutar(args, dsl, kernel, detalle=None):
     """
     comun.imprimir_contexto()
     torch.manual_seed(0)
+    gpu = torch.cuda.get_device_name(0)
+    if args.pico_gbs is None:
+        if gpu not in PICO_GBS:
+            raise SystemExit(f"No conozco el ancho de banda pico de '{gpu}': anadelo a PICO_GBS "
+                             f"(benchmarks/banco_rmsnorm.py) o pasa --pico-gbs.")
+        args.pico_gbs = PICO_GBS[gpu]
+    print(f"Pico de memoria para el % del pico: {args.pico_gbs} GB/s ({gpu})\n", flush=True)
 
     filas = []
     resumen = {}

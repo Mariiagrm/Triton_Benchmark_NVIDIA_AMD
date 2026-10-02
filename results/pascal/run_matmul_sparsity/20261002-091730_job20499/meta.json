@@ -1,0 +1,38 @@
+{
+  "experimento": "run_matmul_sparsity",
+  "contexto": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "sm": "120",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post2",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:fff8b0bdd32b1127220e4cd0ecff21b2e4e2e2deb697e06390a2ca9cad0bcf0b",
+    "host": "pascal",
+    "slurm_job": "20499",
+    "fecha": "2026-10-02T09:17:30",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_matmul_sparsity.py"
+  },
+  "parametros": {
+    "sizes": [
+      4096,
+      8192
+    ]
+  },
+  "resumen": {
+    "4096": {
+      "densa_tflops": 208.75,
+      "sparse24_fp16_tflops": 97.68,
+      "speedup": 0.4679
+    },
+    "8192": {
+      "densa_tflops": 211.99,
+      "sparse24_fp16_tflops": 399.75,
+      "speedup": 1.8857
+    }
+  }
+}
