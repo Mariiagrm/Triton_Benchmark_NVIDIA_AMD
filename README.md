@@ -144,7 +144,7 @@ Dentro de una sesión interactiva (`~/srun_hennessy.sh`), sin cola:
 
 - Log: `logs/<nombre-job>-<JOBID>.out`
 - Resultados: `results/<benchmark>/<fecha>_job<JOBID>/{resultados.csv,meta.json}` (el
-  `meta.json` guarda el DSL y el id de la imagen usada), `results/<benchmark>/ultimo` apunta a
+  `meta.json` guarda el DSL, el id de la imagen, el driver NVIDIA y el kernel del nodo), `results/<benchmark>/ultimo` apunta a
   la ejecución más reciente, y `results/{matmul,rmsnorm}_metrics.csv` se regeneran con la
   última de cada benchmark.
 
@@ -206,4 +206,5 @@ python3.11 benchmarks/informe.py results/<benchmark>/ultimo
 ```
 
 Las secciones redactadas para la memoria del TFM están en `docs/TFM/*.md` y `docs/TFM/*.tex`
-(includables con `\input`): `resumen`, `tma`, `fp8`, `sparsity` y `procedencia_kernels` (origen de cada kernel).
+(includables con `\input`): `resumen`, `plataforma` (hardware y software exactos de las pruebas), `tma`, `fp8`, `sparsity` y
+`procedencia_kernels` (origen de cada kernel).

@@ -70,6 +70,9 @@ def contexto():
         "dsl": os.environ.get("TFM_DSL"),
         "imagen": os.environ.get("TFM_IMAGEN"),
         "host": os.environ.get("TFM_HOST", platform.node()),
+        # Del nodo, no del contenedor: el driver y el kernel pueden cambiar entre ejecuciones.
+        "driver_nvidia": os.environ.get("TFM_DRIVER") or None,
+        "kernel_linux": os.environ.get("TFM_KERNEL") or None,
         "slurm_job": os.environ.get("SLURM_JOB_ID") or None,
         "fecha": datetime.datetime.now().isoformat(timespec="seconds"),
         "comando": " ".join(sys.argv),

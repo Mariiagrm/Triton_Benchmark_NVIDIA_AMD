@@ -201,6 +201,8 @@ en_contenedor() {
         -e TFM_RAIZ=/workspace/tfm \
         -e TFM_IMAGEN="${IMAGE}@$(docker image inspect -f '{{.Id}}' "${IMAGE}")" \
         -e TFM_HOST="$(hostname)" \
+        -e TFM_KERNEL="$(uname -r)" \
+        -e TFM_DRIVER="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -1)" \
         -e TFM_DSL="${DSL}" \
         -e SLURM_JOB_ID="${SLURM_JOB_ID:-}" \
         -e TFM_EXPERIMENTO="${TFM_EXPERIMENTO:-}" \

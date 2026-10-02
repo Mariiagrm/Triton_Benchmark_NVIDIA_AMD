@@ -1,0 +1,93 @@
+% Seccion del TFM: plataforma experimental. Incluir con \input{docs/TFM/plataforma.tex}.
+% Requiere: \usepackage{booktabs,tabularx}. Version Markdown: docs/TFM/plataforma.md.
+% Datos leidos de los nodos (lscpu, /proc/meminfo, nvidia-smi, historial de apt/dpkg), de las
+% propiedades CUDA en el contenedor y de los meta.json de cada ejecucion (2 oct 2026).
+
+\section{Plataforma experimental}
+\label{sec:plataforma}
+
+Las pruebas se han hecho en dos nodos con el mismo hardware, un sistema NVIDIA GB10 (Grace
+Blackwell) con memoria unificada, gestionados con Slurm y Docker. En \textbf{hennessy} se
+ejecutaron todos los experimentos de matmul y el RMSNorm en Triton, y en \textbf{patterson}
+el RMSNorm en Gluon, Helion y CUTLASS. Los datos se han leído de los propios nodos y del
+runtime de CUDA dentro del contenedor. Cada ejecución guarda además su contexto (GPU,
+versiones, imagen y job de Slurm) en un \texttt{meta.json}.
+
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabularx}{\linewidth}{lX}
+    \toprule
+    \multicolumn{2}{l}{\textbf{GPU} (idéntica en ambos nodos)} \\
+    \midrule
+    modelo & NVIDIA GB10, arquitectura Blackwell, integrada (memoria unificada) \\
+    \emph{compute capability} & 12.1 (\texttt{sm\_121}) \\
+    SMs & 48; 1536 hilos y 65\,536 registros por SM; warp de 32 \\
+    memoria compartida & 100~KiB por SM; 48~KiB por bloque (99~KiB con \emph{opt-in}) \\
+    caché L2 & 24~MiB \\
+    reloj SM & máx.\ 3003~MHz; 2418~MHz por defecto según CUDA \\
+    \midrule
+    \multicolumn{2}{l}{\textbf{Memoria}} \\
+    \midrule
+    tipo & LPDDR5X unificada CPU/GPU, bus de 256 bits a 8533~MT/s \\
+    ancho de banda teórico & $256/8 \times 8533\cdot 10^6 = 273$~GB/s \\
+    capacidad & 128\,520\,806\,400~B visibles para CUDA (119,7~GiB) \\
+    \midrule
+    \multicolumn{2}{l}{\textbf{CPU}} \\
+    \midrule
+    núcleos & 20 Arm (aarch64): 10 Cortex-X925 (3,9~GHz) + 10 Cortex-A725 (2,808~GHz) \\
+    caché & L2 25~MiB, L3 24~MiB; 1 nodo NUMA \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Hardware de los nodos de prueba.}
+  \label{tab:hardware}
+\end{table}
+
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabularx}{\linewidth}{lXX}
+    \toprule
+    & hennessy & patterson \\
+    \midrule
+    periodo de las pruebas & 29 sep 09:35 -- 30 sep 14:23 & 30 sep 15:55 -- 16:41 \\
+    sistema operativo & Ubuntu 24.04 LTS & Ubuntu 24.04.4 LTS \\
+    kernel Linux & 6.17.0-1021-nvidia & 6.17.0-1008-nvidia \\
+    driver NVIDIA & 580.159.03 (módulo abierto) & 580.126.09 (módulo abierto) \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Software del sistema de cada nodo durante sus pruebas (año 2026).}
+  \label{tab:sistema}
+\end{table}
+
+Los dos nodos no tenían el mismo driver. Además, hennessy se actualizó después de sus
+pruebas: el 30 de septiembre pasó a Linux 7.0.0-1019-nvidia y al driver 610.57.04, y desde
+entonces el modo de direccionamiento de la GPU aparece como \texttt{None} en lugar de
+\texttt{ATS}. Las ejecuciones en hennessy posteriores a esa fecha no son directamente
+comparables con las de la tabla~\ref{tab:sistema}.
+
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabularx}{\linewidth}{lX}
+    \toprule
+    componente & versión \\
+    \midrule
+    imagen base & NGC PyTorch 25.10 (\texttt{nvcr.io/nvidia/pytorch:25.10-py3}) \\
+    PyTorch & 2.9.0a0+145a3a7bda.nv25.10 \\
+    CUDA & 13.0 (\texttt{nvcc} V13.0.88); cuDNN 9.14.0 \\
+    Python & 3.12.3 \\
+    Triton & 3.8.0 (PyPI, igual en todas las imágenes) \\
+    triton-utlx (TLX) & 3.8.0.post1 \\
+    Helion & 1.4.1.dev349+g256f2c8c5 (hennessy); 1.4.1.dev368+g0f3b2423e (patterson) \\
+    CUTLASS & v4.8.0; CMake 3.31.6 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Software de los contenedores (una imagen por DSL a partir de una base común).}
+  \label{tab:contenedores}
+\end{table}
+
+Todas las medidas usan \texttt{triton.testing.do\_bench} con 100~ms de calentamiento y
+500~ms de repetición. Se informa la mediana con los percentiles 20 y 80, y la L2 se vacía
+entre repeticiones. La compilación JIT y el autotuning ocurren en la primera llamada, que
+queda fuera de la medida. Cada kernel se valida frente a PyTorch antes de medirlo. Los
+relojes de la GPU \textbf{no se han fijado}: los relojes de aplicación están inactivos y el
+límite de potencia no es configurable, así que la GPU usa su gestión dinámica de frecuencia
+por defecto (con el modo de persistencia activado).
