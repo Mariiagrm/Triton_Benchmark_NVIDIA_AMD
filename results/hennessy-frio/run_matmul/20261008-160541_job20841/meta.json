@@ -1,0 +1,65 @@
+{
+  "experimento": "run_matmul",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy-frio",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20841",
+    "cache_fria": true,
+    "fecha": "2026-10-08T16:05:41",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_matmul.py --sizes 8192"
+  },
+  "parametros": {
+    "sizes": [
+      8192
+    ],
+    "dtypes": [
+      "fp16"
+    ]
+  },
+  "resumen": {
+    "baseline": {
+      "fp16": {
+        "dtype": "fp16",
+        "M": 8192,
+        "N": 8192,
+        "K": 8192,
+        "BLOCK_SIZE_M": 128,
+        "BLOCK_SIZE_N": 256,
+        "BLOCK_SIZE_K": 64,
+        "GROUP_SIZE_M": 8,
+        "num_warps": 8,
+        "num_stages": 3,
+        "autotune_s": 34.1,
+        "triton_ms": 11.8272,
+        "triton_ms_p20": 11.7867,
+        "triton_ms_p80": 12.294,
+        "triton_reloj_mhz": 2411,
+        "triton_potencia_w": 19.6,
+        "triton_tflops": 92.96,
+        "triton_gbs": 34.0,
+        "cublas_ms": 11.5667,
+        "cublas_ms_p20": 11.5382,
+        "cublas_ms_p80": 12.2088,
+        "cublas_reloj_mhz": 2281,
+        "cublas_potencia_w": 66.2,
+        "cublas_tflops": 95.06,
+        "cublas_gbs": 34.8,
+        "triton_mma": "mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32",
+        "cublas_kernel": "nvjet_sm121_hsh_mma_128x208x64_2_32x104x64_tmaAB_bz_NNNN"
+      }
+    }
+  }
+}

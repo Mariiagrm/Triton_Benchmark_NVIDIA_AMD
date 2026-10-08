@@ -1,0 +1,4 @@
+dtype,M,N,K,BLOCK_SIZE_M,BLOCK_SIZE_N,BLOCK_SIZE_K,GROUP_SIZE_M,num_warps,num_stages,autotune_s,triton_ms,triton_ms_p20,triton_ms_p80,triton_tflops,triton_gbs,cublas_ms,cublas_ms_p20,cublas_ms_p80,cublas_tflops,cublas_gbs
+fp16,4096,4096,4096,128,128,32,8,4,4,28.3,1.3957,1.3906,1.6071,98.47,72.1,1.7317,1.6916,1.9637,79.36,58.1
+fp16,8192,8192,8192,128,256,64,8,8,3,13.4,11.7238,11.7105,12.2899,93.78,34.3,11.7146,11.675,12.2955,93.86,34.4
+fp16,16384,16384,16384,256,128,64,8,8,3,77.1,95.1921,95.1652,96.3958,92.4,16.9,92.074,90.9068,92.3678,95.53,17.5

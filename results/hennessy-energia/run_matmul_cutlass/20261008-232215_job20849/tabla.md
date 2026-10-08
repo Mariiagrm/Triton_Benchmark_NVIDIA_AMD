@@ -1,0 +1,6 @@
+| variante | dtype | M | N | K | ms | ms_p20 | ms_p80 | reloj_mhz | potencia_w | tflops | gbs | reloj_sost_mhz | potencia_sost_w | potencia_reposo_w | mj_llamada | tflops_sost | gflop_j | gflop_j_din | t_compilacion_s | detalle |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| cutlass | fp16 | 8192 | 8192 | 8192 | 45.0278 | 44.6337 | 45.2403 | 2424 | 12 | 24.42 | 8.9 | 2427.5 | 42.7 | 11.9 | 1918.25 | 24.47 | 573.2 | 794.6 | 0.71 | Sm120GemmKernel tile=128x128x64 |
+| cublas | fp16 | 8192 | 8192 | 8192 | 11.4831 | 11.4166 | 12.0267 | 2424 | 43 | 95.75 | 35.1 | 2151 | 90.8 | 11.9 | 1051.45 | 94.95 | 1045.7 | 1203.4 |  | nvjet_sm121_hsh_mma_128x208x64_2_32x104x64_tmaAB_bz_NNNN |
+
+*NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20849, 2026-10-08T23:22:15. Mediana de triton.testing.do_bench.*

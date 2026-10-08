@@ -1,0 +1,45 @@
+{
+  "experimento": "run_rmsnorm_gluon",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "gluon",
+    "imagen": "tfm-gluon:ngc-arm64@sha256:205a75dbc84d2950fd1d4a17eb3d33f417034fb59b558e024599bddfa3fcdc57",
+    "maquina": "hennessy-frio",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20843",
+    "cache_fria": true,
+    "fecha": "2026-10-08T16:13:32",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/gluon/run_rmsnorm_gluon.py --rows 16384 --cols 8192 --dtypes fp16"
+  },
+  "parametros": {
+    "rows": [
+      16384
+    ],
+    "cols": [
+      8192
+    ],
+    "dtypes": [
+      "fp16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 273.0,
+    "dsl": "gluon"
+  },
+  "resumen": {
+    "fp16_16384x8192": {
+      "gluon_gbs": 242.1,
+      "torch_gbs": 216.0,
+      "gluon_vs_torch": 1.1208
+    }
+  }
+}

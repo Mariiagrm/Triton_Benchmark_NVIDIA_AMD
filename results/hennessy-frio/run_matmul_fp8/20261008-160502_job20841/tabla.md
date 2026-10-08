@@ -1,0 +1,8 @@
+| variante | M | N | K | BLOCK_SIZE_M | BLOCK_SIZE_N | BLOCK_SIZE_K | GROUP_SIZE_M | num_warps | num_stages | carga | error_rel | ms | ms_p20 | ms_p80 | reloj_mhz | potencia_w | tflops | gbs | mma |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| fp16 | 8192 | 8192 | 8192 | 128 | 256 | 64 | 8 | 8 | 3 | cp.async | 0.00021 | 11.9112 | 11.8497 | 12.3574 | 2418 | 33.6 | 92.31 | 33.8 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 |
+| fp8 | 8192 | 8192 | 8192 | 256 | 128 | 128 | 8 | 8 | 3 | cp.async | 0.03753 | 7.3774 | 7.3548 | 7.7554 | 2411 | 27.8 | 149.04 | 36.4 | mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 |
+| fp8_tma | 8192 | 8192 | 8192 | 128 | 256 | 128 | 8 | 8 | 3 | TMA | 0.03753 | 7.1229 | 7.1086 | 7.509 | 2411 | 17.8 | 154.36 | 37.7 | mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 |
+| fp8_cublas | 8192 | 8192 | 8192 |  |  |  |  |  |  | cublasLt | 0.03753 | 5.8143 | 5.7683 | 6.2511 | 2320 | 60.3 | 189.11 | 46.2 | cublasLt |
+
+*NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20841, 2026-10-08T16:05:02. Mediana de triton.testing.do_bench.*

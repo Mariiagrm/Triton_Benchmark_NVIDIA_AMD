@@ -1,0 +1,159 @@
+{
+  "experimento": "run_pico_mma",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20834",
+    "fecha": "2026-10-08T14:32:09",
+    "comando": "/workspace/tfm/benchmarks/run_pico_mma.py"
+  },
+  "parametros": {
+    "variantes": [
+      "f16\u00b7f32acc",
+      "f16\u00b7f16acc",
+      "bf16\u00b7f32acc",
+      "tf32\u00b7f32acc",
+      "e4m3\u00b7f32acc",
+      "e4m3\u00b7f16acc",
+      "s8\u00b7s32acc",
+      "e2m1\u00b7f32acc",
+      "mxf8 e4m3",
+      "mxf4 e2m1",
+      "nvf4 e2m1"
+    ],
+    "warps": [
+      1,
+      4,
+      8,
+      16,
+      32
+    ],
+    "ilp": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "ms": 2.0
+  },
+  "resumen": {
+    "n_sm": 48,
+    "arquitectura": "sm_121a",
+    "reloj_max_mhz": 3003,
+    "pico": {
+      "f16\u00b7f32acc": {
+        "tflops": 122.72,
+        "warps_sm": 8,
+        "ilp": 1,
+        "reloj_mhz": 2522,
+        "potencia_w": 64.0,
+        "flop_ciclo_sm": 1013.7,
+        "sass": "HMMA.16816.F32"
+      },
+      "f16\u00b7f16acc": {
+        "tflops": 122.82,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2509,
+        "potencia_w": 63.6,
+        "flop_ciclo_sm": 1019.8,
+        "sass": "HMMA.16816.F16"
+      },
+      "bf16\u00b7f32acc": {
+        "tflops": 122.77,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2509,
+        "potencia_w": 66.9,
+        "flop_ciclo_sm": 1019.4,
+        "sass": "HMMA.16816.F32.BF16"
+      },
+      "tf32\u00b7f32acc": {
+        "tflops": 61.42,
+        "warps_sm": 8,
+        "ilp": 2,
+        "reloj_mhz": 2502,
+        "potencia_w": 59.4,
+        "flop_ciclo_sm": 511.4,
+        "sass": "HMMA.1688.F32.TF32"
+      },
+      "e4m3\u00b7f32acc": {
+        "tflops": 243.29,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2483,
+        "potencia_w": 72.2,
+        "flop_ciclo_sm": 2041.3,
+        "sass": "QMMA.16832.F32.E4M3.E4M3"
+      },
+      "e4m3\u00b7f16acc": {
+        "tflops": 243.48,
+        "warps_sm": 8,
+        "ilp": 1,
+        "reloj_mhz": 2489,
+        "potencia_w": 64.7,
+        "flop_ciclo_sm": 2038.0,
+        "sass": "QMMA.16832.F16.E4M3.E4M3"
+      },
+      "s8\u00b7s32acc": {
+        "tflops": 243.92,
+        "warps_sm": 8,
+        "ilp": 2,
+        "reloj_mhz": 2502,
+        "potencia_w": 60.9,
+        "flop_ciclo_sm": 2031.0,
+        "sass": "IMMA.16832.S8.S8"
+      },
+      "e2m1\u00b7f32acc": {
+        "tflops": 245.7,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2496,
+        "potencia_w": 58.5,
+        "flop_ciclo_sm": 2050.8,
+        "sass": "QMMA.16832.F32.E2M1.E2M1"
+      },
+      "mxf8 e4m3": {
+        "tflops": 242.9,
+        "warps_sm": 8,
+        "ilp": 1,
+        "reloj_mhz": 2483,
+        "potencia_w": 70.7,
+        "flop_ciclo_sm": 2038.0,
+        "sass": "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+      },
+      "mxf4 e2m1": {
+        "tflops": 487.29,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2483,
+        "potencia_w": 66.4,
+        "flop_ciclo_sm": 4088.6,
+        "sass": "OMMA.SF.16864.F32.E2M1.E2M1.E8"
+      },
+      "nvf4 e2m1": {
+        "tflops": 486.87,
+        "warps_sm": 8,
+        "ilp": 1,
+        "reloj_mhz": 2483,
+        "potencia_w": 66.6,
+        "flop_ciclo_sm": 4085.0,
+        "sass": "OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X"
+      }
+    },
+    "no_disponibles": {}
+  }
+}

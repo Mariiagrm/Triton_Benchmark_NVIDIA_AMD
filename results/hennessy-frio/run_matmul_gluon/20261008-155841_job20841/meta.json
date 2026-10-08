@@ -1,0 +1,40 @@
+{
+  "experimento": "run_matmul_gluon",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "gluon",
+    "imagen": "tfm-gluon:ngc-arm64@sha256:205a75dbc84d2950fd1d4a17eb3d33f417034fb59b558e024599bddfa3fcdc57",
+    "maquina": "hennessy-frio",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20841",
+    "cache_fria": true,
+    "fecha": "2026-10-08T15:58:41",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/gluon/run_matmul_gluon.py --sizes 8192"
+  },
+  "parametros": {
+    "sizes": [
+      8192
+    ],
+    "dtypes": [
+      "fp16"
+    ],
+    "dsl": "gluon"
+  },
+  "resumen": {
+    "fp16_8192": {
+      "gluon_tflops": 79.26,
+      "cublas_tflops": 97.26,
+      "gluon_vs_cublas": 0.8149
+    }
+  }
+}

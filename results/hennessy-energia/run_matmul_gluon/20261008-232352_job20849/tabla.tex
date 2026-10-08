@@ -1,0 +1,14 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrrrrrrrrrrrrrrll}
+    \toprule
+    variante & dtype & M & N & K & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & tflops & gbs & reloj\_sost\_mhz & potencia\_sost\_w & potencia\_reposo\_w & mj\_llamada & tflops\_sost & gflop\_j & gflop\_j\_din & t\_compilacion\_s & detalle \\
+    \midrule
+    gluon & fp16 & 8192 & 8192 & 8192 & 14.3893 & 14.2569 & 14.7519 & 2411 & 105.1 & 76.41 & 28 & 2158 & 88.3 & 12.7 & 1277.67 & 75.99 & 860.6 & 1005.1 & 69.52 & BM=128 BN=128 BK=32 stages=3 warps=2x2 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    cublas & fp16 & 8192 & 8192 & 8192 & 11.7228 & 11.6911 & 12.3175 & 2158 & 87.9 & 93.79 & 34.3 & 2086 & 88 & 12.7 & 1037.68 & 93.24 & 1059.6 & 1238.3 &  & nvjet\_sm121\_hsh\_mma\_128x208x64\_2\_32x104x64\_tmaAB\_bz\_NNNN \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_matmul\_gluon: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20849, 2026-10-08T23:23:52. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-energia-run-matmul-gluon}
+\end{table}

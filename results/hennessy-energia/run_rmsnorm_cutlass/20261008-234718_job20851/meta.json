@@ -1,0 +1,55 @@
+{
+  "experimento": "run_rmsnorm_cutlass",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "cutlass",
+    "imagen": "tfm-cutlass:ngc-arm64@sha256:e72a9a3627354e9b86298e623275b4a763264ea00216f59962ae56ba9fe4a833",
+    "maquina": "hennessy-energia",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20851",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "energia": true,
+    "energia_segundos": 6.0,
+    "energia_descarte": 2.0,
+    "fecha": "2026-10-08T23:47:18",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/cutlass/run_rmsnorm_cutlass.py --rows 16384 --cols 8192"
+  },
+  "parametros": {
+    "rows": [
+      16384
+    ],
+    "cols": [
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 273.0,
+    "dsl": "cutlass"
+  },
+  "resumen": {
+    "fp16_16384x8192": {
+      "cutlass_gbs": 246.9,
+      "torch_gbs": 216.1,
+      "cutlass_vs_torch": 1.1425
+    },
+    "bf16_16384x8192": {
+      "cutlass_gbs": 227.0,
+      "torch_gbs": 216.4,
+      "cutlass_vs_torch": 1.049
+    }
+  }
+}

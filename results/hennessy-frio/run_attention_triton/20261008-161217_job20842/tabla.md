@@ -1,0 +1,6 @@
+| variante | dtype | B | H | N_CTX | HEAD_DIM | causal | ms | ms_p20 | ms_p80 | reloj_mhz | potencia_w | tflops | gbs | error_rel | t_compilacion_s | detalle |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| triton | fp16 | 4 | 32 | 4096 | 128 | False | 12.3576 | 12.3079 | 12.7302 | 2418 | 20.6 | 88.97 | 43.4 | 0.000376 | 15.22 | BM=128 BN=32 stages=2 num_warps=4 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 |
+| sdpa | fp16 | 4 | 32 | 4096 | 128 | False | 13.2997 | 13.2796 | 13.7826 | 2275 | 65.3 | 82.67 | 40.4 |  |  | void pytorch_flash::flash_fwd_kernel<Flash_fwd_kernel_traits<128, 128, 64, 4, false, false, cutlass::half_t, Flash_kernel_traits<128, 128, 64, 4, cutlass::half_t> >, false, false, false, false, true, true, false, false>(pytorch_flash::Flash_fwd_params) |
+
+*NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20842, 2026-10-08T16:12:17. Mediana de triton.testing.do_bench.*

@@ -1,0 +1,36 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrrrrll}
+    \toprule
+    variante & dtype & M & N & ms & ms\_p20 & ms\_p80 & gbs & pct\_pico & t\_compilacion\_s & detalle \\
+    \midrule
+    helion & fp16 & 4096 & 2048 & 0.1628 & 0.1618 & 0.1639 & 206.1 & 75.5 & 69.25 & autotune=quick \\
+    torch & fp16 & 4096 & 2048 & 0.1772 & 0.1761 & 0.1782 & 189.4 & 69.4 &  &  \\
+    helion & fp16 & 4096 & 4096 & 0.3072 & 0.3062 & 0.3089 & 218.5 & 80 & 68.74 & autotune=quick \\
+    torch & fp16 & 4096 & 4096 & 0.3328 & 0.3316 & 0.3338 & 201.7 & 73.9 &  &  \\
+    helion & fp16 & 4096 & 8192 & 0.6154 & 0.6134 & 0.6175 & 218.1 & 79.9 & 67.63 & autotune=quick \\
+    torch & fp16 & 4096 & 8192 & 0.6922 & 0.6901 & 0.6943 & 193.9 & 71 &  &  \\
+    helion & fp16 & 16384 & 2048 & 0.5908 & 0.5889 & 0.5929 & 227.2 & 83.2 & 80.4 & autotune=quick \\
+    torch & fp16 & 16384 & 2048 & 0.6319 & 0.6308 & 0.634 & 212.4 & 77.8 &  &  \\
+    helion & fp16 & 16384 & 4096 & 1.1919 & 1.1878 & 1.1971 & 225.2 & 82.5 & 77.61 & autotune=quick \\
+    torch & fp16 & 16384 & 4096 & 1.2483 & 1.2462 & 1.2513 & 215 & 78.8 &  &  \\
+    helion & fp16 & 16384 & 8192 & 2.3316 & 2.3286 & 2.3389 & 230.3 & 84.4 & 65.47 & autotune=quick \\
+    torch & fp16 & 16384 & 8192 & 2.6839 & 2.6788 & 2.6895 & 200 & 73.3 &  &  \\
+    helion & bf16 & 4096 & 2048 & 0.1658 & 0.1648 & 0.1667 & 202.4 & 74.1 & 69.23 & autotune=quick \\
+    torch & bf16 & 4096 & 2048 & 0.1782 & 0.1772 & 0.1792 & 188.3 & 69 &  &  \\
+    helion & bf16 & 4096 & 4096 & 0.3103 & 0.3092 & 0.3113 & 216.3 & 79.2 & 69.37 & autotune=quick \\
+    torch & bf16 & 4096 & 4096 & 0.3287 & 0.3277 & 0.3308 & 204.2 & 74.8 &  &  \\
+    helion & bf16 & 4096 & 8192 & 0.6011 & 0.6 & 0.6022 & 223.3 & 81.8 & 73.29 & autotune=quick \\
+    torch & bf16 & 4096 & 8192 & 0.6902 & 0.6881 & 0.6932 & 194.5 & 71.2 &  &  \\
+    helion & bf16 & 16384 & 2048 & 0.6041 & 0.6021 & 0.6052 & 222.2 & 81.4 & 69.35 & autotune=quick \\
+    torch & bf16 & 16384 & 2048 & 0.6226 & 0.6206 & 0.6246 & 215.6 & 79 &  &  \\
+    helion & bf16 & 16384 & 4096 & 1.1551 & 1.153 & 1.1571 & 232.4 & 85.1 & 70.19 & autotune=quick \\
+    torch & bf16 & 16384 & 4096 & 1.2402 & 1.238 & 1.2431 & 216.5 & 79.3 &  &  \\
+    helion & bf16 & 16384 & 8192 & 2.3696 & 2.3675 & 2.3736 & 226.6 & 83 & 72.2 & autotune=quick \\
+    torch & bf16 & 16384 & 8192 & 2.7135 & 2.7094 & 2.7187 & 197.9 & 72.5 &  &  \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_rmsnorm\_helion: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20435, 2026-09-30T16:17:34. Mediana de triton.testing.do\_bench.}
+  \label{tab:patterson-run-rmsnorm-helion}
+\end{table}

@@ -1,0 +1,20 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrlrrrrrlll}
+    \toprule
+    variante & dtype & B & H & N\_CTX & HEAD\_DIM & causal & ms & ms\_p20 & ms\_p80 & tflops & gbs & error\_rel & t\_compilacion\_s & detalle \\
+    \midrule
+    triton & fp16 & 4 & 32 & 1024 & 128 & False & 0.8888 & 0.8868 & 0.8919 & 77.31 & 151 & 0.00036 & 3.26 & BM=128 BN=64 stages=3 num\_warps=8 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 1024 & 128 & False & 1.0027 & 0.9965 & 1.015 & 68.54 & 133.9 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, false, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    triton & fp16 & 4 & 32 & 4096 & 128 & False & 11.9951 & 11.9794 & 12.0109 & 91.66 & 44.8 & 0.000376 & 5.56 & BM=128 BN=32 stages=2 num\_warps=4 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 4096 & 128 & False & 12.9643 & 12.9446 & 12.9886 & 84.81 & 41.4 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, false, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    triton & fp16 & 4 & 32 & 1024 & 128 & True & 0.6224 & 0.6205 & 0.6236 & 55.2 & 215.6 & 0.000214 & 0.34 & BM=128 BN=64 stages=3 num\_warps=8 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 1024 & 128 & True & 0.638 & 0.6369 & 0.64 & 53.86 & 210.4 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, true, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    triton & fp16 & 4 & 32 & 4096 & 128 & True & 6.529 & 6.5144 & 6.5425 & 84.2 & 82.2 & 0.00026 & 0.01 & BM=128 BN=32 stages=2 num\_warps=4 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 4096 & 128 & True & 6.5271 & 6.521 & 6.5359 & 84.23 & 82.3 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, true, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_attention\_triton: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20682, 2026-10-05T14:48:50. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-run-attention-triton}
+\end{table}

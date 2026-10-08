@@ -1,0 +1,16 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrrrrrrrrrrrrrll}
+    \toprule
+    variante & dtype & M & N & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & gbs & reloj\_sost\_mhz & potencia\_sost\_w & potencia\_reposo\_w & mj\_llamada & gbs\_sost & gb\_j & gb\_j\_din & pct\_pico & t\_compilacion\_s & detalle \\
+    \midrule
+    helion & fp16 & 16384 & 8192 & 2.17 & 2.1648 & 2.177 & 2411 & 36.3 & 247.4 & 2483 & 38.3 & 15.8 & 82.5864 & 249 & 6.5 & 11.07 & 90.6 & 75.21 & autotune=quick block\_sizes=[1] num\_warps=32 num\_stages=6 pid\_type=flat indexing=['pointer','pointer','tensor\_descriptor','pointer','tensor\_descriptor','pointer','pointer'] \\
+    torch & fp16 & 16384 & 8192 & 2.4761 & 2.4689 & 2.4852 & 2483 & 34.8 & 216.8 & 2431 & 36.6 & 15.8 & 90.5826 & 216.9 & 5.93 & 10.43 & 79.4 &  &  \\
+    helion & bf16 & 16384 & 8192 & 2.1688 & 2.163 & 2.1749 & 2411 & 20.8 & 247.5 & 2483 & 38.5 & 15.8 & 82.9856 & 249.1 & 6.47 & 10.97 & 90.7 & 77.85 & autotune=quick block\_sizes=[1] num\_warps=32 num\_stages=3 pid\_type=flat indexing=['pointer','pointer','pointer','tensor\_descriptor','pointer','pointer','pointer'] \\
+    torch & bf16 & 16384 & 8192 & 2.4853 & 2.4781 & 2.4924 & 2483 & 38.6 & 216 & 2431 & 36.6 & 15.8 & 90.4025 & 217.4 & 5.94 & 10.45 & 79.1 &  &  \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_rmsnorm\_helion: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20851, 2026-10-08T23:51:33. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-energia-run-rmsnorm-helion}
+\end{table}

@@ -1,0 +1,3 @@
+variante,dtype,M,N,ms,ms_p20,ms_p80,reloj_mhz,potencia_w,gbs,pct_pico,t_compilacion_s,detalle
+triton,fp16,16384,8192,2.2159,2.2118,2.2236,2418,15.5,242.3,88.8,0.61,num_warps=16
+torch,fp16,16384,8192,2.4944,2.4862,2.5076,2502,27.2,215.2,78.8,,

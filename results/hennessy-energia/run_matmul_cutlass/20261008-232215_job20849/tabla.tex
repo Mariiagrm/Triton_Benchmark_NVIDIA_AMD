@@ -1,0 +1,14 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrrrrrrrrrrrrrrll}
+    \toprule
+    variante & dtype & M & N & K & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & tflops & gbs & reloj\_sost\_mhz & potencia\_sost\_w & potencia\_reposo\_w & mj\_llamada & tflops\_sost & gflop\_j & gflop\_j\_din & t\_compilacion\_s & detalle \\
+    \midrule
+    cutlass & fp16 & 8192 & 8192 & 8192 & 45.0278 & 44.6337 & 45.2403 & 2424 & 12 & 24.42 & 8.9 & 2427.5 & 42.7 & 11.9 & 1918.25 & 24.47 & 573.2 & 794.6 & 0.71 & Sm120GemmKernel tile=128x128x64 \\
+    cublas & fp16 & 8192 & 8192 & 8192 & 11.4831 & 11.4166 & 12.0267 & 2424 & 43 & 95.75 & 35.1 & 2151 & 90.8 & 11.9 & 1051.45 & 94.95 & 1045.7 & 1203.4 &  & nvjet\_sm121\_hsh\_mma\_128x208x64\_2\_32x104x64\_tmaAB\_bz\_NNNN \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_matmul\_cutlass: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20849, 2026-10-08T23:22:15. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-energia-run-matmul-cutlass}
+\end{table}

@@ -1,0 +1,98 @@
+{
+  "experimento": "run_sostenido",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20848",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "fecha": "2026-10-08T16:23:22",
+    "comando": "/workspace/tfm/benchmarks/run_sostenido.py"
+  },
+  "parametros": {
+    "n": 8192,
+    "segundos": 6.0,
+    "descarte": 2.0
+  },
+  "resumen": {
+    "n_sm": 48,
+    "filas": [
+      {
+        "kernel": "mma.sync f16\u00b7f32acc",
+        "precision": "fp16",
+        "tflops": 118.7,
+        "reloj_mhz": 2424.0,
+        "potencia_w": 99.7,
+        "pico_mma_a_ese_reloj": 119.1,
+        "pct_pico_mismo_reloj": 99.6
+      },
+      {
+        "kernel": "mma.sync e4m3\u00b7f32acc",
+        "precision": "fp8",
+        "tflops": 237.3,
+        "reloj_mhz": 2424.0,
+        "potencia_w": 99.4,
+        "pico_mma_a_ese_reloj": 238.3,
+        "pct_pico_mismo_reloj": 99.6
+      },
+      {
+        "kernel": "cuBLAS fp16",
+        "precision": "fp16",
+        "tflops": 94.4,
+        "reloj_mhz": 2138.0,
+        "potencia_w": 90.1,
+        "pico_mma_a_ese_reloj": 105.1,
+        "pct_pico_mismo_reloj": 89.8
+      },
+      {
+        "kernel": "Triton fp16",
+        "precision": "fp16",
+        "tflops": 90.57,
+        "reloj_mhz": 2177.0,
+        "potencia_w": 89.6,
+        "pico_mma_a_ese_reloj": 107.0,
+        "pct_pico_mismo_reloj": 84.6
+      },
+      {
+        "kernel": "Triton + TMA fp16",
+        "precision": "fp16",
+        "tflops": 93.75,
+        "reloj_mhz": 2080.0,
+        "potencia_w": 89.1,
+        "pico_mma_a_ese_reloj": 102.2,
+        "pct_pico_mismo_reloj": 91.7
+      },
+      {
+        "kernel": "cuBLASLt FP8",
+        "precision": "fp8",
+        "tflops": 182.9,
+        "reloj_mhz": 2145.0,
+        "potencia_w": 90.7,
+        "pico_mma_a_ese_reloj": 210.9,
+        "pct_pico_mismo_reloj": 86.7
+      },
+      {
+        "kernel": "Triton FP8",
+        "precision": "fp8",
+        "tflops": 143.95,
+        "reloj_mhz": 2158.0,
+        "potencia_w": 90.7,
+        "pico_mma_a_ese_reloj": 212.1,
+        "pct_pico_mismo_reloj": 67.9
+      }
+    ]
+  }
+}

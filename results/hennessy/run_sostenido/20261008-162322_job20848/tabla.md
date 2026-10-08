@@ -1,0 +1,11 @@
+| kernel | precision | tflops | reloj_mhz | potencia_w | pico_mma_a_ese_reloj | pct_pico_mismo_reloj |
+|:---|:---|:---|:---|:---|:---|:---|
+| mma.sync f16·f32acc | fp16 | 118.7 | 2424 | 99.7 | 119.1 | 99.6 |
+| mma.sync e4m3·f32acc | fp8 | 237.3 | 2424 | 99.4 | 238.3 | 99.6 |
+| cuBLAS fp16 | fp16 | 94.4 | 2138 | 90.1 | 105.1 | 89.8 |
+| Triton fp16 | fp16 | 90.57 | 2177 | 89.6 | 107 | 84.6 |
+| Triton + TMA fp16 | fp16 | 93.75 | 2080 | 89.1 | 102.2 | 91.7 |
+| cuBLASLt FP8 | fp8 | 182.9 | 2145 | 90.7 | 210.9 | 86.7 |
+| Triton FP8 | fp8 | 143.95 | 2158 | 90.7 | 212.1 | 67.9 |
+
+*NVIDIA GB10 (sm_121); job 20848, 2026-10-08T16:23:22. Régimen sostenido: 6.0 s seguidos por kernel tras 3 s de reposo; rendimiento, reloj y potencia (instantanea) solo de los últimos 4 s. Matmul 8192^3.*

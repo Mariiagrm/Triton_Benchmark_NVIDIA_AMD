@@ -1,0 +1,44 @@
+{
+  "experimento": "run_attention_triton",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy-frio",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20842",
+    "cache_fria": true,
+    "fecha": "2026-10-08T16:12:17",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_attention_triton.py --seqlens 4096 --head-dims 128 --causal no"
+  },
+  "parametros": {
+    "batch": 4,
+    "heads": 32,
+    "seqlens": [
+      4096
+    ],
+    "head_dims": [
+      128
+    ],
+    "causal": "no",
+    "dsl": "triton"
+  },
+  "resumen": {
+    "N4096_D128_nocausal": {
+      "triton_tflops": 88.97,
+      "sdpa_tflops": 82.67,
+      "triton_vs_sdpa": 1.0762
+    },
+    "fallos": []
+  }
+}

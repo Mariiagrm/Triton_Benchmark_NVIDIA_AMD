@@ -1,0 +1,14 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrrrrrrll}
+    \toprule
+    variante & dtype & M & N & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & gbs & pct\_pico & t\_compilacion\_s & detalle \\
+    \midrule
+    triton & fp16 & 16384 & 8192 & 2.2159 & 2.2118 & 2.2236 & 2418 & 15.5 & 242.3 & 88.8 & 0.61 & num\_warps=16 \\
+    torch & fp16 & 16384 & 8192 & 2.4944 & 2.4862 & 2.5076 & 2502 & 27.2 & 215.2 & 78.8 &  &  \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_rmsnorm\_triton: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20843, 2026-10-08T16:15:13. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-frio-run-rmsnorm-triton}
+\end{table}

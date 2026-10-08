@@ -1,0 +1,14 @@
+algoritmo,dsl,loc_kernel,loc_envoltura,loc_ajuste,loc_propias,loc_total,origen_kernel,ajuste,configs,configs_nota,forma,t_frio_s,valor,unidad,reloj_mhz,job,cache_fria,pct_pico,error
+Matmul fp16,Triton,67,0,0,67,67,src/CBKernels/triton/matmul.py,autotune (triton.autotune),64,"3×3×2×2×2 = 72 (BM, BN, BK, warps, etapas), menos 256×256",8192³,34.1,92.96,TFLOP/s,2411.0,20841,True,75.7,
+Matmul fp16,Triton + TMA,68,0,0,68,68,src/CBKernels/triton/matmul_tma.py,autotune (triton.autotune),128,"3×3×2×2×4 = 144, menos 256×256",8192×8192×8192,96.1,93.31,TFLOP/s,2411.0,20841,True,76.0,
+Matmul fp16,Gluon,85,0,16,101,101,src/CBKernels/gluon/matmul.py,barrido propio (sin autotuning),7,lista CONFIGS,8192×8192×8192,3.88,79.26,TFLOP/s,2411.0,20841,True,64.6,
+Matmul fp16,Helion,25,0,0,25,25,src/CBKernels/helion/matmul.py,autotune Helion (quick),251,,8192×8192×8192,239.55,61.94,TFLOP/s,2418.0,20841,True,50.5,
+Matmul fp16,CUTLASS,672,41,0,41,713,https://github.com/NVIDIA/cutlass/blob/v4.8.0/examples/python/CuTeDSL/cute/blackwell_geforce/kernel/dense_gemm/dense_gemm.py,fija (tile del ejemplo),1,--tile a mano,8192×8192×8192,1.04,23.59,TFLOP/s,2424.0,20841,True,19.2,
+FlashAttention fp16,Triton,220,0,0,220,220,src/CBKernels/triton/fused_attention.py,autotune (triton.autotune),36,"2×3×3×2 (BM, BN, etapas, warps); la poda solo actua en sm_90 o con BM > N",N=4096 D=128,15.22,88.97,TFLOP/s,2418.0,20842,True,72.5,
+FlashAttention fp16,Helion,45,18,0,18,63,https://github.com/pytorch/helion/blob/0f3b242/examples/attention.py,autotune Helion (quick),135,,N=4096 D=128,127.62,84.76,TFLOP/s,2418.0,20842,True,69.1,
+FlashAttention fp16,CUTLASS,713,43,22,65,778,https://github.com/NVIDIA/cutlass/blob/v4.8.0/examples/python/CuTeDSL/cute/ampere/kernel/attention/flash_attention_v2.py,barrido propio (sin autotuning),6,"2×2×2 (BM, BN, hilos) filtradas por can_implement",N=4096 D=128,7.74,90.92,TFLOP/s,2418.0,20842,True,74.1,
+RMSNorm fp16,Triton,38,0,0,38,38,src/MBKernels/triton/rmsnorm_baseline.py,heurística (warps por N),1,,16384×8192,0.61,242.3,GB/s,2418.0,20843,True,88.8,
+RMSNorm fp16,Triton + TLX,52,0,0,52,52,src/MBKernels/triton_tlx/rmsnorm.py,heurística + --stages a mano,1,,,,,,,,,,"no compila en GB10 (triton-utlx 3.8.0.post1, ver procedencia_kernels.md)"
+RMSNorm fp16,Gluon,35,0,0,35,35,src/MBKernels/gluon/rmsnorm.py,heurística (warps y layout por N),1,,16384×8192,0.6,242.1,GB/s,2489.0,20843,True,88.7,
+RMSNorm fp16,Helion,16,0,0,16,16,src/MBKernels/helion/rmsnorm.py,autotune Helion (quick),134,,16384×8192,77.33,247.2,GB/s,2418.0,20843,True,90.5,
+RMSNorm fp16,CUTLASS,135,68,0,68,203,https://github.com/NVIDIA/cutlass/blob/v4.8.0/tools/util/include/cutlass/util/device_rmsnorm.h,fija (heurística de CUTLASS),1,,16384×8192,55.52,247.0,GB/s,2411.0,20843,True,90.5,

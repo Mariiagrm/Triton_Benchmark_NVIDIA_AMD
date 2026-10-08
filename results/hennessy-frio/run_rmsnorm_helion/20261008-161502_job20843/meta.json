@@ -1,0 +1,46 @@
+{
+  "experimento": "run_rmsnorm_helion",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": "1.4.1.dev368+g0f3b2423e",
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "helion",
+    "imagen": "tfm-helion:ngc-arm64@sha256:35f28608d04e5bfd2f39039aff42a4391f8a56b27d1718bf86f315816189fbee",
+    "maquina": "hennessy-frio",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20843",
+    "cache_fria": true,
+    "fecha": "2026-10-08T16:15:02",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/helion/run_rmsnorm_helion.py --rows 16384 --cols 8192 --dtypes fp16"
+  },
+  "parametros": {
+    "rows": [
+      16384
+    ],
+    "cols": [
+      8192
+    ],
+    "dtypes": [
+      "fp16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 273.0,
+    "autotune": "quick",
+    "dsl": "helion"
+  },
+  "resumen": {
+    "fp16_16384x8192": {
+      "helion_gbs": 247.2,
+      "torch_gbs": 204.6,
+      "helion_vs_torch": 1.2082
+    }
+  }
+}

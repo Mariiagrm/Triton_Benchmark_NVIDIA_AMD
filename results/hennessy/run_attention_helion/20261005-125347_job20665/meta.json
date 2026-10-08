@@ -1,0 +1,103 @@
+{
+  "experimento": "run_attention_helion",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": "1.4.1.dev368+g0f3b2423e",
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "helion",
+    "imagen": "tfm-helion:ngc-arm64@sha256:35f28608d04e5bfd2f39039aff42a4391f8a56b27d1718bf86f315816189fbee",
+    "maquina": "hennessy",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20665",
+    "fecha": "2026-10-05T12:53:47",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/helion/run_attention_helion.py"
+  },
+  "parametros": {
+    "batch": 4,
+    "heads": 32,
+    "seqlens": [
+      1024,
+      4096,
+      16384
+    ],
+    "head_dims": [
+      64,
+      128
+    ],
+    "causal": "ambos",
+    "autotune": "quick",
+    "benchmark_timeout": 300,
+    "dsl": "helion"
+  },
+  "resumen": {
+    "N1024_D64_nocausal": {
+      "helion_tflops": 69.76,
+      "sdpa_tflops": 79.89,
+      "helion_vs_sdpa": 0.8732
+    },
+    "N4096_D64_nocausal": {
+      "helion_tflops": 74.94,
+      "sdpa_tflops": 88.2,
+      "helion_vs_sdpa": 0.8497
+    },
+    "N16384_D64_nocausal": {
+      "helion_tflops": 78.99,
+      "sdpa_tflops": 87.09,
+      "helion_vs_sdpa": 0.907
+    },
+    "N1024_D64_causal": {
+      "helion_tflops": 36.7,
+      "sdpa_tflops": 51.31,
+      "helion_vs_sdpa": 0.7153
+    },
+    "N4096_D64_causal": {
+      "helion_tflops": 33.27,
+      "sdpa_tflops": 85.84,
+      "helion_vs_sdpa": 0.3876
+    },
+    "N16384_D64_causal": {
+      "helion_tflops": 39.39,
+      "sdpa_tflops": 86.72,
+      "helion_vs_sdpa": 0.4542
+    },
+    "N1024_D128_nocausal": {
+      "helion_tflops": 78.95,
+      "sdpa_tflops": 66.7,
+      "helion_vs_sdpa": 1.1837
+    },
+    "N4096_D128_nocausal": {
+      "helion_tflops": 87.15,
+      "sdpa_tflops": 82.99,
+      "helion_vs_sdpa": 1.0501
+    },
+    "N16384_D128_nocausal": {
+      "helion_tflops": 66.45,
+      "sdpa_tflops": 83.73,
+      "helion_vs_sdpa": 0.7936
+    },
+    "N1024_D128_causal": {
+      "helion_tflops": 33.72,
+      "sdpa_tflops": 55.01,
+      "helion_vs_sdpa": 0.613
+    },
+    "N4096_D128_causal": {
+      "helion_tflops": 31.27,
+      "sdpa_tflops": 81.33,
+      "helion_vs_sdpa": 0.3845
+    },
+    "N16384_D128_causal": {
+      "helion_tflops": 42.14,
+      "sdpa_tflops": 85.98,
+      "helion_vs_sdpa": 0.4901
+    },
+    "fallos": []
+  }
+}

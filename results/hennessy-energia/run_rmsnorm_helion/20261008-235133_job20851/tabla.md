@@ -1,0 +1,8 @@
+| variante | dtype | M | N | ms | ms_p20 | ms_p80 | reloj_mhz | potencia_w | gbs | reloj_sost_mhz | potencia_sost_w | potencia_reposo_w | mj_llamada | gbs_sost | gb_j | gb_j_din | pct_pico | t_compilacion_s | detalle |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| helion | fp16 | 16384 | 8192 | 2.17 | 2.1648 | 2.177 | 2411 | 36.3 | 247.4 | 2483 | 38.3 | 15.8 | 82.5864 | 249 | 6.5 | 11.07 | 90.6 | 75.21 | autotune=quick block_sizes=[1] num_warps=32 num_stages=6 pid_type=flat indexing=['pointer','pointer','tensor_descriptor','pointer','tensor_descriptor','pointer','pointer'] |
+| torch | fp16 | 16384 | 8192 | 2.4761 | 2.4689 | 2.4852 | 2483 | 34.8 | 216.8 | 2431 | 36.6 | 15.8 | 90.5826 | 216.9 | 5.93 | 10.43 | 79.4 |  |  |
+| helion | bf16 | 16384 | 8192 | 2.1688 | 2.163 | 2.1749 | 2411 | 20.8 | 247.5 | 2483 | 38.5 | 15.8 | 82.9856 | 249.1 | 6.47 | 10.97 | 90.7 | 77.85 | autotune=quick block_sizes=[1] num_warps=32 num_stages=3 pid_type=flat indexing=['pointer','pointer','pointer','tensor_descriptor','pointer','pointer','pointer'] |
+| torch | bf16 | 16384 | 8192 | 2.4853 | 2.4781 | 2.4924 | 2483 | 38.6 | 216 | 2431 | 36.6 | 15.8 | 90.4025 | 217.4 | 5.94 | 10.45 | 79.1 |  |  |
+
+*NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20851, 2026-10-08T23:51:33. Mediana de triton.testing.do_bench.*

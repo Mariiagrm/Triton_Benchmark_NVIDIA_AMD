@@ -1,0 +1,29 @@
+# Dependencias Python del TFM.
+#
+# En hennessy NO se instalan con pip a mano: hay una imagen Docker por DSL (targets del
+# Dockerfile: triton-tlx, gluon, helion, cutlass) y todas parten de
+# NGC PyTorch 25.10 (nvcr.io/nvidia/pytorch:25.10-py3), que ya trae torch 2.9 y triton
+# compilados para aarch64/GB10. Reinstalarlos desde PyPI romperia esa build.
+# Este fichero documenta el entorno y sirve para instalarlo fuera del contenedor, p. ej.
+# en el login para regenerar informes (basta matplotlib).
+#
+# Proporcionadas por la imagen NGC (no reinstalar dentro del contenedor).
+# Helion requiere torch >= 2.9; versiones medidas: torch 2.9, triton 3.8.0, CUDA 13.0.
+torch>=2.9
+triton
+
+# DSLs (cada uno solo en su imagen; Gluon viene con triton; Cutlass/CuTe es C++, ver CMakeLists.txt)
+triton-utlx                                     # imagen triton-tlx: plugin TLX
+helion @ git+https://github.com/pytorch/helion.git  # imagen helion
+
+# Comunes a todas las imagenes
+huggingface_hub
+
+# Analisis e informes
+pandas
+matplotlib
+jupyterlab
+
+# Utilidades
+pytest
+ninja

@@ -1,0 +1,49 @@
+{
+  "experimento": "run_matmul_cutlass",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "cutlass",
+    "imagen": "tfm-cutlass:ngc-arm64@sha256:e72a9a3627354e9b86298e623275b4a763264ea00216f59962ae56ba9fe4a833",
+    "maquina": "hennessy-energia",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20849",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "energia": true,
+    "energia_segundos": 6.0,
+    "energia_descarte": 2.0,
+    "fecha": "2026-10-08T23:22:15",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/cutlass/run_matmul_cutlass.py --sizes 8192"
+  },
+  "parametros": {
+    "sizes": [
+      8192
+    ],
+    "dtypes": [
+      "fp16"
+    ],
+    "tile": [
+      128,
+      128,
+      64
+    ],
+    "dsl": "cutlass"
+  },
+  "resumen": {
+    "fp16_8192": {
+      "cutlass_tflops": 24.42,
+      "cublas_tflops": 95.75,
+      "cutlass_vs_cublas": 0.255
+    }
+  }
+}

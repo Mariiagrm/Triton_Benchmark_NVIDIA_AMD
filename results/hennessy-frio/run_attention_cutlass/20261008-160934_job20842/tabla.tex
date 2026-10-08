@@ -1,0 +1,14 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrlrrrrrrrlll}
+    \toprule
+    variante & dtype & B & H & N\_CTX & HEAD\_DIM & causal & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & tflops & gbs & error\_rel & t\_compilacion\_s & detalle \\
+    \midrule
+    cutlass & fp16 & 4 & 32 & 4096 & 128 & False & 12.0934 & 12.0649 & 12.5413 & 2418 & 49.8 & 90.92 & 44.4 & 0.000136 & 7.74 & FlashAttentionForwardAmpere BM=128 BN=128 hilos=256 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 4096 & 128 & False & 13.2874 & 13.2388 & 13.7456 & 2255 & 83.4 & 82.75 & 40.4 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, false, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_attention\_cutlass: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20842, 2026-10-08T16:09:34. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-frio-run-attention-cutlass}
+\end{table}

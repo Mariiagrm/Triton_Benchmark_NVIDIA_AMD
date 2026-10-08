@@ -1,0 +1,6 @@
+| variante | dtype | M | N | K | ms | ms_p20 | ms_p80 | reloj_mhz | potencia_w | tflops | gbs | reloj_sost_mhz | potencia_sost_w | potencia_reposo_w | mj_llamada | tflops_sost | gflop_j | gflop_j_din | t_compilacion_s | detalle |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| gluon | fp16 | 8192 | 8192 | 8192 | 14.3893 | 14.2569 | 14.7519 | 2411 | 105.1 | 76.41 | 28 | 2158 | 88.3 | 12.7 | 1277.67 | 75.99 | 860.6 | 1005.1 | 69.52 | BM=128 BN=128 BK=32 stages=3 warps=2x2 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 |
+| cublas | fp16 | 8192 | 8192 | 8192 | 11.7228 | 11.6911 | 12.3175 | 2158 | 87.9 | 93.79 | 34.3 | 2086 | 88 | 12.7 | 1037.68 | 93.24 | 1059.6 | 1238.3 |  | nvjet_sm121_hsh_mma_128x208x64_2_32x104x64_tmaAB_bz_NNNN |
+
+*NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20849, 2026-10-08T23:23:52. Mediana de triton.testing.do_bench.*

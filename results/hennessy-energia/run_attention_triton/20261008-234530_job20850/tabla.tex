@@ -1,0 +1,16 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrlrrrrrrrrrrrrrrlll}
+    \toprule
+    variante & dtype & B & H & N\_CTX & HEAD\_DIM & causal & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & tflops & gbs & reloj\_sost\_mhz & potencia\_sost\_w & potencia\_reposo\_w & mj\_llamada & tflops\_sost & gflop\_j & gflop\_j\_din & error\_rel & t\_compilacion\_s & detalle \\
+    \midrule
+    triton & fp16 & 4 & 32 & 4096 & 128 & False & 12.5336 & 12.5028 & 12.5614 & 2411 & 17.3 & 87.72 & 42.8 & 2171 & 94.7 & 16.6 & 1203.51 & 86.52 & 913.6 & 1107.8 & 0.000376 & 5.96 & BM=128 BN=32 stages=2 num\_warps=4 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 4096 & 128 & False & 13.5906 & 13.5524 & 14.0337 & 2171 & 93.5 & 80.9 & 39.5 & 2216 & 94.6 & 16.6 & 1298.72 & 80.09 & 846.6 & 1026.8 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, false, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    triton & fp16 & 4 & 32 & 4096 & 128 & True & 6.8368 & 6.7993 & 7.1939 & 2216 & 94.4 & 80.41 & 78.5 & 2203 & 92.2 & 16.6 & 644.073 & 78.7 & 853.6 & 1041 & 0.00026 & 0.01 & BM=128 BN=32 stages=2 num\_warps=4 mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 4096 & 128 & True & 6.8798 & 6.8325 & 7.1371 & 2203 & 91.8 & 79.91 & 78 & 2216 & 92.7 & 16.6 & 646.037 & 78.88 & 851 & 1036.6 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, true, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_attention\_triton: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20850, 2026-10-08T23:45:30. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-energia-run-attention-triton}
+\end{table}

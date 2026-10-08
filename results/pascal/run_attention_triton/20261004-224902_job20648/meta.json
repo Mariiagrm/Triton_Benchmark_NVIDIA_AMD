@@ -1,0 +1,100 @@
+{
+  "experimento": "run_attention_triton",
+  "contexto": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "sm": "120",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post2",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:fff8b0bdd32b1127220e4cd0ecff21b2e4e2e2deb697e06390a2ca9cad0bcf0b",
+    "maquina": "pascal",
+    "host": "pascal",
+    "driver_nvidia": "610.43.02",
+    "kernel_linux": "4.18.0-553.62.1.el8_10.x86_64",
+    "slurm_job": "20648",
+    "fecha": "2026-10-04T22:49:02",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_attention_triton.py"
+  },
+  "parametros": {
+    "batch": 4,
+    "heads": 32,
+    "seqlens": [
+      1024,
+      4096,
+      16384
+    ],
+    "head_dims": [
+      64,
+      128
+    ],
+    "causal": "ambos",
+    "dsl": "triton"
+  },
+  "resumen": {
+    "N1024_D64_nocausal": {
+      "triton_tflops": 145.79,
+      "sdpa_tflops": 134.25,
+      "triton_vs_sdpa": 1.086
+    },
+    "N4096_D64_nocausal": {
+      "triton_tflops": 164.26,
+      "sdpa_tflops": 158.17,
+      "triton_vs_sdpa": 1.0385
+    },
+    "N16384_D64_nocausal": {
+      "triton_tflops": 167.88,
+      "sdpa_tflops": 163.78,
+      "triton_vs_sdpa": 1.025
+    },
+    "N1024_D64_causal": {
+      "triton_tflops": 118.15,
+      "sdpa_tflops": 99.86,
+      "triton_vs_sdpa": 1.1832
+    },
+    "N4096_D64_causal": {
+      "triton_tflops": 156.67,
+      "sdpa_tflops": 145.98,
+      "triton_vs_sdpa": 1.0732
+    },
+    "N16384_D64_causal": {
+      "triton_tflops": 166.25,
+      "sdpa_tflops": 159.98,
+      "triton_vs_sdpa": 1.0392
+    },
+    "N1024_D128_nocausal": {
+      "triton_tflops": 134.71,
+      "sdpa_tflops": 124.98,
+      "triton_vs_sdpa": 1.0779
+    },
+    "N4096_D128_nocausal": {
+      "triton_tflops": 157.1,
+      "sdpa_tflops": 147.53,
+      "triton_vs_sdpa": 1.0649
+    },
+    "N16384_D128_nocausal": {
+      "triton_tflops": 162.82,
+      "sdpa_tflops": 152.93,
+      "triton_vs_sdpa": 1.0647
+    },
+    "N1024_D128_causal": {
+      "triton_tflops": 99.23,
+      "sdpa_tflops": 104.9,
+      "triton_vs_sdpa": 0.9459
+    },
+    "N4096_D128_causal": {
+      "triton_tflops": 142.1,
+      "sdpa_tflops": 140.84,
+      "triton_vs_sdpa": 1.0089
+    },
+    "N16384_D128_causal": {
+      "triton_tflops": 157.2,
+      "sdpa_tflops": 152.36,
+      "triton_vs_sdpa": 1.0318
+    }
+  }
+}

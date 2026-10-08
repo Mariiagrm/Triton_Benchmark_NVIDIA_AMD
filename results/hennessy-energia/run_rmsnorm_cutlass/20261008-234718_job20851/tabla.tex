@@ -1,0 +1,16 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrrrrrrrrrrrrrll}
+    \toprule
+    variante & dtype & M & N & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & gbs & reloj\_sost\_mhz & potencia\_sost\_w & potencia\_reposo\_w & mj\_llamada & gbs\_sost & gb\_j & gb\_j\_din & pct\_pico & t\_compilacion\_s & detalle \\
+    \midrule
+    cutlass & fp16 & 16384 & 8192 & 2.1749 & 2.1699 & 2.1821 & 2411 & 22.6 & 246.9 & 2502 & 41.4 & 13.7 & 89.413 & 248.6 & 6 & 8.97 & 90.4 & 55.3 & rmsnorm\_twoPassAlgo\_e8 \\
+    torch & fp16 & 16384 & 8192 & 2.4848 & 2.475 & 2.4934 & 2502 & 41.6 & 216.1 & 2437 & 34.4 & 13.7 & 85.2705 & 216.6 & 6.3 & 10.46 & 79.2 &  &  \\
+    cutlass & bf16 & 16384 & 8192 & 2.3655 & 2.3589 & 2.3726 & 2431 & 34.5 & 227 & 2502 & 49 & 13.7 & 114.723 & 229.3 & 4.68 & 6.5 & 83.2 & 0 & rmsnorm\_twoPassAlgo\_e1 \\
+    torch & bf16 & 16384 & 8192 & 2.4812 & 2.471 & 2.49 & 2502 & 34 & 216.4 & 2437 & 34.6 & 13.7 & 85.3064 & 217.8 & 6.29 & 10.42 & 79.3 &  &  \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_rmsnorm\_cutlass: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20851, 2026-10-08T23:47:18. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-energia-run-rmsnorm-cutlass}
+\end{table}

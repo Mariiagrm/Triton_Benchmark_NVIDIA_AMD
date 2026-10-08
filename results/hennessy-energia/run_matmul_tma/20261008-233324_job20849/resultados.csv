@@ -1,0 +1,4 @@
+variante,dtype,M,N,K,BLOCK_SIZE_M,BLOCK_SIZE_N,BLOCK_SIZE_K,GROUP_SIZE_M,num_warps,num_stages,carga,usa_tma,autotune_s,ms,ms_p20,ms_p80,reloj_mhz,potencia_w,tflops,gbs,reloj_sost_mhz,potencia_sost_w,potencia_reposo_w,mj_llamada,tflops_sost,gflop_j,gflop_j_din,mma
+baseline,fp16,8192,8192,8192,128,256,64,8,8,3,cp.async,False,13.8,12.6313,12.1885,12.716,2255.0,92.1,87.05,31.9,2158.0,88.3,17.0,1078.9347,89.98,1019.1,1262.0,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+blockptr,fp16,8192,8192,8192,128,256,64,8,8,3,cp.async,False,35.0,11.9829,11.9518,12.5148,2268,87.7,91.76,33.6,2125,87.9,17.0,1061.2757,91.07,1036.0,1284.4,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32
+tma,fp16,8192,8192,8192,128,128,32,8,4,4,TMA,True,64.5,11.5865,11.5614,11.6543,2242.0,86.0,94.9,34.8,2047,88.0,17.0,1033.3169,93.64,1064.1,1318.8,mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32

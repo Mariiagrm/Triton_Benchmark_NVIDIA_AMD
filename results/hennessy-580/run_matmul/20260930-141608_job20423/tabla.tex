@@ -1,0 +1,14 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{lllrrrrr}
+    \toprule
+    dtype & $M \times N \times K$ & Config. Triton & Triton (ms) & Triton (TFLOP/s) & cuBLAS (ms) & cuBLAS (TFLOP/s) & Triton/cuBLAS \\
+    \midrule
+    fp16 & 4096$\times$4096$\times$4096 & 128$\times$128$\times$32, w4, s4 & 1.394 & 98.6 & 1.683 & 81.6 & 120.8\% \\
+    fp16 & 8192$\times$8192$\times$8192 & 128$\times$256$\times$64, w8, s3 & 11.979 & 91.8 & 11.886 & 92.5 & 99.2\% \\
+    \bottomrule
+  \end{tabular}
+  \caption{Baseline matmul: Triton con \texttt{@triton.autotune} frente a cuBLAS. NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20423, 2026-09-30T14:16:08. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-580-baseline-matmul}
+\end{table}

@@ -1,0 +1,41 @@
+{
+  "experimento": "run_matmul_helion",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": "1.4.1.dev368+g0f3b2423e",
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "helion",
+    "imagen": "tfm-helion:ngc-arm64@sha256:35f28608d04e5bfd2f39039aff42a4391f8a56b27d1718bf86f315816189fbee",
+    "maquina": "hennessy-frio",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20841",
+    "cache_fria": true,
+    "fecha": "2026-10-08T16:02:54",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/helion/run_matmul_helion.py --sizes 8192"
+  },
+  "parametros": {
+    "sizes": [
+      8192
+    ],
+    "dtypes": [
+      "fp16"
+    ],
+    "autotune": "quick",
+    "dsl": "helion"
+  },
+  "resumen": {
+    "fp16_8192": {
+      "helion_tflops": 61.94,
+      "cublas_tflops": 94.17,
+      "helion_vs_cublas": 0.6577
+    }
+  }
+}

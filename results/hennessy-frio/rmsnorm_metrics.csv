@@ -1,0 +1,9 @@
+maquina,experimento,ejecucion,gpu,driver_nvidia,fecha,variante,dtype,M,N,ms,ms_p20,ms_p80,reloj_mhz,potencia_w,gbs,pct_pico,t_compilacion_s,detalle
+hennessy-frio,run_rmsnorm_cutlass,20261008-161324_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:13:24,cutlass,fp16,16384,8192,2.174,2.1688,2.183,2411.0,13.5,247.0,90.5,55.52,rmsnorm_twoPassAlgo_e8
+hennessy-frio,run_rmsnorm_cutlass,20261008-161324_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:13:24,torch,fp16,16384,8192,2.496,2.4842,2.5056,2450,30.0,215.1,78.8,,
+hennessy-frio,run_rmsnorm_gluon,20261008-161332_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:13:32,gluon,fp16,16384,8192,2.218,2.2129,2.2252,2489,15.8,242.1,88.7,0.6,num_warps=16 vec=8
+hennessy-frio,run_rmsnorm_gluon,20261008-161332_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:13:32,torch,fp16,16384,8192,2.4852,2.4772,2.4981,2522,26.5,216.0,79.1,,
+hennessy-frio,run_rmsnorm_helion,20261008-161502_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:15:02,helion,fp16,16384,8192,2.1719,2.1678,2.1806,2418,18.0,247.2,90.5,77.33,"autotune=quick block_sizes=[1] num_warps=32 num_stages=1 pid_type=flat indexing=['tensor_descriptor','pointer','pointer','pointer','tensor_descriptor','tensor_descriptor','pointer']"
+hennessy-frio,run_rmsnorm_helion,20261008-161502_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:15:02,torch,fp16,16384,8192,2.6236,2.6122,2.6368,2502.0,28.5,204.6,74.9,,
+hennessy-frio,run_rmsnorm_triton,20261008-161513_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:15:13,triton,fp16,16384,8192,2.2159,2.2118,2.2236,2418,15.5,242.3,88.8,0.61,num_warps=16
+hennessy-frio,run_rmsnorm_triton,20261008-161513_job20843,NVIDIA GB10,610.57.04,2026-10-08T16:15:13,torch,fp16,16384,8192,2.4944,2.4862,2.5076,2502,27.2,215.2,78.8,,

@@ -1,0 +1,55 @@
+{
+  "experimento": "run_attention_helion",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": "1.4.1.dev368+g0f3b2423e",
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "helion",
+    "imagen": "tfm-helion:ngc-arm64@sha256:35f28608d04e5bfd2f39039aff42a4391f8a56b27d1718bf86f315816189fbee",
+    "maquina": "hennessy-energia",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "20850",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "energia": true,
+    "energia_segundos": 6.0,
+    "energia_descarte": 2.0,
+    "fecha": "2026-10-08T23:44:34",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/helion/run_attention_helion.py --seqlens 4096 --head-dims 128 --causal ambos"
+  },
+  "parametros": {
+    "batch": 4,
+    "heads": 32,
+    "seqlens": [
+      4096
+    ],
+    "head_dims": [
+      128
+    ],
+    "causal": "ambos",
+    "autotune": "quick",
+    "benchmark_timeout": 300,
+    "dsl": "helion"
+  },
+  "resumen": {
+    "N4096_D128_nocausal": {
+      "helion_tflops": 84.12,
+      "sdpa_tflops": 80.65,
+      "helion_vs_sdpa": 1.043
+    },
+    "N4096_D128_causal": {
+      "helion_tflops": 40.63,
+      "sdpa_tflops": 80.11,
+      "helion_vs_sdpa": 0.5072
+    },
+    "fallos": []
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "experimento": "run_attention_cutlass",
+  "contexto": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "sm": "120",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "cutlass",
+    "imagen": "tfm-cutlass:ngc-arm64@sha256:9afd220c0c1e22d5d4b77dda754763c83549d6a75f98fd466f80eb94d8fd43d6",
+    "maquina": "pascal",
+    "host": "pascal",
+    "driver_nvidia": "610.43.02",
+    "kernel_linux": "4.18.0-553.62.1.el8_10.x86_64",
+    "slurm_job": "20648",
+    "fecha": "2026-10-04T22:20:48",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/cutlass/run_attention_cutlass.py"
+  },
+  "parametros": {
+    "batch": 4,
+    "heads": 32,
+    "seqlens": [
+      1024,
+      4096,
+      16384
+    ],
+    "head_dims": [
+      64,
+      128
+    ],
+    "causal": "ambos",
+    "bloques": null,
+    "dsl": "cutlass"
+  },
+  "resumen": {
+    "N1024_D64_nocausal": {
+      "cutlass_tflops": 144.63,
+      "sdpa_tflops": 134.22,
+      "cutlass_vs_sdpa": 1.0776
+    },
+    "N4096_D64_nocausal": {
+      "cutlass_tflops": 163.58,
+      "sdpa_tflops": 158.0,
+      "cutlass_vs_sdpa": 1.0353
+    },
+    "N16384_D64_nocausal": {
+      "cutlass_tflops": 167.37,
+      "sdpa_tflops": 163.61,
+      "cutlass_vs_sdpa": 1.023
+    },
+    "N1024_D64_causal": {
+      "cutlass_tflops": 111.52,
+      "sdpa_tflops": 99.86,
+      "cutlass_vs_sdpa": 1.1168
+    },
+    "N4096_D64_causal": {
+      "cutlass_tflops": 153.79,
+      "sdpa_tflops": 145.97,
+      "cutlass_vs_sdpa": 1.0536
+    },
+    "N16384_D64_causal": {
+      "cutlass_tflops": 164.19,
+      "sdpa_tflops": 159.88,
+      "cutlass_vs_sdpa": 1.027
+    },
+    "N1024_D128_nocausal": {
+      "cutlass_tflops": 147.02,
+      "sdpa_tflops": 124.97,
+      "cutlass_vs_sdpa": 1.1764
+    },
+    "N4096_D128_nocausal": {
+      "cutlass_tflops": 160.14,
+      "sdpa_tflops": 147.43,
+      "cutlass_vs_sdpa": 1.0862
+    },
+    "N16384_D128_nocausal": {
+      "cutlass_tflops": 164.64,
+      "sdpa_tflops": 153.17,
+      "cutlass_vs_sdpa": 1.0749
+    },
+    "N1024_D128_causal": {
+      "cutlass_tflops": 123.36,
+      "sdpa_tflops": 104.86,
+      "cutlass_vs_sdpa": 1.1764
+    },
+    "N4096_D128_causal": {
+      "cutlass_tflops": 154.61,
+      "sdpa_tflops": 140.76,
+      "cutlass_vs_sdpa": 1.0984
+    },
+    "N16384_D128_causal": {
+      "cutlass_tflops": 162.18,
+      "sdpa_tflops": 152.46,
+      "cutlass_vs_sdpa": 1.0638
+    }
+  }
+}

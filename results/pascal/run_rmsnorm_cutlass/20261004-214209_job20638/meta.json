@@ -1,0 +1,103 @@
+{
+  "experimento": "run_rmsnorm_cutlass",
+  "contexto": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "sm": "120",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": null,
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "cutlass",
+    "imagen": "tfm-cutlass:ngc-arm64@sha256:9afd220c0c1e22d5d4b77dda754763c83549d6a75f98fd466f80eb94d8fd43d6",
+    "maquina": "pascal",
+    "host": "pascal",
+    "driver_nvidia": "610.43.02",
+    "kernel_linux": "4.18.0-553.62.1.el8_10.x86_64",
+    "slurm_job": "20638",
+    "fecha": "2026-10-04T21:42:09",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/cutlass/run_rmsnorm_cutlass.py"
+  },
+  "parametros": {
+    "rows": [
+      4096,
+      16384
+    ],
+    "cols": [
+      2048,
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 1792.0,
+    "dsl": "cutlass"
+  },
+  "resumen": {
+    "fp16_4096x2048": {
+      "cutlass_gbs": 1189.0,
+      "torch_gbs": 1108.6,
+      "cutlass_vs_torch": 1.0725
+    },
+    "fp16_4096x4096": {
+      "cutlass_gbs": 1353.2,
+      "torch_gbs": 1179.0,
+      "cutlass_vs_torch": 1.1478
+    },
+    "fp16_4096x8192": {
+      "cutlass_gbs": 1401.1,
+      "torch_gbs": 1144.6,
+      "cutlass_vs_torch": 1.2241
+    },
+    "fp16_16384x2048": {
+      "cutlass_gbs": 1388.0,
+      "torch_gbs": 1359.2,
+      "cutlass_vs_torch": 1.0212
+    },
+    "fp16_16384x4096": {
+      "cutlass_gbs": 1421.4,
+      "torch_gbs": 1375.7,
+      "cutlass_vs_torch": 1.0332
+    },
+    "fp16_16384x8192": {
+      "cutlass_gbs": 1438.7,
+      "torch_gbs": 1299.3,
+      "cutlass_vs_torch": 1.1073
+    },
+    "bf16_4096x2048": {
+      "cutlass_gbs": 676.6,
+      "torch_gbs": 1076.7,
+      "cutlass_vs_torch": 0.6284
+    },
+    "bf16_4096x4096": {
+      "cutlass_gbs": 904.8,
+      "torch_gbs": 1161.4,
+      "cutlass_vs_torch": 0.7791
+    },
+    "bf16_4096x8192": {
+      "cutlass_gbs": 1165.9,
+      "torch_gbs": 1134.3,
+      "cutlass_vs_torch": 1.0279
+    },
+    "bf16_16384x2048": {
+      "cutlass_gbs": 1186.9,
+      "torch_gbs": 1359.2,
+      "cutlass_vs_torch": 0.8732
+    },
+    "bf16_16384x4096": {
+      "cutlass_gbs": 1348.0,
+      "torch_gbs": 1376.6,
+      "cutlass_vs_torch": 0.9792
+    },
+    "bf16_16384x8192": {
+      "cutlass_gbs": 1400.1,
+      "torch_gbs": 1302.8,
+      "cutlass_vs_torch": 1.0747
+    }
+  }
+}

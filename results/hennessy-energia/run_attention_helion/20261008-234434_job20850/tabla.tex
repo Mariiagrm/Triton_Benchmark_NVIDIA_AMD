@@ -1,0 +1,16 @@
+% Requiere \usepackage{booktabs}
+\begin{table}[htbp]
+  \centering\small
+  \begin{tabular}{llrrrrlrrrrrrrrrrrrrrlll}
+    \toprule
+    variante & dtype & B & H & N\_CTX & HEAD\_DIM & causal & ms & ms\_p20 & ms\_p80 & reloj\_mhz & potencia\_w & tflops & gbs & reloj\_sost\_mhz & potencia\_sost\_w & potencia\_reposo\_w & mj\_llamada & tflops\_sost & gflop\_j & gflop\_j\_din & error\_rel & t\_compilacion\_s & detalle \\
+    \midrule
+    helion & fp16 & 4 & 32 & 4096 & 128 & False & 13.0703 & 13.0468 & 13.5237 & 2418 & 95.1 & 84.12 & 41.1 & 2132 & 94.7 & 16.1 & 1256.3 & 82.88 & 875.2 & 1054.5 & 0.000439 & 147.9 & autotune=quick block\_sizes=[1,128,32] num\_warps=4 num\_stages=2 pid\_type=flat indexing=['pointer','tensor\_descriptor','pointer','pointer'] mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 4096 & 128 & False & 13.6334 & 13.5315 & 14.0415 & 2125 & 94.3 & 80.65 & 39.4 & 2216 & 94.6 & 16.1 & 1297.31 & 80.18 & 847.5 & 1021.4 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, false, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    helion & fp16 & 4 & 32 & 4096 & 128 & True & 13.5322 & 13.5072 & 13.7704 & 2418 & 112.6 & 40.63 & 39.7 & 2164 & 94 & 16.1 & 1292.82 & 39.97 & 425.2 & 513.1 & 0.000382 & 292.37 & autotune=quick block\_sizes=[1,128,32] num\_warps=4 num\_stages=2 pid\_type=flat indexing=['pointer','pointer','tensor\_descriptor','tensor\_descriptor','pointer'] mma=mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 \\
+    sdpa & fp16 & 4 & 32 & 4096 & 128 & True & 6.8627 & 6.8221 & 7.1271 & 2158 & 93.6 & 80.11 & 78.2 & 2210 & 92.4 & 16.1 & 646.121 & 78.62 & 850.9 & 1030.4 &  &  & void pytorch\_flash::flash\_fwd\_kernel<Flash\_fwd\_kernel\_traits<128, 128, 64, 4, false, false, cutlass::half\_t, Flash\_kernel\_traits<128, 128, 64, 4, cutlass::half\_t> >, false, true, false, false, true, true, false, false>(pytorch\_flash::Flash\_fwd\_params) \\
+    \bottomrule
+  \end{tabular}
+  \caption{run\_attention\_helion: NVIDIA GB10 (sm\_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20850, 2026-10-08T23:44:34. Mediana de triton.testing.do\_bench.}
+  \label{tab:hennessy-energia-run-attention-helion}
+\end{table}

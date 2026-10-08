@@ -1,0 +1,84 @@
+{
+  "experimento": "run_matmul",
+  "contexto": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "sm": "120",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post2",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:fff8b0bdd32b1127220e4cd0ecff21b2e4e2e2deb697e06390a2ca9cad0bcf0b",
+    "host": "pascal",
+    "slurm_job": "20499",
+    "fecha": "2026-10-02T09:17:24",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_matmul.py"
+  },
+  "parametros": {
+    "sizes": [
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ]
+  },
+  "resumen": {
+    "baseline": {
+      "fp16": {
+        "dtype": "fp16",
+        "M": 8192,
+        "N": 8192,
+        "K": 8192,
+        "BLOCK_SIZE_M": 256,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_K": 64,
+        "GROUP_SIZE_M": 8,
+        "num_warps": 8,
+        "num_stages": 3,
+        "autotune_s": 8.8,
+        "triton_ms": 5.0463,
+        "triton_ms_p20": 5.0445,
+        "triton_ms_p80": 5.0483,
+        "triton_tflops": 217.89,
+        "triton_gbs": 79.8,
+        "cublas_ms": 5.2572,
+        "cublas_ms_p20": 5.251,
+        "cublas_ms_p80": 5.2623,
+        "cublas_tflops": 209.14,
+        "cublas_gbs": 76.6,
+        "triton_mma": "mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32",
+        "cublas_kernel": "void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_nn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_nn_align8::Params)"
+      },
+      "bf16": {
+        "dtype": "bf16",
+        "M": 8192,
+        "N": 8192,
+        "K": 8192,
+        "BLOCK_SIZE_M": 128,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_K": 32,
+        "GROUP_SIZE_M": 8,
+        "num_warps": 4,
+        "num_stages": 4,
+        "autotune_s": 8.8,
+        "triton_ms": 4.9716,
+        "triton_ms_p20": 4.9691,
+        "triton_ms_p80": 4.9746,
+        "triton_tflops": 221.16,
+        "triton_gbs": 81.0,
+        "cublas_ms": 5.1005,
+        "cublas_ms_p20": 5.0995,
+        "cublas_ms_p80": 5.1036,
+        "cublas_tflops": 215.57,
+        "cublas_gbs": 78.9,
+        "triton_mma": "mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32",
+        "cublas_kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x64_64x3_nn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x64_64x3_nn_align8::Params)"
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+arquitectura,fila,columna,tipo,valor,unidad,extra,tamano,config,maquina,experimento,ejecucion
+NVIDIA GB10 (sm_121),Triton,Matmul fp16,CB,93.46,TFLOP/s,,8192×8192×8192,BM=128 BN=256 BK=64 GROUP_M=8 · 8 warps (256 hilos) · 3 etapas,hennessy,run_matmul,20261008-144724_job20835
+NVIDIA GB10 (sm_121),Triton,Matmul FP8,CB,145.95,TFLOP/s,,8192×8192×8192,BM=256 BN=128 BK=128 GROUP_M=8 · 8 warps (256 hilos) · 3 etapas · error 3.75%,hennessy,run_matmul_fp8,20261008-145124_job20837
+NVIDIA GB10 (sm_121),Triton,FlashAttention fp16,CB,91.66,TFLOP/s,,B=4 H=32 N=4096 D=128,BM=128 · BN=32 · 2 etapas · 4 warps (128 hilos),hennessy,run_attention_triton,20261005-144850_job20682
+NVIDIA GB10 (sm_121),Triton,FlashAttention causal fp16,CB,84.2,TFLOP/s,,B=4 H=32 N=4096 D=128,BM=128 · BN=32 · 2 etapas · 4 warps (128 hilos),hennessy,run_attention_triton,20261005-144850_job20682
+NVIDIA GB10 (sm_121),Triton,RMSNorm fp16,MB,243,GB/s,89 % del pico,16384×8192,16 warps (512 hilos),hennessy,run_rmsnorm_triton,20261002-092055_job20500
+NVIDIA GB10 (sm_121),Triton,RMSNorm bf16,MB,243.1,GB/s,89 % del pico,16384×8192,16 warps (512 hilos),hennessy,run_rmsnorm_triton,20261002-092055_job20500
+NVIDIA GB10 (sm_121),Triton (block-ptr),Matmul fp16,CB,92.93,TFLOP/s,,8192×8192×8192,BM=128 BN=256 BK=64 GROUP_M=8 · 8 warps (256 hilos) · 3 etapas · carga=cp.async,hennessy,run_matmul_tma,20261008-161937_job20847
+NVIDIA GB10 (sm_121),Triton + TMA,Matmul fp16,CB,95.5,TFLOP/s,,8192×8192×8192,BM=128 BN=128 BK=32 GROUP_M=8 · 4 warps (128 hilos) · 4 etapas · carga=TMA,hennessy,run_matmul_tma,20261008-161937_job20847
+NVIDIA GB10 (sm_121),Triton + TMA,Matmul FP8,CB,151.06,TFLOP/s,,8192×8192×8192,BM=128 BN=256 BK=128 GROUP_M=8 · 8 warps (256 hilos) · 3 etapas · carga=TMA · error 3.75%,hennessy,run_matmul_fp8,20261008-145124_job20837
+NVIDIA GB10 (sm_121),Gluon,RMSNorm fp16,MB,243.1,GB/s,89 % del pico,16384×8192,16 warps (512 hilos) · 8 elem/hilo (16 B),hennessy,run_rmsnorm_gluon,20261006-214456_job20782
+NVIDIA GB10 (sm_121),Gluon,RMSNorm bf16,MB,243.1,GB/s,89 % del pico,16384×8192,16 warps (512 hilos) · 8 elem/hilo (16 B),hennessy,run_rmsnorm_gluon,20261006-214456_job20782
+NVIDIA GB10 (sm_121),Helion,FlashAttention fp16,CB,66.45,TFLOP/s,,B=4 H=32 N=16384 D=128,"2 warps (64 hilos) · bloques=[1,64,32] · 1 etapas · autotune=quick",hennessy,run_attention_helion,20261005-125347_job20665
+NVIDIA GB10 (sm_121),Helion,FlashAttention causal fp16,CB,42.14,TFLOP/s,,B=4 H=32 N=16384 D=128,"4 warps (128 hilos) · bloques=[1,128,32] · 2 etapas · autotune=quick",hennessy,run_attention_helion,20261005-125347_job20665
+NVIDIA GB10 (sm_121),Helion,RMSNorm fp16,MB,230.3,GB/s,84.4 % del pico,16384×8192,autotune=quick,patterson,run_rmsnorm_helion,20260930-161734_job20435
+NVIDIA GB10 (sm_121),Helion,RMSNorm bf16,MB,226.6,GB/s,83 % del pico,16384×8192,autotune=quick,patterson,run_rmsnorm_helion,20260930-161734_job20435
+NVIDIA GB10 (sm_121),CUTLASS,FlashAttention fp16,CB,91.39,TFLOP/s,,B=4 H=32 N=16384 D=128,CuTe DSL FlashAttentionForwardAmpere · BM=128 BN=128 · 256 hilos (8 warps),hennessy,run_attention_cutlass,20261004-222101_job20649
+NVIDIA GB10 (sm_121),CUTLASS,FlashAttention causal fp16,CB,90.8,TFLOP/s,,B=4 H=32 N=16384 D=128,CuTe DSL FlashAttentionForwardAmpere · BM=128 BN=128 · 256 hilos (8 warps),hennessy,run_attention_cutlass,20261004-222101_job20649
+NVIDIA GB10 (sm_121),CUTLASS,RMSNorm fp16,MB,230.5,GB/s,84.4 % del pico,16384×8192,cutlass::rmsnorm _e8 (float4) · 1024 hilos/bloque · 1 bloque/fila,patterson,run_rmsnorm_cutlass,20260930-164148_job20435
+NVIDIA GB10 (sm_121),CUTLASS,RMSNorm bf16,MB,211.6,GB/s,77.5 % del pico,16384×8192,cutlass::rmsnorm _e1 (escalar) · 256 hilos/bloque · 1 bloque/fila,patterson,run_rmsnorm_cutlass,20260930-164148_job20435
+NVIDIA GB10 (sm_121),Referencia,Matmul fp16,CB,95.22,TFLOP/s,,8192×8192×8192,cuBLAS nvjet_sm121_hsh_mma_128x208x64_2_32x104x64_tmaAB_bz_NNNN,hennessy,run_matmul,20261008-144724_job20835
+NVIDIA GB10 (sm_121),Referencia,Matmul FP8,CB,183.83,TFLOP/s,,8192×8192×8192,cuBLASLt (torch._scaled_mm) · error 3.75%,hennessy,run_matmul_fp8,20261008-145124_job20837
+NVIDIA GB10 (sm_121),Referencia,FlashAttention fp16,CB,84.81,TFLOP/s,,B=4 H=32 N=4096 D=128,PyTorch SDPA pytorch_flash::flash_fwd_kernel,hennessy,run_attention_triton,20261005-144850_job20682
+NVIDIA GB10 (sm_121),Referencia,FlashAttention causal fp16,CB,84.23,TFLOP/s,,B=4 H=32 N=4096 D=128,PyTorch SDPA pytorch_flash::flash_fwd_kernel,hennessy,run_attention_triton,20261005-144850_job20682
+NVIDIA GB10 (sm_121),Referencia,RMSNorm fp16,MB,218.5,GB/s,80 % del pico,16384×8192,PyTorch F.rms_norm,hennessy,run_rmsnorm_gluon,20261006-214456_job20782
+NVIDIA GB10 (sm_121),Referencia,RMSNorm bf16,MB,218.3,GB/s,80 % del pico,16384×8192,PyTorch F.rms_norm,hennessy,run_rmsnorm_gluon,20261006-214456_job20782
+NVIDIA GeForce RTX 5090 (sm_120),Triton,Matmul fp16,CB,217.89,TFLOP/s,,8192×8192×8192,BM=256 BN=128 BK=64 GROUP_M=8 · 8 warps (256 hilos) · 3 etapas,pascal,run_matmul,20261002-091724_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton,Matmul FP8,CB,394.76,TFLOP/s,,8192×8192×8192,BM=128 BN=256 BK=128 GROUP_M=8 · 8 warps (256 hilos) · 3 etapas · error 3.75%,pascal,run_matmul_fp8,20261002-091623_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton,FlashAttention fp16,CB,162.82,TFLOP/s,,B=4 H=32 N=16384 D=128,BM=128 · BN=32 · 2 etapas · 4 warps (128 hilos),pascal,run_attention_triton,20261004-224902_job20648
+NVIDIA GeForce RTX 5090 (sm_120),Triton,FlashAttention causal fp16,CB,157.2,TFLOP/s,,B=4 H=32 N=16384 D=128,BM=128 · BN=32 · 2 etapas · 4 warps (128 hilos),pascal,run_attention_triton,20261004-224902_job20648
+NVIDIA GeForce RTX 5090 (sm_120),Triton,RMSNorm fp16,MB,1521.4,GB/s,84.9 % del pico,16384×8192,16 warps (512 hilos),pascal,run_rmsnorm_triton,20261002-092354_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton,RMSNorm bf16,MB,1513.4,GB/s,84.5 % del pico,16384×8192,16 warps (512 hilos),pascal,run_rmsnorm_triton,20261002-092354_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton (block-ptr),Matmul fp16,CB,217.6,TFLOP/s,,8192×8192×8192,BM=128 BN=128 BK=64 GROUP_M=8 · 4 warps (128 hilos) · 2 etapas · carga=cp.async,pascal,run_matmul_tma,20261002-092322_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton + TMA,Matmul fp16,CB,223.6,TFLOP/s,,8192×8192×8192,BM=128 BN=128 BK=64 GROUP_M=8 · 4 warps (128 hilos) · 2 etapas · carga=TMA,pascal,run_matmul_tma,20261002-092322_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton + TMA,Matmul FP8,CB,394.47,TFLOP/s,,8192×8192×8192,BM=256 BN=128 BK=128 GROUP_M=8 · 8 warps (256 hilos) · 3 etapas · carga=TMA · error 3.75%,pascal,run_matmul_fp8,20261002-091623_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton + TLX,RMSNorm fp16,MB,1456.4,GB/s,81.3 % del pico,16384×8192,3 etapas · 16 warps (512 hilos) · grid=340 (persistente) · carga=cp.async,pascal,run_rmsnorm_tlx,20261002-092338_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Triton + TLX,RMSNorm bf16,MB,1456.4,GB/s,81.3 % del pico,16384×8192,3 etapas · 16 warps (512 hilos) · grid=340 (persistente) · carga=cp.async,pascal,run_rmsnorm_tlx,20261002-092338_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Gluon,RMSNorm fp16,MB,1521.2,GB/s,84.9 % del pico,16384×8192,16 warps (512 hilos) · 8 elem/hilo (16 B),pascal,run_rmsnorm_gluon,20261002-115344_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Gluon,RMSNorm bf16,MB,1513.4,GB/s,84.5 % del pico,16384×8192,16 warps (512 hilos) · 8 elem/hilo (16 B),pascal,run_rmsnorm_gluon,20261002-115344_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Helion,FlashAttention fp16,CB,149.88,TFLOP/s,,B=4 H=32 N=16384 D=128,"1 warps (32 hilos) · bloques=[1,32,32] · 1 etapas · autotune=quick",pascal,run_attention_helion,20261004-224724_job20648
+NVIDIA GeForce RTX 5090 (sm_120),Helion,FlashAttention causal fp16,CB,75.85,TFLOP/s,,B=4 H=32 N=16384 D=128,"1 warps (32 hilos) · bloques=[1,32,16] · 1 etapas · autotune=quick",pascal,run_attention_helion,20261004-224724_job20648
+NVIDIA GeForce RTX 5090 (sm_120),CUTLASS,Matmul fp16,CB,165.83,TFLOP/s,,8192×8192×8192,CuTe DSL Sm120GemmKernel · tile 128x128x64,pascal,run_matmul_cutlass,20261004-214055_job20638
+NVIDIA GeForce RTX 5090 (sm_120),CUTLASS,FlashAttention fp16,CB,164.64,TFLOP/s,,B=4 H=32 N=16384 D=128,CuTe DSL FlashAttentionForwardAmpere · BM=128 BN=128 · 256 hilos (8 warps),pascal,run_attention_cutlass,20261004-222048_job20648
+NVIDIA GeForce RTX 5090 (sm_120),CUTLASS,FlashAttention causal fp16,CB,162.18,TFLOP/s,,B=4 H=32 N=16384 D=128,CuTe DSL FlashAttentionForwardAmpere · BM=64 BN=64 · 128 hilos (4 warps),pascal,run_attention_cutlass,20261004-222048_job20648
+NVIDIA GeForce RTX 5090 (sm_120),CUTLASS,RMSNorm fp16,MB,1438.7,GB/s,80.3 % del pico,16384×8192,cutlass::rmsnorm _e8 (float4) · 1024 hilos/bloque · 1 bloque/fila,pascal,run_rmsnorm_cutlass,20261004-214209_job20638
+NVIDIA GeForce RTX 5090 (sm_120),CUTLASS,RMSNorm bf16,MB,1400.1,GB/s,78.1 % del pico,16384×8192,cutlass::rmsnorm _e1 (escalar) · 256 hilos/bloque · 1 bloque/fila,pascal,run_rmsnorm_cutlass,20261004-214209_job20638
+NVIDIA GeForce RTX 5090 (sm_120),Referencia,Matmul fp16,CB,209.14,TFLOP/s,,8192×8192×8192,cuBLAS cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_nn_align8,pascal,run_matmul,20261002-091724_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Referencia,Matmul FP8,CB,598.67,TFLOP/s,,8192×8192×8192,cuBLASLt (torch._scaled_mm) · error 3.75%,pascal,run_matmul_fp8,20261002-091623_job20499
+NVIDIA GeForce RTX 5090 (sm_120),Referencia,FlashAttention fp16,CB,152.93,TFLOP/s,,B=4 H=32 N=16384 D=128,PyTorch SDPA pytorch_flash::flash_fwd_kernel,pascal,run_attention_triton,20261004-224902_job20648
+NVIDIA GeForce RTX 5090 (sm_120),Referencia,FlashAttention causal fp16,CB,152.36,TFLOP/s,,B=4 H=32 N=16384 D=128,PyTorch SDPA pytorch_flash::flash_fwd_kernel,pascal,run_attention_triton,20261004-224902_job20648
+NVIDIA GeForce RTX 5090 (sm_120),Referencia,RMSNorm fp16,MB,1299.3,GB/s,72.5 % del pico,16384×8192,PyTorch F.rms_norm,pascal,run_rmsnorm_cutlass,20261004-214209_job20638
+NVIDIA GeForce RTX 5090 (sm_120),Referencia,RMSNorm bf16,MB,1302.8,GB/s,72.7 % del pico,16384×8192,PyTorch F.rms_norm,pascal,run_rmsnorm_cutlass,20261004-214209_job20638
