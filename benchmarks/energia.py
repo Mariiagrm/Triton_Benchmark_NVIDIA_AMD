@@ -11,7 +11,7 @@ F.rms_norm) en la misma GPU. La version "dinamica" descuenta la potencia en repo
 
 Salida:
     results/energia.csv                           formato largo (una fila por celda)
-    docs/TFM/resultados/energia.{md,tex}          una tabla por arquitectura
+    docs/TFM/resultados/energia.md          una tabla por arquitectura
     docs/TFM/resultados/figuras/energia_{compute,memory}_bound.{png,pdf}
 
 Lo llama comun.guardar() al final de cada ejecucion con TFM_ENERGIA=1. A mano (login, sin GPU):
@@ -31,6 +31,44 @@ RAIZ = informe.RAIZ
 UNIDAD = {"CB": "GFLOP/J", "MB": "GB/J"}
 CLAVE = {"CB": ("gflop_j", "gflop_j_din", "tflops_sost", "TFLOP/s"),
          "MB": ("gb_j", "gb_j_din", "gbs_sost", "GB/s")}
+
+
+# Metodo de calculo: se escribe al principio de energia.md (comun.energia()).
+METODO_MD = """## Cómo se calcula
+
+La energía no se mide con un contador de julios: se mide la **potencia** de la GPU mientras el
+kernel se ejecuta sin parar y se combina con el trabajo hecho en ese tiempo (`comun.energia()`,
+activado con `TFM_ENERGIA=1`).
+
+1. **Potencia en reposo**, una vez por script: 4 s sin carga y mediana de los 2 últimos
+   (`potencia_reposo_w`).
+2. **Régimen sostenido** de cada kernel, después de su medida con `do_bench`: 3 s de reposo
+   (todos parten del mismo estado térmico) y 6 s en bucle, en lotes de ~50 ms seguidos de una
+   sincronización. Los 2 primeros segundos se descartan, porque el reloj tarda ~0.5 s en
+   estabilizarse bajo carga y NVML en reflejarlo. Cuenta el tramo final de 4 s: llamadas
+   completadas / 4 s = **ritmo** (llamadas/s). Duraciones configurables con
+   `TFM_ENERGIA_SEGUNDOS` y `TFM_ENERGIA_DESCARTE`.
+3. **Potencia y reloj**: un hilo lee de NVML cada 20 ms el reloj SM y la potencia
+   **instantánea** de la GPU (`NVML_FI_DEV_POWER_INSTANT`; la de `nvmlDeviceGetPowerUsage` es un
+   promedio retrasado ~1 s). Se toma la mediana de las muestras del tramo medido.
+4. **Cálculo**:
+
+| magnitud | fórmula |
+|:---|:---|
+| rendimiento sostenido | ritmo × FLOP por llamada (TFLOP/s) o × bytes por llamada (GB/s) |
+| energía por llamada | potencia / ritmo (mJ) |
+| eficiencia CB | TFLOP/s sostenidos × 1000 / W = **GFLOP/J** (1 W = 1 J/s) |
+| eficiencia MB | GB/s sostenidos / W = **GB/J** |
+| eficiencia dinámica | igual, dividiendo por (potencia − potencia en reposo) |
+| × referencia | eficiencia del DSL / eficiencia de cuBLAS, SDPA o `F.rms_norm` en la misma GPU y forma |
+
+**Limitaciones.** Es solo la potencia de la GPU según NVML: no incluye CPU, memoria ni el resto
+del sistema, así que no es comparable con el TDP de 140 W de todo el SoC de GB10. NVML actualiza
+cada ~0.5 s, así que el tramo de 4 s tiene unas 8 lecturas distintas. La potencia en reposo se
+mide justo después del autotuning y varía entre scripts (12–17 W en GB10): la eficiencia total es
+fiable, y la dinámica depende de esa cifra. Cada kernel se mide una sola vez, sin repeticiones.
+
+"""
 
 
 def _es_energia(maquina, ultimo):
@@ -86,7 +124,7 @@ def _lineas(c):
     rel = f" (×{c['vs_ref']:g} ref.)" if c["vs_ref"] else ""
     din = f" · {c['eficiencia_din']:g} {c['unidad']} dinámica" if c["eficiencia_din"] not in ("", None) else ""
     detalle = (f"{c['potencia_w']:g} W (reposo {c['reposo_w']:g} W){din} · {c['rend_sost']:g} {c['unidad_rend']} "
-               f"sost. · {c['reloj_mhz']:g} MHz · {c['mj_llamada']:g} mJ/llamada · {c['tamano']}")
+               f"sost. · {c['reloj_mhz']:g} MHz · {c['mj_llamada']:.4g} mJ/llamada · {c['tamano']}")
     return f"{c['eficiencia']:g} {c['unidad']}{rel}", detalle, f"{c['maquina']}, {resumen._job(c)}"
 
 
@@ -106,36 +144,6 @@ def tabla_md(arq, celdas):
             textos.append(f"**{v}**<br>{det}<br>_{org}_")
         lineas.append(f"| **{fila}** | " + " | ".join(textos) + " |")
     return f"## {arq}\n\n" + "\n".join(lineas) + "\n"
-
-
-def tabla_tex(arq, celdas, etiqueta):
-    cols, filas = _cols_filas(celdas)
-    t = resumen._tex
-    cuerpo = []
-    for fila in filas:
-        de_fila = {c["columna"]: c for c in celdas if c["fila"] == fila}
-        textos = []
-        for col in cols:
-            c = de_fila.get(col)
-            if c is None:
-                textos.append("---")
-                continue
-            v, det, org = _lineas(c)
-            textos.append(rf"\textbf{{{t(v)}}} \newline {t(det)} \newline \emph{{{t(org)}}}")
-        cuerpo.append(rf"    \textbf{{{t(fila)}}} & " + " & ".join(textos) + r" \\ \midrule")
-    if cuerpo:
-        cuerpo[-1] = cuerpo[-1].replace(r" \midrule", "")
-    cabecera = " & ".join(rf"\textbf{{{t(col)}}} ({resumen.TIPO[col]})" for col in cols)
-    return (r"% Requiere \usepackage{booktabs,tabularx,pdflscape}. Generado por benchmarks/energia.py." "\n"
-            r"\begin{landscape}" "\n" r"\begin{table}[p]" "\n" r"  \centering\scriptsize" "\n"
-            r"  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.2cm}*{" + str(len(cols))
-            + r"}{>{\raggedright\arraybackslash}X}}" "\n" r"    \toprule" "\n"
-            rf"    \textbf{{DSL}} & {cabecera} \\" "\n" r"    \midrule" "\n" + "\n".join(cuerpo) + "\n"
-            r"    \bottomrule" "\n" r"  \end{tabularx}" "\n"
-            rf"  \caption{{Eficiencia energética por DSL y algoritmo en {t(arq)} en régimen sostenido: "
-            r"CB en GFLOP/J, MB en GB/J, con la potencia de la GPU (NVML instantánea) y la relativa a la "
-            r"referencia.}" "\n"
-            rf"  \label{{tab:energia-{etiqueta}}}" "\n" r"\end{table}" "\n" r"\end{landscape}" "\n")
 
 
 def graficas(celdas, docs):
@@ -192,23 +200,22 @@ def generar():
 
     docs = os.path.join(informe.DOCS, "TFM", "resultados")
     os.makedirs(docs, exist_ok=True)
-    nota = ("*Generado por `benchmarks/energia.py` a partir de las ejecuciones con `TFM_ENERGIA=1`. Régimen "
-            "sostenido: cada kernel en bucle tras 3 s de reposo, descartando el arranque; potencia instantánea de "
-            "NVML (solo GPU). CB en GFLOP/J, MB en GB/J; «×» = eficiencia relativa a la referencia de la misma GPU; "
-            "«dinámica» descuenta la potencia en reposo.*\n\n")
-    md, tex = ["# Eficiencia energética por arquitectura\n\n", nota], []
+    nota = ("*Generado por `benchmarks/energia.py` a partir de las ejecuciones con `TFM_ENERGIA=1`. CB en GFLOP/J, "
+            "MB en GB/J; «×» = eficiencia relativa a la referencia de la misma GPU; «dinámica» descuenta la potencia "
+            "en reposo.*\n\n")
+    md = ["# Eficiencia energética por arquitectura\n\n", nota, METODO_MD,
+          "## Gráficas\n\n![Compute-bound](figuras/energia_compute_bound.png)\n\n"
+          "![Memory-bound](figuras/energia_memory_bound.png)\n\n"]
     for arq in sorted({c["arquitectura"] for c in celdas}):
         de_arq = [c for c in celdas if c["arquitectura"] == arq]
         md.append(tabla_md(arq, de_arq) + "\n")
-        tex.append(tabla_tex(arq, de_arq, re.sub(r"[^a-z0-9]+", "-", arq.lower()).strip("-")))
-    for nom, txt in (("energia.md", "".join(md)), ("energia.tex", "\n".join(tex))):
-        with open(os.path.join(docs, nom), "w") as fh:
-            fh.write(txt)
+    with open(os.path.join(docs, "energia.md"), "w") as fh:
+        fh.write("".join(md))
     try:
         graficas(celdas, docs)
     except Exception as e:
         print(f"AVISO: fallo al generar las graficas de energia ({type(e).__name__}: {e}).", flush=True)
-    print(f"Eficiencia energetica en docs/TFM/resultados/energia.{{md,tex}} y {os.path.relpath(destino_csv, RAIZ)}",
+    print(f"Eficiencia energetica en docs/TFM/resultados/energia.md y {os.path.relpath(destino_csv, RAIZ)}",
           flush=True)
 
 

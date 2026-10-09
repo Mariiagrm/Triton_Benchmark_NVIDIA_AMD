@@ -18,7 +18,7 @@ memoria de la GPU (MB, columna pct_pico de RMSNorm).
 
 Uso (login, sin GPU):
     python3.11 benchmarks/productividad.py [--frio hennessy-frio] [--pico hennessy]
-Salida: results/productividad.csv y docs/TFM/resultados/productividad.{md,tex} (+ figuras/)
+Salida: results/productividad.csv y docs/TFM/resultados/productividad.md (+ figuras/)
 Detalle y lectura: docs/TFM/productividad.md
 """
 import argparse
@@ -397,9 +397,6 @@ def main():
            f"TFLOP/s (`{args.pico}`/run_pico_mma). LoC = líneas lógicas sin blancos, comentarios ni docstrings.")
     meta = {"contexto": {}}
     md = informe.tabla_md(t, meta, list(t[0])).rsplit("\n\n*", 1)[0] + f"\n\n*{pie}*\n"
-    esc = pie.replace("`", "").replace("%", r"\%").replace("_", r"\_").replace("³", r"$^3$").replace("→", r"$\to$")
-    tex = re.sub(r"  \\caption\{.*\}\n", lambda _: "  \\caption{Productividad frente a rendimiento. " + esc + "}\n",
-                 informe.tabla_tex(t, meta, list(t[0]), "productividad-completa"))
     docs = os.path.join(informe.DOCS, "TFM", "resultados")
     os.makedirs(os.path.join(docs, "figuras"), exist_ok=True)
     grafica(filas, os.path.join(docs, "figuras"), pico,
@@ -409,11 +406,9 @@ def main():
         f.write("# Productividad frente a rendimiento (GB10)\n\nGenerado por `benchmarks/productividad.py`. "
                 "Análisis en [../productividad.md](../productividad.md).\n\n"
                 "![productividad](figuras/productividad.png)\n\n" + md)
-    with open(os.path.join(docs, "productividad.tex"), "w") as f:
-        f.write(tex)
     for r in t:
         print(" | ".join(str(v) for v in r.values()))
-    print("\nresults/productividad.csv y docs/TFM/resultados/productividad.{md,tex} (+ figuras/productividad.png)")
+    print("\nresults/productividad.csv y docs/TFM/resultados/productividad.md (+ figuras/productividad.png)")
 
 
 if __name__ == "__main__":

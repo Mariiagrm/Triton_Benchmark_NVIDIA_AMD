@@ -9,8 +9,8 @@ Regenerar a mano cualquier ejecucion:
     python3.11 benchmarks/informe.py results/<maquina>/<experimento>/<ejecucion>
     python3.11 benchmarks/informe.py results/<maquina>/<experimento>/ultimo
 
-Salida en la ejecucion: tabla.md, tabla.tex, grafica.png, grafica.pdf
-Copia para la memoria: docs/TFM/resultados/<maquina>/<experimento>.{md,tex} (+ figuras/)
+Salida en la ejecucion: tabla.md, grafica.png, grafica.pdf
+Copia para la memoria: docs/TFM/resultados/<maquina>/<experimento>.md (+ figuras/)
 
 Los resultados se separan por MAQUINA (entorno de ejecucion: por defecto el nodo; se
 puede fijar con TFM_MAQUINA para distinguir entornos en el mismo nodo).
@@ -97,26 +97,6 @@ def tabla_md(filas, meta, columnas):
     sep = "|" + "|".join([":---"] * len(columnas)) + "|"
     cuerpo = ["| " + " | ".join(_fmt(f.get(c, "")) for c in columnas) + " |" for f in filas]
     return "\n".join([cab, sep] + cuerpo) + f"\n\n*{pie(meta)}*\n"
-
-
-def etiqueta_tex(meta, nombre):
-    """\\label unica por entorno: la misma tabla de dos GPUs (p. ej. hennessy y pascal) puede
-    incluirse en la misma memoria sin que LaTeX las confunda. tab:<maquina>-<nombre>."""
-    maquina = meta.get("contexto", {}).get("maquina")
-    return "tab:" + "-".join(x.replace("_", "-") for x in (maquina, nombre) if x)
-
-
-def tabla_tex(filas, meta, columnas, nombre):
-    esc = lambda s: str(s).replace("×", r"$\times$").replace("%", r"\%").replace("_", r"\_")  # noqa: E731
-    align = "".join("r" if all(isinstance(f.get(c), (int, float)) for f in filas) else "l" for c in columnas)
-    cuerpo = "\n".join("    " + " & ".join(esc(_fmt(f.get(c, ""))) for c in columnas) + r" \\" for f in filas)
-    return (r"% Requiere \usepackage{booktabs}" "\n"
-            r"\begin{table}[htbp]" "\n" r"  \centering\small" "\n"
-            r"  \begin{tabular}{" + align + "}\n" r"    \toprule" "\n"
-            "    " + " & ".join(esc(c) for c in columnas) + r" \\" "\n" r"    \midrule" "\n"
-            + cuerpo + "\n" r"    \bottomrule" "\n" r"  \end{tabular}" "\n"
-            r"  \caption{" + esc(nombre) + ": " + esc(pie(meta)) + "}\n"
-            r"  \label{" + etiqueta_tex(meta, nombre) + "}\n" r"\end{table}" "\n")
 
 
 def grafica(filas, meta, destino, nombre):
@@ -221,16 +201,12 @@ def generar(ejecucion):
     md = tabla_md(filas, meta, columnas)
     with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
         f.write(md)
-    with open(os.path.join(ejecucion, "tabla.tex"), "w") as f:
-        f.write(tabla_tex(filas, meta, columnas, nombre))
     hay_grafica = grafica(filas, meta, ejecucion, nombre)
 
     # Copia para la memoria del TFM, separada por maquina.
     docs = os.path.join(DOCS, "TFM", "resultados", maquina)
     figs = os.path.join(docs, "figuras")
     os.makedirs(figs, exist_ok=True)
-    with open(os.path.join(docs, f"{nombre}.tex"), "w") as f:
-        f.write(tabla_tex(filas, meta, columnas, nombre))
     cabecera_img = ""
     if hay_grafica:
         for ext in ("png", "pdf"):

@@ -10,7 +10,7 @@ en su PTX, y se registra el kernel de cuBLAS (fp32 va en TF32, ver comun.py).
 Uso:
     bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_matmul [--sizes 4096 8192] [--dtypes fp16]
 Resultados: results/run_matmul/<fecha>_job<JOBID>/{resultados.csv,meta.json}
-           + tabla.md/.tex y grafica.png/.pdf (ver informe_matmul.py)
+           + tabla.md y grafica.png/.pdf (ver informe_matmul.py)
 """
 import argparse
 import time

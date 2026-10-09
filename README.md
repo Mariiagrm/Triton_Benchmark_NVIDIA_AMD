@@ -240,24 +240,21 @@ key `resumen.pico`) scaled to the measured clock.
 
 ## Reports for the thesis
 
-**Summary by architecture** (`../tfm/docs/TFM/resultados/resumen_<arquitectura>.{md,tex}` and
+**Summary by architecture** (`../tfm/docs/TFM/resultados/resumen_<arquitectura>.md` and
 `resumen.md`): one table per GPU with DSLs in the rows and algorithms in the columns,
 marked as CB (compute-bound, in TFLOP/s) or MB (memory-bound, in GB/s and % of peak).
 
-**Per-benchmark tables** (`../tfm/docs/TFM/resultados/<machine>/<benchmark>.{md,tex}` + `figuras/`) are
-regenerated automatically after each run; their LaTeX label is `tab:<machine>-<benchmark>`
-(e.g. `tab:pascal-run-matmul-fp8`), so the same table from two GPUs can be `\input` in one
-document. To regenerate a run's report without a GPU: `python3.11 benchmarks/informe.py
+**Per-benchmark tables** (`../tfm/docs/TFM/resultados/<machine>/<benchmark>.md` + `figuras/`) are
+regenerated automatically after each run. To regenerate a run's report without a GPU: `python3.11 benchmarks/informe.py
 results/<machine>/<benchmark>/ultimo` (or `--informe` for `run_pico_mma` / `run_sostenido`).
 
 **Probes** (`.sonda/`) are throwaway diagnostics, indexed in [.sonda/README.md](.sonda/README.md);
 the outputs that support a thesis claim are archived in `../tfm/docs/TFM/resultados/sondas/`, since
 `logs/` is not versioned.
 
-**Consolidated thesis sections** (`../tfm/docs/TFM/<section>.{md,tex}`, include the `.tex` with
-`\input`): `plataforma` (hardware and methodology), `procedencia_kernels` (origin of every
+**Consolidated thesis sections** (`../tfm/docs/TFM/<section>.md`): `plataforma` (hardware and methodology), `procedencia_kernels` (origin of every
 kernel), `tma`, `fp8`, `sparsity`, `pico_mma` (real tensor-core peak and the kernels as a
 % of it) and `productividad` (code size and tuning cost vs performance per DSL).
-**Energy efficiency** (`../tfm/docs/TFM/resultados/energia.{md,tex}` + `figuras/energia_*`) is regenerated
+**Energy efficiency** (`../tfm/docs/TFM/resultados/energia.md` + `figuras/energia_*`) is regenerated
 after each `TFM_ENERGIA=1` run, or by hand with `python3.11 benchmarks/energia.py`. `../tfm/docs/TFM/resumen.md` summarizes the matmul study and `../tfm/docs/TFM/bitacora.md` is the
 dated work log, with the Slurm jobs behind each claim.

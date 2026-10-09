@@ -218,16 +218,12 @@ def generar_informe(ejecucion):
     tabla = tabla_pico(filas)
     columnas = list(dict.fromkeys(k for f in tabla for k in f))
     md = informe.tabla_md(tabla, meta, columnas)
-    tex = informe.tabla_tex(tabla, meta, columnas, nombre)
-    for nom, txt in (("tabla.md", md), ("tabla.tex", tex)):
-        with open(os.path.join(ejecucion, nom), "w") as f:
-            f.write(txt)
+    with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
+        f.write(md)
     hay = grafica_pico(filas, meta, ejecucion)
 
     docs = os.path.join(informe.DOCS, "TFM", "resultados", maquina)
     os.makedirs(os.path.join(docs, "figuras"), exist_ok=True)
-    with open(os.path.join(docs, f"{nombre}.tex"), "w") as f:
-        f.write(tex)
     img = ""
     if hay:
         for ext in ("png", "pdf"):

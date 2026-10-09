@@ -165,16 +165,11 @@ def generar_informe(ejecucion):
     columnas = list(dict.fromkeys(k for f in filas for k in f))
     pie = _pie(meta)
     md = informe.tabla_md(filas, meta, columnas).rsplit("\n\n*", 1)[0] + f"\n\n*{pie}*\n"
-    tex = informe.tabla_tex(filas, meta, columnas, nombre)
-    tex = tex.replace(informe.pie(meta).replace("%", r"\%").replace("_", r"\_"), pie.replace("%", r"\%").replace("_", r"\_").replace("^3", r"$^3$"))
-    for nom, txt in (("tabla.md", md), ("tabla.tex", tex)):
-        with open(os.path.join(ejecucion, nom), "w") as f:
-            f.write(txt)
+    with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
+        f.write(md)
     grafica(filas, meta, ejecucion)
     docs = os.path.join(informe.DOCS, "TFM", "resultados", maquina)
     os.makedirs(os.path.join(docs, "figuras"), exist_ok=True)
-    with open(os.path.join(docs, f"{nombre}.tex"), "w") as f:
-        f.write(tex)
     for ext in ("png", "pdf"):
         shutil.copy(os.path.join(ejecucion, f"grafica.{ext}"), os.path.join(docs, "figuras", f"{nombre}.{ext}"))
     origen = os.path.relpath(ejecucion, informe.RAIZ)

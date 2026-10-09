@@ -13,7 +13,7 @@ Metrica por tipo de algoritmo:
 Se genera a partir de la ultima ejecucion de cada benchmark en cada entorno
 (results/<maquina>/<benchmark>/ultimo). Salida:
     results/resumen.csv                          formato largo (una fila por celda y entorno)
-    docs/TFM/resultados/resumen_<arq>.{md,tex}   una tabla por arquitectura
+    docs/TFM/resultados/resumen_<arq>.md   una tabla por arquitectura
     docs/TFM/resultados/resumen.md               todas las arquitecturas juntas
 
 Lo llama comun.guardar() al final de cada ejecucion, que ademas imprime en el log la tabla
@@ -274,42 +274,6 @@ def tabla_texto(arq, celdas, ancho=30):
     return "\n".join(out)
 
 
-def _tex(s):
-    s = s.replace("\\", r"\textbackslash{}")
-    for a, b in [("&", r"\&"), ("%", r"\%"), ("_", r"\_"), ("#", r"\#"), ("×", r"$\times$"),
-                 ("·", r"$\cdot$"), ("³", r"$^3$")]:
-        s = s.replace(a, b)
-    return s
-
-
-def tabla_tex(arq, celdas, etiqueta):
-    cols = [col for col, _ in COLUMNAS if any(c["columna"] == col for c in celdas)]
-    filas = [f for f in FILAS if any(c["fila"] == f for c in celdas)]
-    cuerpo = []
-    for fila in filas:
-        textos = []
-        for col in cols:
-            cs = sorted((c for c in celdas if c["fila"] == fila and c["columna"] == col), key=lambda c: c["maquina"])
-            textos.append(r" \newline\newline ".join(
-                rf"\textbf{{{_tex(str(c['valor']))} {_tex(c['unidad'])}}}"
-                + (rf" ({_tex(c['extra'])})" if c["extra"] else "")
-                + rf" \newline {_tex(c['tamano'])} $\cdot$ {_tex(c['config'])} \newline \emph{{{_tex(c['maquina'])}, {_tex(_job(c))}}}"
-                for c in cs) or "---")
-        cuerpo.append(rf"    \textbf{{{_tex(fila)}}} & " + " & ".join(textos) + r" \\ \midrule")
-    if cuerpo:
-        cuerpo[-1] = cuerpo[-1].replace(r" \midrule", "")
-    cabecera = " & ".join(rf"\textbf{{{_tex(col)}}} ({TIPO[col]})" for col in cols)
-    return (r"% Requiere \usepackage{booktabs,tabularx,pdflscape}. Generado por benchmarks/resumen.py." "\n"
-            r"\begin{landscape}" "\n" r"\begin{table}[p]" "\n" r"  \centering\scriptsize" "\n"
-            r"  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.2cm}*{" + str(len(cols))
-            + r"}{>{\raggedright\arraybackslash}X}}" "\n" r"    \toprule" "\n"
-            rf"    \textbf{{DSL}} & {cabecera} \\" "\n" r"    \midrule" "\n" + "\n".join(cuerpo) + "\n"
-            r"    \bottomrule" "\n" r"  \end{tabularx}" "\n"
-            rf"  \caption{{Rendimiento por DSL y algoritmo en {_tex(arq)}: CB en TFLOP/s, MB en GB/s; "
-            r"mayor tamaño medido y configuración de cada ejecución.}" "\n"
-            rf"  \label{{tab:resumen-{etiqueta}}}" "\n" r"\end{table}" "\n" r"\end{landscape}" "\n")
-
-
 def graficas(celdas, docs):
     """Dos graficas de barras agrupadas, una faceta por arquitectura (seaborn.catplot):
     CB (TFLOP/s, viridis) y MB (GB/s, magma); barras por DSL (hue). Si faltan seaborn/pandas
@@ -413,8 +377,6 @@ def generar(mostrar=None):
         md = tabla_md(arq, de_arq)
         with open(os.path.join(docs, f"resumen_{slug}.md"), "w") as fh:
             fh.write(f"# Resumen: {arq}\n\n{nota}{md.split(chr(10), 2)[2]}")
-        with open(os.path.join(docs, f"resumen_{slug}.tex"), "w") as fh:
-            fh.write(tabla_tex(arq, de_arq, slug.replace("_", "-")))
         completo.append(md + "\n")
     with open(os.path.join(docs, "resumen.md"), "w") as fh:
         fh.write("".join(completo))
@@ -423,7 +385,7 @@ def generar(mostrar=None):
         graficas(celdas, docs)
     except Exception as e:
         print(f"AVISO: fallo al generar las graficas del resumen ({type(e).__name__}: {e}).", flush=True)
-    print(f"Resumen por arquitectura en docs/TFM/resultados/resumen*.md/.tex y {os.path.relpath(destino_csv, RAIZ)}",
+    print(f"Resumen por arquitectura en docs/TFM/resultados/resumen*.md y {os.path.relpath(destino_csv, RAIZ)}",
           flush=True)
     if mostrar:
         arqs = sorted({c["arquitectura"] for c in celdas}) if mostrar == "todas" else [arquitectura(mostrar)[0]]

@@ -5,7 +5,7 @@ cualquier ejecucion (no necesita GPU ni torch; basta matplotlib):
     python3.11 benchmarks/CBKernels/triton/informe_matmul.py results/<maquina>/run_matmul/<ejecucion|ultimo>
 
 Salida:
-    <ejecucion>/tabla.md, tabla.tex, grafica.png, grafica.pdf
+    <ejecucion>/tabla.md, grafica.png, grafica.pdf
     docs/TFM/resultados/<maquina>/run_matmul.md (+ figuras/)  -> copia, para la memoria
 """
 import csv
@@ -86,22 +86,6 @@ def tabla_md(filas, meta):
     return texto
 
 
-def tabla_tex(filas, meta):
-    import informe  # benchmarks/ esta en PYTHONPATH (etiqueta \label unica por entorno)
-    esc = lambda s: s.replace("×", r"$\times$").replace("%", r"\%")  # noqa: E731
-    cab = ["dtype", r"$M \times N \times K$", "Config. Triton", "Triton (ms)", "Triton (TFLOP/s)",
-           "cuBLAS (ms)", "cuBLAS (TFLOP/s)", "Triton/cuBLAS"]
-    cuerpo = "\n".join("    " + " & ".join(esc(x) for x in r) + r" \\" for r in filas_tabla(filas))
-    return (r"% Requiere \usepackage{booktabs}" "\n"
-            r"\begin{table}[htbp]" "\n" r"  \centering\small" "\n"
-            r"  \begin{tabular}{lllrrrrr}" "\n" r"    \toprule" "\n"
-            "    " + " & ".join(cab) + r" \\" "\n" r"    \midrule" "\n"
-            + cuerpo + "\n" r"    \bottomrule" "\n" r"  \end{tabular}" "\n"
-            r"  \caption{Baseline matmul: Triton con \texttt{@triton.autotune} frente a cuBLAS. "
-            + esc(pie(meta)).replace("_", r"\_") + "}\n"
-            r"  \label{" + informe.etiqueta_tex(meta, "baseline-matmul") + "}\n" r"\end{table}" "\n")
-
-
 def grafica(filas, meta, destino):
     dtypes = list(dict.fromkeys(f["dtype"] for f in filas))
     fig, ejes = plt.subplots(1, len(dtypes), figsize=(6.4 * len(dtypes), 4.2), sharey=True, squeeze=False)
@@ -160,8 +144,6 @@ def generar(ejecucion):
     md = tabla_md(filas, meta)
     with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
         f.write(md)
-    with open(os.path.join(ejecucion, "tabla.tex"), "w") as f:
-        f.write(tabla_tex(filas, meta))
     grafica(filas, meta, ejecucion)
 
     # Copia para la memoria del TFM (siempre la ejecucion pedida, normalmente la ultima).
@@ -171,7 +153,6 @@ def generar(ejecucion):
     os.makedirs(figs, exist_ok=True)
     for ext in ("png", "pdf"):
         shutil.copy(os.path.join(ejecucion, f"grafica.{ext}"), os.path.join(figs, f"run_matmul.{ext}"))
-    shutil.copy(os.path.join(ejecucion, "tabla.tex"), os.path.join(docs, "run_matmul.tex"))
     origen = os.path.relpath(ejecucion, RAIZ)
     with open(os.path.join(docs, "run_matmul.md"), "w") as f:
         f.write(f"# Baseline matmul ({maquina})\n\nGenerado automáticamente desde `{origen}/`.\n\n"
