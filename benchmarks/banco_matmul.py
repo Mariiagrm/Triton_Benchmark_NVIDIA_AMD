@@ -50,7 +50,7 @@ def ejecutar(args, dsl, preparar, detalle=None):
             c = fn()
             torch.cuda.synchronize()
             t_compilacion = round(time.perf_counter() - t0, 2)
-            validation.comprobar_matmul(c, a, b, f"matmul {dsl} {dt} {n}")
+            err = round(validation.comprobar_matmul(c, a, b, f"matmul {dsl} {dt} {n}"), 6)
             info = detalle(a, b, fn) if detalle else ""
             cublas = comun.kernels_cuda(lambda: torch.matmul(a, b))
 
@@ -61,6 +61,7 @@ def ejecutar(args, dsl, preparar, detalle=None):
                 tflops[nombre] = r["tflops"]
                 print(f"   [{nombre:7s}] {r['ms']:8.3f} ms  {r['tflops']:7.2f} TFLOP/s", flush=True)
                 filas.append({"variante": nombre, "dtype": dt, "M": M, "N": N, "K": K, **r,
+                              "error_rel": err if nombre == dsl else "",
                               "t_compilacion_s": t_compilacion if nombre == dsl else "",
                               "detalle": info if nombre == dsl else ";".join(cublas)})
             sp = tflops[dsl] / tflops["cublas"]

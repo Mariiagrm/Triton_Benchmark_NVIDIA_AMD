@@ -24,14 +24,17 @@ def comprobar(salida, referencia, atol, rtol, nombre="kernel"):
 
 
 def comprobar_matmul(c, a, b, nombre="matmul"):
-    """c debe ser a @ b (referencia: torch.matmul, es decir, cuBLAS)."""
-    comprobar(c, torch.matmul(a, b), nombre=nombre, **TOL_MATMUL)
+    """c debe ser a @ b (referencia: torch.matmul, es decir, cuBLAS). Devuelve su error_rel."""
+    ref = torch.matmul(a, b)
+    comprobar(c, ref, nombre=nombre, **TOL_MATMUL)
+    return error_rel(c, ref)
 
 
 def comprobar_rmsnorm(y, x, w, eps, nombre="rmsnorm"):
-    """y debe ser RMSNorm(x) * w (referencia: F.rms_norm calculado en fp32)."""
+    """y debe ser RMSNorm(x) * w (referencia: F.rms_norm calculado en fp32). Devuelve su error_rel."""
     ref = F.rms_norm(x.float(), (x.shape[-1],), w.float(), eps).to(y.dtype)
     comprobar(y, ref, nombre=nombre, **TOL_RMSNORM)
+    return error_rel(y, ref)
 
 
 def error_rel(c, ref):

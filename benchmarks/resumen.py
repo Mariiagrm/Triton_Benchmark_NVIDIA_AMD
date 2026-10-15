@@ -269,7 +269,8 @@ def recoger():
         # Entornos *-energia (TFM_ENERGIA=1): miden energia con menos formas; si entraran, por ser
         # mas recientes sustituirian las celdas. Los *-frio (TFM_CACHE_FRIA=1) tampoco, salvo para
         # una celda que no tenga otro dato: su rendimiento se mide igual (do_bench tras compilar).
-        if maquina.endswith("-energia"):
+        # Los *-ncu (TFM_NCU=1) tampoco: el proceso corre bajo Nsight Compute (benchmarks/ncu.py).
+        if maquina.endswith(("-energia", "-ncu")):
             continue
         destino = frias if maquina.endswith("-frio") else mejores
         arq, ejecucion = arquitectura(ultimo)
@@ -542,10 +543,14 @@ def generar(mostrar=None):
         print(f"AVISO: fallo al generar las graficas del resumen ({type(e).__name__}: {e}).", flush=True)
     print(f"Resumen por arquitectura en docs/TFM/resultados/resumen*.md y {os.path.relpath(destino_csv, RAIZ)}",
           flush=True)
-    # Procedencia de cada kernel junto a estos resultados: docs/TFM/resultados/kernels.md.
+    # Procedencia de cada kernel junto a estos resultados (kernels.md) y metricas de ncu (ncu.md).
     try:
         import kernels
         kernels.generar()
+        import ncu
+        ncu.generar()
+        import comparativa  # documento unico: metodologia + todo lo anterior
+        comparativa.generar()
     except Exception as e:
         print(f"AVISO: no se pudo generar kernels.md ({type(e).__name__}: {e}). "
               f"Regeneralo con: python3.11 benchmarks/kernels.py", flush=True)

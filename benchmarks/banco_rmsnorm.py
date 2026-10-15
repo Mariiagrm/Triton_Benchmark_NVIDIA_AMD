@@ -68,7 +68,7 @@ def ejecutar(args, dsl, kernel, detalle=None):
                 y = kernel(x, w, args.eps)
                 torch.cuda.synchronize()
                 t_compilacion = round(time.perf_counter() - t0, 2)
-                validation.comprobar_rmsnorm(y, x, w, args.eps, f"rmsnorm {dsl} {dt} {M}x{N}")
+                err = round(validation.comprobar_rmsnorm(y, x, w, args.eps, f"rmsnorm {dsl} {dt} {M}x{N}"), 6)
                 info = detalle(x, w) if detalle else ""
 
                 print(f"== {M}x{N} ({dt}), {bytes_movidos / 1e6:.0f} MB movidos, "
@@ -81,7 +81,7 @@ def ejecutar(args, dsl, kernel, detalle=None):
                     gbs[nombre] = r["gbs"]
                     print(f"   [{nombre:7s}] {r['ms']:8.4f} ms  {r['gbs']:7.1f} GB/s  ({pico:.0%} del pico)", flush=True)
                     filas.append({"variante": nombre, "dtype": dt, "M": M, "N": N, **r,
-                                  "pct_pico": round(100 * pico, 1),
+                                  "pct_pico": round(100 * pico, 1), "error_rel": err if nombre == dsl else "",
                                   "t_compilacion_s": t_compilacion if nombre == dsl else "",
                                   "detalle": info if nombre == dsl else ""})
                 sp = gbs[dsl] / gbs["torch"]

@@ -94,6 +94,9 @@ def contexto():
         "energia": ENERGIA,
         "energia_segundos": ENERGIA_SEGUNDOS if ENERGIA else None,
         "energia_descarte": ENERGIA_DESCARTE if ENERGIA else None,
+        # True: cada medida lleva ademas las metricas de Nsight Compute (TFM_NCU=1; benchmarks/ncu.py).
+        "ncu": NCU,
+        "ncu_csv": os.environ.get("TFM_NCU_CSV") if NCU else None,
         "fecha": datetime.datetime.now().isoformat(timespec="seconds"),
         "comando": " ".join(sys.argv),
     }
@@ -211,7 +214,35 @@ def medir(fn, flops=None, bytes_movidos=None, warmup=100, rep=500):
         r["gbs"] = round(bytes_movidos / (ms * 1e-3) / 1e9, 1)
     if ENERGIA:
         r.update(energia(fn, flops=flops, bytes_movidos=bytes_movidos))
+    if NCU and (flops is not None or bytes_movidos is not None):
+        r["ncu_id"] = perfil_ncu(fn)  # solo las medidas que se guardan, no los barridos de configuracion
     return r
+
+
+# Nsight Compute (TFM_NCU=1, lo pone ejecutar.sh, que lanza el proceso bajo 'ncu --profile-from-start
+# off --nvtx'): medir() perfila UNA llamada mas de fn, ya compilada y caliente, dentro de un rango NVTX
+# 'tfm#<n>'. ncu solo mide lo que hay entre cudaProfilerStart/Stop, asi que la compilacion, el
+# autotuning y las repeticiones de do_bench quedan fuera. Al acabar el proceso, benchmarks/ncu.py une
+# las metricas de cada 'tfm#<n>' con su fila de resultados (columna ncu_id).
+NCU = os.environ.get("TFM_NCU") == "1"
+_ncu_siguiente = 0
+
+
+def perfil_ncu(fn):
+    """Una llamada de fn bajo Nsight Compute; devuelve su etiqueta NVTX ('tfm#<n>')."""
+    global _ncu_siguiente
+    etiqueta = f"tfm#{_ncu_siguiente}"
+    _ncu_siguiente += 1
+    torch.cuda.synchronize()
+    torch.cuda.nvtx.range_push(etiqueta)
+    torch.cuda.cudart().cudaProfilerStart()
+    try:
+        fn()
+        torch.cuda.synchronize()
+    finally:
+        torch.cuda.cudart().cudaProfilerStop()
+        torch.cuda.nvtx.range_pop()
+    return etiqueta
 
 
 # Eficiencia energetica (TFM_ENERGIA=1, lo pasa ejecutar.sh): medir() ejecuta ademas cada kernel
@@ -445,5 +476,12 @@ def guardar(filas, parametros=None, resumen=None, nombre=None, informe=None):
         except Exception as e:
             print(f"AVISO: no se pudo actualizar la eficiencia energetica ({type(e).__name__}: {e}). "
                   f"Regenerala con: python3.11 benchmarks/energia.py", flush=True)
+    # Vista unica (rendimiento, % del pico, error, ncu, energia, productividad; ambas GPU juntas).
+    try:
+        import conclusiones as _conclusiones
+        _conclusiones.generar()
+    except Exception as e:
+        print(f"AVISO: no se pudo actualizar conclusiones.md ({type(e).__name__}: {e}). "
+              f"Regeneralo con: python3.11 benchmarks/conclusiones.py", flush=True)
 
     return destino

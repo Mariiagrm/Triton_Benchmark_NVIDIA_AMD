@@ -47,7 +47,7 @@ def evaluar(nombre, fn, kernel_at, a, b, dt, n, flops, bytes_movidos):
 
     mma = comun.exigir_tensor_cores(kernel, f"{nombre} {dt} {n}")
     carga = comun.copias_asincronas(kernel)
-    validation.comprobar_matmul(c, a, b, f"{nombre} {dt} {n}")
+    err = round(validation.comprobar_matmul(c, a, b, f"{nombre} {dt} {n}"), 6)
 
     cfg = kernel_at.best_config
     rt = comun.medir(lambda: fn(a, b), flops=flops, bytes_movidos=bytes_movidos)
@@ -61,7 +61,7 @@ def evaluar(nombre, fn, kernel_at, a, b, dt, n, flops, bytes_movidos):
         "variante": nombre, "dtype": dt, "M": M, "N": N, "K": K,
         **cfg.kwargs, "num_warps": cfg.num_warps, "num_stages": cfg.num_stages,
         "carga": carga["carga"], "usa_tma": bool(carga["tma"]),
-        "autotune_s": round(t_autotune, 1),
+        "autotune_s": round(t_autotune, 1), "error_rel": err,
         **rt,
         "mma": ";".join(mma),
     }

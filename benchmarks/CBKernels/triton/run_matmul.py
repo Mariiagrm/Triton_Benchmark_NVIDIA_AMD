@@ -52,7 +52,7 @@ def main():
             mma = comun.exigir_tensor_cores(kernel, f"matmul Triton {dt} {n}")
             cublas_kernels = comun.kernels_cuda(lambda: torch.matmul(a, b))
 
-            validation.comprobar_matmul(c, a, b, f"matmul Triton {dt} {n}")
+            err = round(validation.comprobar_matmul(c, a, b, f"matmul Triton {dt} {n}"), 6)
 
             cfg = matmul_kernel.best_config
             flops = 2 * M * N * K
@@ -72,7 +72,7 @@ def main():
                 "dtype": dt, "M": M, "N": N, "K": K,
                 **cfg.kwargs, "num_warps": cfg.num_warps, "num_stages": cfg.num_stages,
                 "autotune_s": round(t_autotune, 1),
-                **{f"triton_{k}": v for k, v in rt.items()},
+                **{f"triton_{k}": v for k, v in rt.items()}, "triton_error_rel": err,
                 **{f"cublas_{k}": v for k, v in rc.items()},
                 "triton_mma": ";".join(mma), "cublas_kernel": ";".join(cublas_kernels),
             })

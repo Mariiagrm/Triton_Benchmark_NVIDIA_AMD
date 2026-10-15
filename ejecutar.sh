@@ -84,6 +84,11 @@
 #   NCCL_DEBUG=...    'dist': por defecto INFO (subsistemas INIT,NET: muestra si usa RoCE)
 #   TFM_DOCS=...      carpeta de documentos para la memoria (por defecto ../tfm/docs, fuera
 #                     del repositorio)
+#   TFM_NCU=1         cada medida guardada lleva ademas las metricas de Nsight Compute de su kernel
+#                     (Speed of Light, uso de tensor cores, ocupacion, caches, esperas...; ver
+#                     benchmarks/ncu.py). Entorno por defecto <nodo>-ncu, que el resumen de
+#                     rendimiento ignora; resumen en docs/TFM/resultados/ncu.md. El contenedor corre
+#                     como root con --cap-add SYS_ADMIN (contadores de la GPU solo para admin)
 #   TFM_ENERGIA=1     cada medida anade el regimen sostenido (potencia, J por llamada, GFLOP/J
 #                     o GB/J; benchmarks/energia.py los reune). Entorno por defecto
 #                     <nodo>-energia, que el resumen de rendimiento ignora. Duracion de cada
@@ -408,6 +413,16 @@ en_contenedor() {
     local tty=() cache=/workspace/tfm/.cache
     [ "${TFM_CACHE_FRIA:-0}" = "1" ] && cache=/tmp/tfm-cache
     [ -t 0 ] && [ -t 1 ] && tty=(-it)
+    # TFM_NCU=1: root + SYS_ADMIN (los contadores de la GPU son solo para administradores) y el
+    # comando dentro de benchmarks/ncu_envoltura.sh, que lo perfila y devuelve los ficheros al usuario.
+    local usuario=(--user "$(id -u):$(id -g)") envoltura=() maquina
+    maquina="${TFM_MAQUINA:-$(hostname -s)${TFM_ENERGIA:+$([ "${TFM_ENERGIA}" = 1 ] && echo -energia)}}"
+    if [ "${TFM_NCU:-0}" = "1" ]; then
+        usuario=(--cap-add SYS_ADMIN -e TFM_UID="$(id -u):$(id -g)" -e TFM_NCU=1
+                 -e TFM_NCU_CSV="/workspace/tfm/.cache/ncu/${SLURM_JOB_ID:-local}_${TFM_EXPERIMENTO:-cmd}_$(date +%Y%m%d-%H%M%S).csv")
+        envoltura=(bash /workspace/tfm/benchmarks/ncu_envoltura.sh)
+        maquina="${TFM_MAQUINA:-$(hostname -s)-ncu}"
+    fi
     # 'dist': red del host (NCCL ve el ConnectX-7), RDMA (/dev/infiniband, memoria bloqueable).
     local red=()
     if [ "${TFM_DIST:-0}" = "1" ]; then
@@ -420,7 +435,7 @@ en_contenedor() {
     docker run --rm --gpus all ${tty[@]+"${tty[@]}"} ${red[@]+"${red[@]}"} --label tfm.job="${ETIQUETA_JOB}" \
         -v "${RAIZ}":/workspace/tfm -v "${DOCS}":/workspace/docs -e TFM_DOCS=/workspace/docs \
         -w /workspace/tfm \
-        --user "$(id -u):$(id -g)" -e HOME=/tmp \
+        "${usuario[@]}" -e HOME=/tmp \
         -e USER="$(id -un)" -e LOGNAME="$(id -un)" \
         -e PYTHONPATH=/workspace/tfm/src:/workspace/tfm/benchmarks \
         -e TFM_CACHE="${cache}" -e TRITON_CACHE_DIR="${cache}/triton" \
@@ -430,13 +445,13 @@ en_contenedor() {
         -e TFM_RAIZ=/workspace/tfm \
         -e TFM_IMAGEN="${IMAGE}@$(docker image inspect -f '{{.Id}}' "${IMAGE}")" \
         -e TFM_HOST="$(hostname)" \
-        -e TFM_MAQUINA="${TFM_MAQUINA:-$(hostname -s)${TFM_ENERGIA:+$([ "${TFM_ENERGIA}" = 1 ] && echo -energia)}}" \
+        -e TFM_MAQUINA="${maquina}" \
         -e TFM_KERNEL="$(uname -r)" \
         -e TFM_DRIVER="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -1)" \
         -e TFM_DSL="${DSL}" \
         -e SLURM_JOB_ID="${SLURM_JOB_ID:-}" \
         -e TFM_EXPERIMENTO="${TFM_EXPERIMENTO:-}" \
-        "${IMAGE}" "$@"
+        "${IMAGE}" ${envoltura[@]+"${envoltura[@]}"} "$@"
 }
 
 validar() {

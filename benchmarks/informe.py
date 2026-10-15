@@ -314,10 +314,9 @@ def actualizar_metricas(fam):
     for maquina, exp, ultimo in ultimas_ejecuciones():
         if familia(exp) != fam:
             continue
-        with open(os.path.join(ultimo, "resultados.csv")) as f:
-            medidas = list(csv.DictReader(f))
-        with open(os.path.join(ultimo, "meta.json")) as f:
-            c = json.load(f).get("contexto", {})
+        medidas, meta = leer(ultimo)
+        anadir_pct(medidas, meta, exp)  # % del pico, como en la tabla.md de cada ejecucion
+        c = meta.get("contexto", {})
         origen = {"maquina": maquina, "experimento": exp,
                   "ejecucion": os.path.basename(os.path.realpath(ultimo)),
                   "gpu": c.get("gpu"), "driver_nvidia": c.get("driver_nvidia"), "fecha": c.get("fecha")}
