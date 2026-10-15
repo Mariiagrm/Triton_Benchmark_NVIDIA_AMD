@@ -534,13 +534,13 @@ ejecutado*: requiere compilar ese fork de Triton; la conclusión sale de su cód
 
 *Barras: rendimiento de cada DSL; encima, % del pico; línea: pico de referencia; los huecos llevan «✕ (n)» y su motivo debajo.*
 
-![Compute-bound — NVIDIA GB10 (sm_121)](resultados/figuras/resumen_compute_bound_nvidia_gb10_sm_121.png)
+![Compute-bound — NVIDIA GB10 (sm_121)](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/figuras/resumen_compute_bound_nvidia_gb10_sm_121.png)
 
-![Memory-bound — NVIDIA GB10 (sm_121)](resultados/figuras/resumen_memory_bound_nvidia_gb10_sm_121.png)
+![Memory-bound — NVIDIA GB10 (sm_121)](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/figuras/resumen_memory_bound_nvidia_gb10_sm_121.png)
 
-![Compute-bound — NVIDIA GeForce RTX 5090 (sm_120)](resultados/figuras/resumen_compute_bound_nvidia_geforce_rtx_5090_sm_120.png)
+![Compute-bound — NVIDIA GeForce RTX 5090 (sm_120)](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/figuras/resumen_compute_bound_nvidia_geforce_rtx_5090_sm_120.png)
 
-![Memory-bound — NVIDIA GeForce RTX 5090 (sm_120)](resultados/figuras/resumen_memory_bound_nvidia_geforce_rtx_5090_sm_120.png)
+![Memory-bound — NVIDIA GeForce RTX 5090 (sm_120)](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/figuras/resumen_memory_bound_nvidia_geforce_rtx_5090_sm_120.png)
 
 <a id="pico-mma"></a>
 
@@ -556,7 +556,7 @@ sobre ILP acumuladores independientes, sin accesos a memoria; al final escribe u
 para que el compilador no elimine el bucle. Un bloque por SM; se barren 1–32 warps/SM e ILP 1–8.
 Cada instrucción se compila para `sm_121a` y se comprueba en el SASS que es de tensor core.
 
-![Pico de mma.sync en GB10](resultados/hennessy/figuras/run_pico_mma.png)
+![Pico de mma.sync en GB10](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/hennessy/figuras/run_pico_mma.png)
 
 | instrucción PTX | SASS | pico (ráfaga) | FLOP/ciclo/SM | relativo a f16 |
 |:---|:---|---:|---:|---:|
@@ -581,7 +581,7 @@ Cada instrucción se compila para `sm_121a` y se comprueba en el SASS que es de 
 
 **Régimen sostenido** (`run_sostenido`, job 20848; 6 s seguidos, cuentan los 4 últimos), matmul 8192³:
 
-![Rendimiento sostenido frente al pico](resultados/hennessy/figuras/run_sostenido.png)
+![Rendimiento sostenido frente al pico](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/hennessy/figuras/run_sostenido.png)
 
 | kernel | TFLOP/s | reloj (MHz) | potencia (W) | % del pico al mismo reloj | % del pico nominal |
 |:---|---:|---:|---:|---:|---:|
@@ -630,7 +630,7 @@ probaron las técnicas propias de Hopper/Blackwell (datos: entorno `hennessy-580
   2 177 MHz) y el neto es +3.5 %. Una primera lectura («TMA ahorra un tercio de potencia») era un
   artefacto de la potencia promedio de NVML.
 
-![TMA en matmul fp16](resultados/hennessy-580/figuras/run_matmul_tma.png)
+![TMA en matmul fp16](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/hennessy-580/figuras/run_matmul_tma.png)
 
 <a id="fp8"></a>
 
@@ -650,7 +650,7 @@ probaron las técnicas propias de Hopper/Blackwell (datos: entorno `hennessy-580
 - CUTLASS no tiene un matmul FP8 comparable: el `dense_gemm` de CuTe es fp16/bf16 y su FP8 en
   Blackwell GeForce es *block-scaled* (MXFP8), otro formato.
 
-![FP8 frente a FP16](resultados/hennessy-580/figuras/run_matmul_fp8.png)
+![FP8 frente a FP16](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/hennessy-580/figuras/run_matmul_fp8.png)
 
 <a id="sparsity"></a>
 
@@ -712,9 +712,9 @@ fiable, y la dinámica depende de esa cifra. Cada kernel se mide una sola vez, s
 | **CUTLASS** | **573.2 GFLOP/J (×0.55 ref.)**<br>42.7 W (reposo 11.9 W) · 794.6 GFLOP/J dinámica · 24.47 TFLOP/s sost. (20 % del pico) · 2427.5 MHz · 1918 mJ/llamada · 8192×8192×8192<br>_hennessy-energia, job 20849_ | — *sin kernel*: el dense_gemm de CuTe solo admite fp16/bf16 (su FP8 en GeForce es MXFP8) | **930.3 GFLOP/J (×1.1 ref.)**<br>94.3 W (reposo 14.7 W) · 1102.1 GFLOP/J dinámica · 87.73 TFLOP/s sost. (71 % del pico) · 2125 MHz · 1182 mJ/llamada · B=4 H=32 N=4096 D=128<br>_hennessy-energia, job 20850_ | **899.8 GFLOP/J (×1.06 ref.)**<br>92.1 W (reposo 14.7 W) · 1070.7 GFLOP/J dinámica · 82.87 TFLOP/s sost. (67 % del pico) · 2119 MHz · 611 mJ/llamada · B=4 H=32 N=4096 D=128<br>_hennessy-energia, job 20850_ | **6 GB/J (×1.01 ref.)**<br>41.4 W (reposo 13.7 W) · 8.97 GB/J dinámica · 248.6 GB/s sost. (91 % del pico) · 2502 MHz · 89.41 mJ/llamada · 16384×8192<br>_hennessy-energia, job 20851_ | **4.68 GB/J (×0.78 ref.)**<br>49 W (reposo 13.7 W) · 6.5 GB/J dinámica · 229.3 GB/s sost. (84 % del pico) · 2502 MHz · 114.7 mJ/llamada · 16384×8192<br>_hennessy-energia, job 20851_ |
 | **Referencia** | **1051.1 GFLOP/J**<br>87.6 W (reposo 16.9 W) · 1302.4 GFLOP/J dinámica · 92.08 TFLOP/s sost. (75 % del pico) · 2086 MHz · 1046 mJ/llamada · 8192×8192×8192<br>_hennessy-energia, job 20849_ | **2036.5 GFLOP/J**<br>89.5 W (reposo 16.1 W) · 2483.2 GFLOP/J dinámica · 182.27 TFLOP/s sost. (75 % del pico) · 2112 MHz · 539.9 mJ/llamada · 8192×8192×8192<br>_hennessy-energia, job 20849_ | **846.6 GFLOP/J**<br>94.6 W (reposo 16.6 W) · 1026.8 GFLOP/J dinámica · 80.09 TFLOP/s sost. (65 % del pico) · 2216 MHz · 1299 mJ/llamada · B=4 H=32 N=4096 D=128<br>_hennessy-energia, job 20850_ | **851 GFLOP/J**<br>92.7 W (reposo 16.6 W) · 1036.6 GFLOP/J dinámica · 78.88 TFLOP/s sost. (64 % del pico) · 2216 MHz · 646 mJ/llamada · B=4 H=32 N=4096 D=128<br>_hennessy-energia, job 20850_ | **5.95 GB/J**<br>36.5 W (reposo 14.9 W) · 10.06 GB/J dinámica · 217.2 GB/s sost. (80 % del pico) · 2437 MHz · 90.23 mJ/llamada · 16384×8192<br>_hennessy-energia, job 20851_ | **6.02 GB/J**<br>36.2 W (reposo 14.9 W) · 10.23 GB/J dinámica · 217.8 GB/s sost. (80 % del pico) · 2431 MHz · 89.22 mJ/llamada · 16384×8192<br>_hennessy-energia, job 20851_ |
 
-![Energía compute-bound — NVIDIA GB10 (sm_121)](resultados/figuras/energia_compute_bound_nvidia_gb10_sm_121.png)
+![Energía compute-bound — NVIDIA GB10 (sm_121)](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/figuras/energia_compute_bound_nvidia_gb10_sm_121.png)
 
-![Energía memory-bound — NVIDIA GB10 (sm_121)](resultados/figuras/energia_memory_bound_nvidia_gb10_sm_121.png)
+![Energía memory-bound — NVIDIA GB10 (sm_121)](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/figuras/energia_memory_bound_nvidia_gb10_sm_121.png)
 
 <a id="productividad"></a>
 
@@ -730,7 +730,7 @@ fp16 en GB10: matmul 8192³, FlashAttention B=4 H=32 N=4096 D=128, RMSNorm 16384
    llamada (compilación + autotuning + primera ejecución) con **todas las cachés vacías**.
 3. **Rendimiento** de esa misma ejecución, como % del pico.
 
-![Productividad frente a rendimiento](resultados/figuras/productividad.png)
+![Productividad frente a rendimiento](https://raw.githubusercontent.com/Mariiagrm/TFM/master/docs/TFM/resultados/figuras/productividad.png)
 
 | algoritmo | DSL | LoC kernel | LoC propias | LoC total | ajuste | configs | 1a llamada en frío | rendimiento | % del pico |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
