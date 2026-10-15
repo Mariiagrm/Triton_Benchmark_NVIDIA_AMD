@@ -1,10 +1,10 @@
 """Kernels del TFM: PROCEDENCIA + RESULTADOS en una sola tabla por algoritmo.
 
-Junta, por DSL, de donde sale cada kernel (docs/TFM/procedencia_kernels.md: elaboracion y
+Junta, por DSL, de donde sale cada kernel (benchmarks/procedencia.py: elaboracion y
 fuente) con su ultimo resultado en cada arquitectura (results/resumen.csv, el del resumen):
 rendimiento, % del pico y entorno/job. Una celda sin dato dice por que falta (resumen.motivo).
 
-La procedencia se lee de procedencia_kernels.md (unica fuente, escrita a mano); este modulo solo
+La procedencia se lee de benchmarks/procedencia.py (unica fuente, escrita a mano); este modulo solo
 sabe a que celda del resumen corresponde cada kernel (MAPA). Salida:
     docs/TFM/resultados/kernels.md
 
@@ -18,7 +18,7 @@ import re
 import informe
 import resumen
 
-# Kernel (primer `...` de la 1a columna de procedencia_kernels.md) -> filas/columnas del resumen.
+# Kernel (primer `...` de la 1a columna de las tablas de procedencia.TEXTO) -> filas/columnas del resumen.
 FA = ["FlashAttention fp16", "FlashAttention causal fp16"]
 RMS = ["RMSNorm fp16", "RMSNorm bf16"]
 MAPA = {
@@ -51,17 +51,16 @@ GRUPOS = [("Matmul", ["Matmul fp16", "Matmul FP8"]),
           ("FlashAttention (forward)", FA),
           ("RMSNorm", RMS)]
 
-PROCEDENCIA = os.path.join(informe.DOCS, "TFM", "procedencia_kernels.md")
+import procedencia  # noqa: E402  (texto de la procedencia: benchmarks/procedencia.py)
 
 
 def _celdas_md(linea):
     return [c.strip() for c in linea.strip().strip("|").split("|")]
 
 
-def leer_procedencia(ruta=PROCEDENCIA):
+def leer_procedencia(texto=None):
     """{(fila, columna): [ {kernel, elaboracion, fuente} ]} y el texto de la seccion 'Fuentes'."""
-    with open(ruta) as fh:
-        texto = fh.read()
+    texto = texto or procedencia.TEXTO
     proc, seccion = {}, ""
     for linea in texto.splitlines():
         if linea.startswith("## "):
@@ -78,7 +77,7 @@ def leer_procedencia(ruta=PROCEDENCIA):
         elif len(c) >= 4 and c[1] != "DSL":
             kernel, elab, fuente = c[0], c[2], c[3]
             if len(c) >= 5 and c[4]:
-                fuente += f" · ¿corre en sm_120/121? {c[4].replace('ver abajo', 'ver procedencia_kernels.md')}"
+                fuente += f" · ¿corre en sm_120/121? {c[4].replace('ver abajo', 'ver notas de procedencia')}"
         else:
             continue
         if m and m.group(1) in MAPA:
@@ -155,7 +154,7 @@ def generar():
     partes = [
         "# Kernels: procedencia y resultados\n",
         "*Generado por `benchmarks/kernels.py`. Para cada DSL: de dónde sale el kernel (detalle en "
-        "[procedencia_kernels.md](../procedencia_kernels.md)) y su último resultado en cada arquitectura "
+        "la sección de procedencia) y su último resultado en cada arquitectura "
         "(el mismo que el resumen: [resumen.md](resumen.md), con la configuración aplicada). Cada "
         "resultado: rendimiento en el mayor tamaño medido · **% del pico** · entorno y job. Una celda "
         "sin dato dice por qué falta; n/a = la variante no existe para ese algoritmo.*\n",
@@ -165,13 +164,7 @@ def generar():
         partes.append(tabla(grupo, cols, proc, res, arqs))
     if fuentes:
         partes.append("## Fuentes\n\n" + fuentes + "\n")
-    destino = os.path.join(informe.DOCS, "TFM", "resultados", "kernels.md")
-    os.makedirs(os.path.dirname(destino), exist_ok=True)
-    with open(destino, "w") as fh:
-        fh.write("\n".join(partes))
-    print(f"Procedencia + resultados en docs/TFM/resultados/kernels.md", flush=True)
-    return destino
-
+    return "\n".join(partes)  # el documento es docs/TFM/comparativa.md, que usa tabla()
 
 if __name__ == "__main__":
-    generar()
+    print(generar())

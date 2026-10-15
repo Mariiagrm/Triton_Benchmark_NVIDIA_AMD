@@ -20,13 +20,13 @@ CB (compute-bound) in TFLOP/s; MB (memory-bound) in GB/s and % of peak memory ba
 "Reference" = cuBLAS (matmul fp16), cuBLASLt `torch._scaled_mm` (FP8), PyTorch SDPA
 (FlashAttention), and `F.rms_norm` (RMSNorm). Snapshot from 2026-10-08; the live version,
 including the configuration applied in each cell (blocks, warps, stages...) and the
-source environment/job, is located at `../tfm/docs/TFM/resultados/resumen.md`
+source environment/job, is located at `../tfm/docs/TFM/comparativa.md` (§ 5)
 and is regenerated using `benchmarks/resumen.py`. The same results next to the provenance of
 each kernel (official / adapted / own, and its source) are in
-`../tfm/docs/TFM/resultados/kernels.md` (`benchmarks/kernels.py`, regenerated with the summary).
+`../tfm/docs/TFM/comparativa.md` (§ 5) (`benchmarks/kernels.py`, regenerated with the summary).
 
 **NVIDIA GB10 (sm_121)** — hennessy and patterson nodes
-(full table: `../tfm/docs/TFM/resultados/resumen_nvidia_gb10_sm_121.md`)
+(full table: `../tfm/docs/TFM/comparativa.md` (§ 5))
 
 | DSL | Matmul fp16 (CB) | Matmul FP8 (CB) | FlashAttn fp16 (CB) | Causal FlashAttn (CB) | RMSNorm fp16 (MB) | RMSNorm bf16 (MB) |
 |:---|---:|---:|---:|---:|---:|---:|
@@ -40,10 +40,10 @@ each kernel (official / adapted / own, and its source) are in
 
 On GB10, matmul fp16 for Gluon, Helion and CUTLASS was measured only in the cold-cache runs of
 the productivity study (79.3, 61.9 and 23.6 TFLOP/s; see
-`../tfm/docs/TFM/productividad.md`), which the summary ignores.
+`../tfm/docs/TFM/comparativa.md` (§ 9)), which the summary ignores.
 
 **NVIDIA GeForce RTX 5090 (sm_120)** — pascal node
-(full table: `../tfm/docs/TFM/resultados/resumen_nvidia_geforce_rtx_5090_sm_120.md`)
+(full table: `../tfm/docs/TFM/comparativa.md` (§ 5))
 
 | DSL | Matmul fp16 (CB) | Matmul FP8 (CB) | FlashAttn fp16 (CB) | Causal FlashAttn (CB) | RMSNorm fp16 (MB) | RMSNorm bf16 (MB) |
 |:---|---:|---:|---:|---:|---:|---:|
@@ -72,7 +72,7 @@ dense tensor cores with FP32 accumulation and memory bandwidth. RTX 5090: 209.5 
 table 3). GB10: 273 GB/s ([DGX Spark User Guide](https://docs.nvidia.com/dgx/dgx-spark/hardware.html));
 NVIDIA publishes no FP16/FP8 peak for GB10, so its compute charts have no line.
 
-Open issues on the RTX 5090 (see `../tfm/docs/TFM/bitacora.md`, 2026-10-09):
+Open issues on the RTX 5090 (see `../tfm/docs/TFM/comparativa.md` (§ 10), 2026-10-09):
 - cuBLASLt FP8 (599–624 TFLOP/s) exceeds the FP32-accumulate datasheet peak (419).
 - The CUTLASS matmul cell (165.8) comes from a run where cuBLAS itself was 20 % slower (167.9 vs 209.1,
   same kernel), so it is not comparable yet. Both are being re-measured with clock and power.
@@ -83,7 +83,7 @@ On sm_120/sm_121 every DSL ends up in `mma.sync` (there is no `wgmma`/`tcgen05`)
 ceiling is that instruction's throughput. `run_pico_mma` measures it directly: chains of
 `mma.sync` on registers, with no memory access, sweeping warps per SM × independent
 accumulators (`src/Microbench/`). Details and analysis in
-`../tfm/docs/TFM/pico_mma.md`.
+`../tfm/docs/TFM/comparativa.md` (§ 6).
 
 **NVIDIA GB10 (sm_121)**, job 20834, ~2.5 GHz:
 
@@ -110,7 +110,7 @@ The RTX 5090 (pascal) peak is pending (jobs 20838–20840).
 
 Lines of code, tuning cost (cold-cache first call: compile + autotune) and performance, one shape
 per algorithm on GB10 (`benchmarks/productividad.py`; details in
-`../tfm/docs/TFM/productividad.md`):
+`../tfm/docs/TFM/comparativa.md` (§ 9)):
 
 | | Triton | Helion | CUTLASS/CuTe | Gluon |
 |:---|:---|:---|:---|:---|
@@ -129,7 +129,7 @@ Cold timings use `TFM_CACHE_FRIA=1` (compile caches in the container's `/tmp`) a
 With `TFM_ENERGIA=1`, every measurement also runs the kernel in a sustained regime (3 s idle,
 then 6 s in a loop, the first 2 discarded) and records GPU power (NVML instantaneous), idle power,
 clock and work per joule (`<node>-energia` environment, gathered by `benchmarks/energia.py` into
-`../tfm/docs/TFM/resultados/energia.md`). Results on GB10:
+`../tfm/docs/TFM/comparativa.md` (§ 8)). Results on GB10:
 
 | DSL | Matmul fp16 | Matmul FP8 | FlashAttn fp16 | FlashAttn causal | RMSNorm fp16 | RMSNorm bf16 |
 |:---|---:|---:|---:|---:|---:|---:|
@@ -243,21 +243,18 @@ key `resumen.pico`) scaled to the measured clock.
 
 ## Reports for the thesis
 
-**Summary by architecture** (`../tfm/docs/TFM/resultados/resumen_<arquitectura>.md` and
-`resumen.md`): one table per GPU with DSLs in the rows and algorithms in the columns,
-marked as CB (compute-bound, in TFLOP/s) or MB (memory-bound, in GB/s and % of peak).
+**Single document: `../tfm/docs/TFM/comparativa.md`** — the only Markdown of the thesis
+documentation. It holds the platform, the methodology, the provenance of every kernel, the results
+per algorithm and DSL (performance, % of peak, conclusions, Nsight Compute profile), the
+`mma.sync` peak, the matmul techniques (TMA, FP8, 2:4), energy efficiency, productivity, incidents,
+conclusions and sources. `benchmarks/comparativa.py` regenerates it after every run (by hand, without
+a GPU: `python3.11 benchmarks/comparativa.py`). Hand-written analysis lives in that script's
+constants and kernel provenance in `benchmarks/procedencia.py`; every other script only writes CSV
+(`results/`) and figures (`../tfm/docs/TFM/resultados/**/figuras/`).
 
-**Per-benchmark tables** (`../tfm/docs/TFM/resultados/<machine>/<benchmark>.md` + `figuras/`) are
-regenerated automatically after each run. To regenerate a run's report without a GPU: `python3.11 benchmarks/informe.py
+To regenerate one run's figure without a GPU: `python3.11 benchmarks/informe.py
 results/<machine>/<benchmark>/ultimo` (or `--informe` for `run_pico_mma` / `run_sostenido`).
 
 **Probes** (`.sonda/`) are throwaway diagnostics, indexed in [.sonda/README.md](.sonda/README.md);
 the outputs that support a thesis claim are archived in `../tfm/docs/TFM/resultados/sondas/`, since
 `logs/` is not versioned.
-
-**Consolidated thesis sections** (`../tfm/docs/TFM/<section>.md`): `plataforma` (hardware and methodology), `procedencia_kernels` (origin of every
-kernel), `tma`, `fp8`, `sparsity`, `pico_mma` (real tensor-core peak and the kernels as a
-% of it) and `productividad` (code size and tuning cost vs performance per DSL).
-**Energy efficiency** (`../tfm/docs/TFM/resultados/energia.md` + `figuras/energia_*`) is regenerated
-after each `TFM_ENERGIA=1` run, or by hand with `python3.11 benchmarks/energia.py`. `../tfm/docs/TFM/resumen.md` summarizes the matmul study and `../tfm/docs/TFM/bitacora.md` is the
-dated work log, with the Slurm jobs behind each claim.

@@ -10,7 +10,7 @@ descartando los primeros --descarte segundos.
 Kernels: mma.sync f16->f32 y e4m3->f32 (microbenchmark de src/Microbench, 8 warps/SM x ILP 4),
 cuBLAS fp16, Triton y Triton + TMA fp16, cuBLASLt FP8 y Triton FP8, todos a 8192^3. Para cada
 uno: TFLOP/s sostenidos, reloj y potencia, y el % del pico de mma.sync AL MISMO RELOJ
-(1 024 FLOP/ciclo/SM en fp16, 2 048 en fp8; docs/TFM/pico_mma.md).
+(1 024 FLOP/ciclo/SM en fp16, 2 048 en fp8; docs/TFM/comparativa.md, seccion 6).
 
 Uso:
     bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_sostenido [--segundos 6 --descarte 2]
@@ -163,20 +163,14 @@ def generar_informe(ejecucion):
     nombre = meta.get("experimento", "run_sostenido")
     maquina = informe.maquina_de(meta, ejecucion)
     columnas = list(dict.fromkeys(k for f in filas for k in f))
-    pie = _pie(meta)
-    md = informe.tabla_md(filas, meta, columnas).rsplit("\n\n*", 1)[0] + f"\n\n*{pie}*\n"
-    with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
-        f.write(md)
+    # Unico documento Markdown: docs/TFM/comparativa.md (benchmarks/comparativa.py); aqui solo CSV y figuras.
     grafica(filas, meta, ejecucion)
     docs = os.path.join(informe.DOCS, "TFM", "resultados", maquina)
     os.makedirs(os.path.join(docs, "figuras"), exist_ok=True)
     for ext in ("png", "pdf"):
         shutil.copy(os.path.join(ejecucion, f"grafica.{ext}"), os.path.join(docs, "figuras", f"{nombre}.{ext}"))
     origen = os.path.relpath(ejecucion, informe.RAIZ)
-    with open(os.path.join(docs, f"{nombre}.md"), "w") as f:
-        f.write(f"# {nombre} ({maquina})\n\nGenerado automáticamente desde `{origen}/`. Análisis en "
-                f"[../../pico_mma.md](../../pico_mma.md).\n\n![{nombre}](figuras/{nombre}.png)\n\n{md}")
-    print(f"Informe generado en {origen}/ y docs/TFM/resultados/{maquina}/{nombre}.md", flush=True)
+    print(f"Informe generado en {origen}/ (grafica en docs/TFM/resultados/{maquina}/figuras/)", flush=True)
 
 
 if __name__ == "__main__":

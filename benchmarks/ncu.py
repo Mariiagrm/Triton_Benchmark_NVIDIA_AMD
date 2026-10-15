@@ -9,8 +9,8 @@ ncu_id). Este modulo:
     --fusionar <csv>   une el CSV de ncu con los resultados de la ejecucion (columnas ncu_*
                        junto a cada medida, con el mismo prefijo: triton_ncu_*, cublas_ncu_*) y
                        guarda todos los kernels perfilados en ncu.csv; regenera su informe
-    (sin argumentos)   docs/TFM/resultados/ncu.md: por arquitectura y algoritmo, las metricas
-                       del kernel principal de cada DSL en el mayor tamano medido
+    (sin argumentos)   imprime las tablas por arquitectura y algoritmo (las mismas que
+                       docs/TFM/comparativa.md: kernel principal de cada DSL, mayor tamano)
 
 Metricas (todas por kernel; el principal de cada medida es el de mayor duracion):
     Tiempo y reloj        gpu__time_duration, sm__cycles_elapsed.avg.per_second
@@ -172,9 +172,10 @@ def fusionar(ruta_csv):
     if not destinos:
         print(f"ncu: ninguna ejecucion apunta a {ruta_csv} (¿el benchmark no llego a guardar?).", flush=True)
     else:
-        generar()
         import conclusiones  # aqui: conclusiones importa este modulo
         conclusiones.generar()
+        import comparativa  # documento unico (incluye las tablas de ncu)
+        comparativa.generar()
     return destinos
 
 
@@ -294,12 +295,7 @@ def generar():
             t = tabla_columna(arq, col_res, celdas, nivel="###")
             if t:
                 partes.append(t)
-    destino = os.path.join(informe.DOCS, "TFM", "resultados", "ncu.md")
-    os.makedirs(os.path.dirname(destino), exist_ok=True)
-    with open(destino, "w") as fh:
-        fh.write("\n".join(partes))
-    print("Métricas ncu en docs/TFM/resultados/ncu.md", flush=True)
-    return destino
+    return "\n".join(partes)  # el documento es docs/TFM/comparativa.md, que usa tabla_columna()
 
 
 if __name__ == "__main__":
@@ -308,4 +304,4 @@ if __name__ == "__main__":
     elif len(sys.argv) > 2 and sys.argv[1] == "--fusionar":
         fusionar(sys.argv[2])
     else:
-        generar()
+        print(generar())

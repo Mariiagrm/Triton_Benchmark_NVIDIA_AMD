@@ -255,24 +255,18 @@ def generar(ejecucion):
     maquina = maquina_de(meta, ejecucion)
     columnas = anadir_pct(filas, meta, nombre)  # union en orden de aparicion, con los % del pico
 
-    md = tabla_md(filas, meta, columnas)
-    with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
-        f.write(md)
+    # Unico documento Markdown: docs/TFM/comparativa.md (benchmarks/comparativa.py); aqui solo CSV y figuras.
     hay_grafica = grafica(filas, meta, ejecucion, nombre)
 
     # Copia para la memoria del TFM, separada por maquina.
     docs = os.path.join(DOCS, "TFM", "resultados", maquina)
     figs = os.path.join(docs, "figuras")
     os.makedirs(figs, exist_ok=True)
-    cabecera_img = ""
     if hay_grafica:
         for ext in ("png", "pdf"):
             shutil.copy(os.path.join(ejecucion, f"grafica.{ext}"), os.path.join(figs, f"{nombre}.{ext}"))
-        cabecera_img = f"![{nombre}](figuras/{nombre}.png)\n\n"
     origen = os.path.relpath(ejecucion, RAIZ)
-    with open(os.path.join(docs, f"{nombre}.md"), "w") as f:
-        f.write(f"# {nombre} ({maquina})\n\nGenerado automáticamente desde `{origen}/`.\n\n{cabecera_img}{md}")
-    print(f"Informe generado en {origen}/ y docs/TFM/resultados/{maquina}/{nombre}.md", flush=True)
+    print(f"Informe generado en {origen}/ (grafica en docs/TFM/resultados/{maquina}/figuras/)", flush=True)
 
 
 def familia(nombre):

@@ -16,7 +16,7 @@ block-scaled MXFP8/MXFP4/NVFP4) da:
 Uso:
     bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_pico_mma
     bash ~/hennessy/tfm_entorno/ejecutar.sh encolar exp run_pico_mma --variantes "f16·f32acc" --warps 4 8
-Resultados: results/<maquina>/run_pico_mma/<fecha>_job<JOBID>/  (+ docs/TFM/resultados/<maquina>/run_pico_mma.md)
+Resultados: results/<maquina>/run_pico_mma/<fecha>_job<JOBID>/  (+ figura en docs/TFM/resultados/<maquina>/figuras/)
 """
 import argparse
 import os
@@ -217,23 +217,16 @@ def generar_informe(ejecucion):
     maquina = informe.maquina_de(meta, ejecucion)
     tabla = tabla_pico(filas)
     columnas = list(dict.fromkeys(k for f in tabla for k in f))
-    md = informe.tabla_md(tabla, meta, columnas)
-    with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
-        f.write(md)
+    # Unico documento Markdown: docs/TFM/comparativa.md (benchmarks/comparativa.py); aqui solo CSV y figuras.
     hay = grafica_pico(filas, meta, ejecucion)
 
     docs = os.path.join(informe.DOCS, "TFM", "resultados", maquina)
     os.makedirs(os.path.join(docs, "figuras"), exist_ok=True)
-    img = ""
     if hay:
         for ext in ("png", "pdf"):
             shutil.copy(os.path.join(ejecucion, f"grafica.{ext}"), os.path.join(docs, "figuras", f"{nombre}.{ext}"))
-        img = f"![{nombre}](figuras/{nombre}.png)\n\n"
     origen = os.path.relpath(ejecucion, informe.RAIZ)
-    with open(os.path.join(docs, f"{nombre}.md"), "w") as f:
-        f.write(f"# {nombre} ({maquina})\n\nGenerado automáticamente desde `{origen}/` "
-                f"(barrido completo en `resultados.csv`).\n\n{img}{md}")
-    print(f"Informe generado en {origen}/ y docs/TFM/resultados/{maquina}/{nombre}.md", flush=True)
+    print(f"Informe generado en {origen}/ (grafica en docs/TFM/resultados/{maquina}/figuras/)", flush=True)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,0 @@
-| dtype | M | N | K | BLOCK_SIZE_M | BLOCK_SIZE_N | BLOCK_SIZE_K | GROUP_SIZE_M | num_warps | num_stages | autotune_s | triton_ms | triton_ms_p20 | triton_ms_p80 | triton_tflops | triton_pct_pico | triton_gbs | cublas_ms | cublas_ms_p20 | cublas_ms_p80 | cublas_tflops | cublas_pct_pico | cublas_gbs | triton_mma | cublas_kernel |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| fp16 | 4096 | 4096 | 4096 | 128 | 128 | 32 | 8 | 4 | 4 | 7.8 | 1.3937 | 1.3906 | 1.5098 | 98.62 | 80.3 | 72.2 | 1.6835 | 1.6548 | 1.9538 | 81.64 | 66.5 | 59.8 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 | void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x256_32x3_nn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x256_32x3_nn_align8::Params) |
-| fp16 | 8192 | 8192 | 8192 | 128 | 256 | 64 | 8 | 8 | 3 | 14 | 11.9788 | 11.9118 | 12.4435 | 91.79 | 74.7 | 33.6 | 11.8856 | 11.8231 | 12.5542 | 92.51 | 75.3 | 33.9 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 | nvjet_sm121_hsh_mma_128x208x64_2_32x104x64_tmaAB_bz_NNNN |
-
-*NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20423, 2026-09-30T14:16:08. Mediana de triton.testing.do_bench.*

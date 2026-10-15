@@ -141,9 +141,7 @@ def generar(ejecucion):
     ejecucion = os.path.realpath(ejecucion)
     filas, meta = leer(ejecucion)
     maquina = maquina_de(meta, ejecucion)
-    md = tabla_md(filas, meta)
-    with open(os.path.join(ejecucion, "tabla.md"), "w") as f:
-        f.write(md)
+    # Unico documento Markdown: docs/TFM/comparativa.md (benchmarks/comparativa.py); aqui solo CSV y figuras.
     grafica(filas, meta, ejecucion)
 
     # Copia para la memoria del TFM (siempre la ejecucion pedida, normalmente la ultima).
@@ -154,10 +152,7 @@ def generar(ejecucion):
     for ext in ("png", "pdf"):
         shutil.copy(os.path.join(ejecucion, f"grafica.{ext}"), os.path.join(figs, f"run_matmul.{ext}"))
     origen = os.path.relpath(ejecucion, RAIZ)
-    with open(os.path.join(docs, "run_matmul.md"), "w") as f:
-        f.write(f"# Baseline matmul ({maquina})\n\nGenerado automáticamente desde `{origen}/`.\n\n"
-                f"![Baseline matmul](figuras/run_matmul.png)\n\n{md}")
-    print(f"Informe generado en {origen}/ y docs/TFM/resultados/{maquina}/run_matmul.md", flush=True)
+    print(f"Informe generado en {origen}/ (grafica en docs/TFM/resultados/{maquina}/figuras/)", flush=True)
 
 
 if __name__ == "__main__":

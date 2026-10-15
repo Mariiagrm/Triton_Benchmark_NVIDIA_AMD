@@ -519,37 +519,17 @@ def generar(mostrar=None):
 
     docs = os.path.join(informe.DOCS, "TFM", "resultados")
     os.makedirs(docs, exist_ok=True)
-    nota = ("*Generado por `benchmarks/resumen.py` a partir de la última ejecución de cada benchmark en cada "
-            "entorno. CB = compute-bound (TFLOP/s); MB = memory-bound (GB/s y % del pico de memoria). Cada celda: "
-            "rendimiento en el mayor tamaño medido · % del pico · tamaño · configuración aplicada · entorno y job. "
-            "Una celda sin dato dice por qué falta.*\n\n" + NOTA_PICOS)
-    completo = ["# Resumen de rendimiento por arquitectura\n\n", nota]
-    for arq in sorted({c["arquitectura"] for c in celdas}):
-        de_arq = [c for c in celdas if c["arquitectura"] == arq]
-        md = tabla_md(arq, de_arq)
-        tipos = {TIPO[c["columna"]] for c in de_arq}
-        figuras = "".join(f"![{t}](figuras/resumen_{n}_{slug(arq)}.png)\n\n"
-                          for tipo, t, n in (("CB", "Compute-bound", "compute_bound"),
-                                             ("MB", "Memory-bound", "memory_bound")) if tipo in tipos)
-        with open(os.path.join(docs, f"resumen_{slug(arq)}.md"), "w") as fh:
-            fh.write(f"# Resumen: {arq}\n\n{nota}{md.split(chr(10), 2)[2]}\n{figuras}")
-        completo.append(md + "\n")
-    with open(os.path.join(docs, "resumen.md"), "w") as fh:
-        fh.write("".join(completo))
+    # Las tablas Markdown van en el documento unico (docs/TFM/comparativa.md); aqui, CSV y graficas.
     # Graficas (no deben romper el resumen si faltan seaborn/pandas).
     try:
         graficas(celdas, docs)
     except Exception as e:
         print(f"AVISO: fallo al generar las graficas del resumen ({type(e).__name__}: {e}).", flush=True)
-    print(f"Resumen por arquitectura en docs/TFM/resultados/resumen*.md y {os.path.relpath(destino_csv, RAIZ)}",
+    print(f"Resumen por arquitectura en {os.path.relpath(destino_csv, RAIZ)} y docs/TFM/resultados/figuras/",
           flush=True)
-    # Procedencia de cada kernel junto a estos resultados (kernels.md) y metricas de ncu (ncu.md).
+    # Documento unico: metodologia, procedencia, resultados, ncu, energia y productividad.
     try:
-        import kernels
-        kernels.generar()
-        import ncu
-        ncu.generar()
-        import comparativa  # documento unico: metodologia + todo lo anterior
+        import comparativa
         comparativa.generar()
     except Exception as e:
         print(f"AVISO: no se pudo generar kernels.md ({type(e).__name__}: {e}). "

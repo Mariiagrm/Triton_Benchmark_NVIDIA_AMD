@@ -1,0 +1,1 @@
+Entorno en frío `hennessy-frio` (jobs 20841, 20842, 20843); pico de mma.sync f16→f32 = 122.83 TFLOP/s (`hennessy`/run_pico_mma). LoC = líneas lógicas sin blancos, comentarios ni docstrings.

@@ -10,7 +10,7 @@ Todo experimento deberia:
     1. medir con medir()   -> misma metodologia (triton.testing.do_bench, mediana), con
                               el reloj SM y la potencia de la GPU durante la medida
                               (reloj_mhz, potencia_w): el pico de los tensor cores es
-                              proporcional al reloj (docs/TFM/pico_mma.md)
+                              proporcional al reloj (docs/TFM/comparativa.md, seccion 6)
     2. guardar con guardar() -> results/<maquina>/<experimento>/<fecha>_job<JOBID>/
                                   resultados.csv  (una fila por medida)
                                   meta.json       (contexto + parametros + resumen)
@@ -109,7 +109,7 @@ def imprimir_contexto():
 
 
 # Reloj y potencia durante cada medida: el pico de los tensor cores es proporcional al reloj SM
-# (docs/TFM/pico_mma.md), asi que sin el no se puede saber si un kernel pierde rendimiento por
+# (docs/TFM/comparativa.md, seccion 6), asi que sin el no se puede saber si un kernel pierde rendimiento por
 # el propio kernel o porque la GPU baja la frecuencia (p. ej. por limite de potencia en GB10).
 class Muestreador:
     """Muestrea reloj SM (MHz) y potencia (W) en segundo plano: NVML o, si no, nvidia-smi.
@@ -247,7 +247,7 @@ def perfil_ncu(fn):
 
 # Eficiencia energetica (TFM_ENERGIA=1, lo pasa ejecutar.sh): medir() ejecuta ademas cada kernel
 # en regimen sostenido (do_bench dura ~0.6 s y NVML solo actualiza cada ~0.5 s: la potencia de
-# esa ventana es la del transitorio; docs/TFM/pico_mma.md) y anota la energia por llamada y el
+# esa ventana es la del transitorio; docs/TFM/comparativa.md, seccion 6) y anota la energia por llamada y el
 # trabajo por julio. Coste por medida: ENERGIA_REPOSO + ENERGIA_SEGUNDOS.
 ENERGIA = os.environ.get("TFM_ENERGIA") == "1"
 ENERGIA_SEGUNDOS = float(os.environ.get("TFM_ENERGIA_SEGUNDOS") or 6)

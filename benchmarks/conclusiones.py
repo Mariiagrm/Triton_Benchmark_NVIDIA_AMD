@@ -245,11 +245,8 @@ def generar():
         partes.append("> **Faltan las métricas de Nsight Compute**: aún no hay ejecuciones con `TFM_NCU=1` "
                       "(`TFM_NCU=1 bash ejecutar.sh encolar todo`). Al terminar, este documento se regenera solo.\n\n")
     partes += [tabla_md(col, celdas, arqs) + "\n" for col, _ in resumen.COLUMNAS]
-    docs = os.path.join(informe.DOCS, "TFM", "resultados")
-    os.makedirs(docs, exist_ok=True)
-    with open(os.path.join(docs, "conclusiones.md"), "w") as fh:
-        fh.write("".join(partes))
-    print(f"Conclusiones en docs/TFM/resultados/conclusiones.md y {os.path.relpath(destino_csv, RAIZ)}", flush=True)
+    # Las tablas (tabla_md) van en el documento unico, docs/TFM/comparativa.md (benchmarks/comparativa.py).
+    print(f"Conclusiones en {os.path.relpath(destino_csv, RAIZ)}", flush=True)
     return destino_csv
 
 

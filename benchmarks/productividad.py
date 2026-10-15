@@ -92,7 +92,7 @@ ESPEC = [
     dict(columna="RMSNorm fp16", fila="Triton + TLX", exp="run_rmsnorm_tlx", fila_csv="tlx",
          kernel=[("src/MBKernels/triton_tlx/rmsnorm.py", None)],
          ajuste_tipo="heurística + --stages a mano", configs=1,
-         sin_medida="no compila en GB10 (triton-utlx 3.8.0.post1, ver procedencia_kernels.md)"),
+         sin_medida="no compila en GB10 (triton-utlx 3.8.0.post1, ver la sección de procedencia)"),
     dict(columna="RMSNorm fp16", fila="Gluon", exp="run_rmsnorm_gluon", fila_csv="gluon",
          kernel=[("src/MBKernels/gluon/rmsnorm.py", None)],
          ajuste_tipo="heurística (warps y layout por N)", configs=1),
@@ -402,13 +402,15 @@ def main():
     grafica(filas, os.path.join(docs, "figuras"), pico,
             f"Una forma por algoritmo: matmul 8192³, FlashAttention B=4 H=32 N=4096 D=128, RMSNorm 16384×8192; "
             f"fp16; GB10. Jobs {', '.join(jobs) or '—'}.")
-    with open(os.path.join(docs, "productividad.md"), "w") as f:
-        f.write("# Productividad frente a rendimiento (GB10)\n\nGenerado por `benchmarks/productividad.py`. "
-                "Análisis en [../productividad.md](../productividad.md).\n\n"
-                "![productividad](figuras/productividad.png)\n\n" + md)
+    with open(os.path.join(informe.RAIZ, "results", "productividad_tabla.csv"), "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(t[0]))  # la tabla tal cual la muestra comparativa.md
+        w.writeheader()
+        w.writerows(t)
+    with open(os.path.join(informe.RAIZ, "results", "productividad_pie.txt"), "w") as f:
+        f.write(pie + "\n")
     for r in t:
         print(" | ".join(str(v) for v in r.values()))
-    print("\nresults/productividad.csv y docs/TFM/resultados/productividad.md (+ figuras/productividad.png)")
+    print("\nresults/productividad.csv, productividad_tabla.csv y docs/TFM/resultados/figuras/productividad.png")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,110 @@
+{
+  "experimento": "run_rmsnorm_triton",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy-ncu",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "21102",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "energia": false,
+    "energia_segundos": null,
+    "energia_descarte": null,
+    "ncu": true,
+    "ncu_csv": "/workspace/tfm/.cache/ncu/21102_run_rmsnorm_triton_20261015-103917.csv",
+    "fecha": "2026-10-15T08:39:43",
+    "comando": "/workspace/tfm/benchmarks/MBKernels/triton/run_rmsnorm_triton.py"
+  },
+  "parametros": {
+    "rows": [
+      4096,
+      16384
+    ],
+    "cols": [
+      2048,
+      4096,
+      8192
+    ],
+    "dtypes": [
+      "fp16",
+      "bf16"
+    ],
+    "eps": 1e-05,
+    "pico_gbs": 273.0,
+    "dsl": "triton"
+  },
+  "resumen": {
+    "fp16_4096x2048": {
+      "triton_gbs": 214.2,
+      "torch_gbs": 211.4,
+      "triton_vs_torch": 1.0132
+    },
+    "fp16_4096x4096": {
+      "triton_gbs": 230.0,
+      "torch_gbs": 219.9,
+      "triton_vs_torch": 1.0459
+    },
+    "fp16_4096x8192": {
+      "triton_gbs": 236.2,
+      "torch_gbs": 211.2,
+      "triton_vs_torch": 1.1184
+    },
+    "fp16_16384x2048": {
+      "triton_gbs": 235.3,
+      "torch_gbs": 233.7,
+      "triton_vs_torch": 1.0068
+    },
+    "fp16_16384x4096": {
+      "triton_gbs": 242.7,
+      "torch_gbs": 234.2,
+      "triton_vs_torch": 1.0363
+    },
+    "fp16_16384x8192": {
+      "triton_gbs": 242.7,
+      "torch_gbs": 217.3,
+      "triton_vs_torch": 1.1169
+    },
+    "bf16_4096x2048": {
+      "triton_gbs": 215.4,
+      "torch_gbs": 211.4,
+      "triton_vs_torch": 1.0189
+    },
+    "bf16_4096x4096": {
+      "triton_gbs": 230.8,
+      "torch_gbs": 219.9,
+      "triton_vs_torch": 1.0496
+    },
+    "bf16_4096x8192": {
+      "triton_gbs": 236.2,
+      "torch_gbs": 213.5,
+      "triton_vs_torch": 1.1063
+    },
+    "bf16_16384x2048": {
+      "triton_gbs": 236.2,
+      "torch_gbs": 234.1,
+      "triton_vs_torch": 1.009
+    },
+    "bf16_16384x4096": {
+      "triton_gbs": 243.0,
+      "torch_gbs": 234.1,
+      "triton_vs_torch": 1.038
+    },
+    "bf16_16384x8192": {
+      "triton_gbs": 242.7,
+      "torch_gbs": 217.5,
+      "triton_vs_torch": 1.1159
+    }
+  }
+}

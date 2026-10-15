@@ -31,7 +31,7 @@ def es_ejecucion(ruta):
 # Entornos historicos: ejecuciones anteriores a que meta.json guardara 'maquina' y el driver.
 # hennessy uso el driver 580.159.03 hasta el 30-09-2026 16:39 (historial de apt) y no hubo
 # ejecuciones entre ese cambio y la primera con el driver registrado (02-10-2026): todas las
-# de hennessy sin 'driver_nvidia' son de ese entorno. Ver docs/TFM/plataforma.md.
+# de hennessy sin 'driver_nvidia' son de ese entorno. Ver docs/TFM/comparativa.md, seccion 2.
 ENTORNO_SIN_DRIVER = {"hennessy": "hennessy-580"}
 
 

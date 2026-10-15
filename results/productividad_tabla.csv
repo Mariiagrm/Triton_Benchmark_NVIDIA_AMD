@@ -1,0 +1,14 @@
+algoritmo,DSL,LoC kernel,LoC propias,LoC total,ajuste,configs,1a llamada en frío,rendimiento,% del pico
+Matmul fp16,Triton,67,67,67,autotune (triton.autotune),64,34.1 s,92.96 TFLOP/s,75.7
+Matmul fp16,Triton + TMA,68,68,68,autotune (triton.autotune),128,96.1 s,93.31 TFLOP/s,76.0
+Matmul fp16,Gluon,85,101,101,barrido propio (sin autotuning),7,3.9 s,79.26 TFLOP/s,64.5
+Matmul fp16,Helion,25,25,25,autotune Helion (quick),251,4.0 min,61.94 TFLOP/s,50.4
+Matmul fp16,CUTLASS,672,41,713,fija (tile del ejemplo),1,1.0 s,23.59 TFLOP/s,19.2
+FlashAttention fp16,Triton,220,220,220,autotune (triton.autotune),36,15.2 s,88.97 TFLOP/s,72.4
+FlashAttention fp16,Helion,45,18,63,autotune Helion (quick),135,2.1 min,84.76 TFLOP/s,69.0
+FlashAttention fp16,CUTLASS,713,65,778,barrido propio (sin autotuning),6,7.7 s,90.92 TFLOP/s,74.0
+RMSNorm fp16,Triton,38,38,38,heurística (warps por N),1,0.6 s,242.3 GB/s,88.8
+RMSNorm fp16,Triton + TLX,52,52,52,heurística + --stages a mano,1,—,"no compila en GB10 (triton-utlx 3.8.0.post1, ver la sección de procedencia)",—
+RMSNorm fp16,Gluon,35,35,35,heurística (warps y layout por N),1,0.6 s,242.1 GB/s,88.7
+RMSNorm fp16,Helion,16,16,16,autotune Helion (quick),134,77.3 s,247.2 GB/s,90.5
+RMSNorm fp16,CUTLASS,135,68,203,fija (heurística de CUTLASS),1,55.5 s,247 GB/s,90.5

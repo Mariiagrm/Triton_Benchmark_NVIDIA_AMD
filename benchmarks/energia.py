@@ -213,24 +213,12 @@ def generar():
 
     docs = os.path.join(informe.DOCS, "TFM", "resultados")
     os.makedirs(docs, exist_ok=True)
-    nota = ("*Generado por `benchmarks/energia.py` a partir de las ejecuciones con `TFM_ENERGIA=1`. CB en GFLOP/J, "
-            "MB en GB/J; «×» = eficiencia relativa a la referencia de la misma GPU; «dinámica» descuenta la potencia "
-            "en reposo.*\n\n")
-    md = ["# Eficiencia energética por arquitectura\n\n", nota, METODO_MD]
-    for arq in sorted({c["arquitectura"] for c in celdas}):
-        de_arq = [c for c in celdas if c["arquitectura"] == arq]
-        tipos = {c["tipo"] for c in de_arq}
-        md.append(tabla_md(arq, de_arq) + "\n")
-        md += [f"![{t}](figuras/energia_{n}_{resumen.slug(arq)}.png)\n\n"
-               for tipo, t, n in (("CB", "Compute-bound", "compute_bound"), ("MB", "Memory-bound", "memory_bound"))
-               if tipo in tipos]
-    with open(os.path.join(docs, "energia.md"), "w") as fh:
-        fh.write("".join(md))
+    # Tabla y metodo (METODO_MD) van en el documento unico, docs/TFM/comparativa.md.
     try:
         graficas(celdas, docs)
     except Exception as e:
         print(f"AVISO: fallo al generar las graficas de energia ({type(e).__name__}: {e}).", flush=True)
-    print(f"Eficiencia energetica en docs/TFM/resultados/energia.md y {os.path.relpath(destino_csv, RAIZ)}",
+    print(f"Eficiencia energetica en {os.path.relpath(destino_csv, RAIZ)} y docs/TFM/resultados/figuras/",
           flush=True)
 
 
