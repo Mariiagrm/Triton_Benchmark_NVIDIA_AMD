@@ -92,6 +92,55 @@ def _fmt(v):
     return str(v)
 
 
+# Columnas de rendimiento con su % del pico: 'tflops' o '<variante>_tflops' (p. ej. triton_tflops);
+# 'gbs' solo cuando no hay TFLOP/s con el mismo prefijo (en matmul los GB/s no son el limite).
+def _metricas_pct(columnas):
+    out = []
+    for c in columnas:
+        if c == "tflops" or c.endswith("_tflops"):
+            out.append((c, c[:-len("tflops")], "TFLOP/s"))
+        elif (c == "gbs" or c.endswith("_gbs")) and c[:-len("gbs")] + "tflops" not in columnas:
+            out.append((c, c[:-len("gbs")], "GB/s"))
+    return out
+
+
+def anadir_pct(filas, meta, nombre):
+    """Anade '<prefijo>pct_pico' (% del pico) tras cada columna de rendimiento, con el mismo pico que
+    el resumen: compute-bound, pico de mma.sync medido en esa GPU (run_pico_mma) o, si no, el de la
+    ficha; memory-bound, ancho de banda de la ficha. Por nodos si la fila los indica (run_dist_*).
+    Devuelve las columnas en orden. No aplica a run_pico_mma (es el propio pico)."""
+    columnas = list(dict.fromkeys(k for f in filas for k in f))
+    if nombre == "run_pico_mma":
+        return columnas
+    import resumen  # aqui: resumen importa este modulo
+    c = meta.get("contexto", {})
+    arq = f"{c.get('gpu', '?')} (sm_{c.get('sm', '?')})"
+    picos = resumen.picos_mma()
+    nuevas = []
+    for col in columnas:
+        nuevas.append(col)
+        for m, prefijo, unidad in _metricas_pct(columnas):
+            if m != col or prefijo + "pct_pico" in columnas:
+                continue
+            if unidad == "GB/s" and familia(nombre) == "dist":
+                continue  # GB/s de la red, no de la memoria
+            for f in filas:
+                v = f.get(m)
+                if not isinstance(v, (int, float)):
+                    continue
+                if unidad == "TFLOP/s":
+                    texto = str(f.get("dtype") or f.get("variante") or nombre)
+                    pico = resumen.pico_cb(arq, texto, picos)[0]
+                else:
+                    pico = (fichas.pico(arq, "GB/s") or (None,))[0]
+                if pico:
+                    nodos = f.get("nodos") if isinstance(f.get("nodos"), int) else 1
+                    f[prefijo + "pct_pico"] = round(100 * v / (pico * nodos), 1)
+            if any(prefijo + "pct_pico" in f for f in filas):
+                nuevas.append(prefijo + "pct_pico")
+    return nuevas
+
+
 def tabla_md(filas, meta, columnas):
     cab = "| " + " | ".join(columnas) + " |"
     sep = "|" + "|".join([":---"] * len(columnas)) + "|"
@@ -125,7 +174,7 @@ def grafica(filas, meta, destino, nombre):
         xs = range(len(tamanos))
         ancho = min(0.8 / max(len(series), 1), 0.38)
         for i, s in enumerate(series):
-            med, pos = [], []
+            med, pos, pcts = [], [], []
             for x, t in zip(xs, tamanos):
                 fila = next((f for f in ff if etiqueta_tamano(f) == t
                              and (serie_col is None or f[serie_col] == s)), None)
@@ -133,11 +182,13 @@ def grafica(filas, meta, destino, nombre):
                     continue  # sin medida (p. ej. una forma que fallo, con columna 'error')
                 v = fila[metrica]
                 med.append(v)
+                pcts.append(fila.get("pct_pico"))
                 pos.append(x + (i - (len(series) - 1) / 2) * (ancho + 0.02))
                 tope = max(tope, v)
             eje.bar(pos, med, ancho, color=color[s], label=str(s), zorder=2)
-            for p, m in zip(pos, med):
-                eje.text(p, m, f"{m:.0f}", ha="center", va="bottom", fontsize=8, color=TINTA)
+            for p, m, pct in zip(pos, med, pcts):
+                txt = f"{m:.0f}" + (f"\n{pct:.0f} %" if isinstance(pct, (int, float)) else "")
+                eje.text(p, m, txt, ha="center", va="bottom", fontsize=7, color=TINTA, linespacing=0.9)
         eje.set_xticks(list(xs), tamanos, rotation=0)
         eje.set_xlabel(f"Forma (B={ff[0]['B']}, H={ff[0]['H']})" if "N_CTX" in ff[0]
                        else "Tamaño (M×N×K)" if "K" in ff[0] else "Tamaño (M×N)", color=TINTA_2)
@@ -150,7 +201,7 @@ def grafica(filas, meta, destino, nombre):
         eje.spines["bottom"].set_color(TINTA_2)
         eje.tick_params(colors=TINTA_2, length=0)
     ejes[0][0].set_ylabel(METRICAS[metrica], color=TINTA_2)
-    ejes[0][0].set_ylim(0, tope * 1.18 or 1)
+    ejes[0][0].set_ylim(0, tope * 1.25 or 1)
     c = meta.get("contexto", {})
     # Pico de la ficha de NVIDIA: memoria si la metrica es GB/s; si es TFLOP/s, el de la precision
     # de la faceta (dtype) o, sin faceta, la del experimento (run_matmul_fp8 lleva fp16 y FP8).
@@ -164,6 +215,12 @@ def grafica(filas, meta, destino, nombre):
             precs = ["fp8", "fp16"] if "fp8" in nombre else ["fp16"]
         for prec in precs:
             p = fichas.pico(c.get("gpu"), unidad, prec or "fp16")
+            if p is None and unidad == "TFLOP/s" and nombre != "run_pico_mma":
+                # Sin pico de ficha (GB10): el de mma.sync medido, el mismo del % de las barras.
+                import resumen
+                arq = f"{c.get('gpu', '?')} (sm_{c.get('sm', '?')})"
+                v, nom = resumen.pico_cb(arq, prec or "fp16", resumen.picos_mma())
+                p = (v, f"Pico mma.sync medido {prec}: {v:g} TFLOP/s") if v else None
             if p:
                 fichas.dibujar(eje, *p, estilo=":" if len(precs) > 1 and prec == "fp16" else "--")
     fig.suptitle(f"{nombre} — {c.get('gpu', 'GPU')}", color=TINTA, fontsize=12, x=0.02, ha="left")
@@ -171,7 +228,7 @@ def grafica(filas, meta, destino, nombre):
     if serie_col or len(asas) > len(series):
         fig.legend(asas, etiquetas, frameon=False, ncol=len(asas),
                    loc="upper left", bbox_to_anchor=(0.01, 0.95), labelcolor=TINTA, fontsize=9)
-    fig.text(0.02, 0.01, f"Barras: mediana (do_bench). torch {c.get('torch', '?')}, "
+    fig.text(0.02, 0.01, f"Barras: mediana (do_bench) y % del pico (línea). torch {c.get('torch', '?')}, "
              f"triton {c.get('triton', '?')}, CUDA {c.get('cuda', '?')}; job {c.get('slurm_job')}.",
              fontsize=7, color=TINTA_2, ha="left", va="bottom")
     fig.tight_layout(rect=(0, 0.05, 1, 0.9))
@@ -196,7 +253,7 @@ def generar(ejecucion):
     filas, meta = leer(ejecucion)
     nombre = meta.get("experimento") or os.path.basename(os.path.dirname(ejecucion))
     maquina = maquina_de(meta, ejecucion)
-    columnas = list(dict.fromkeys(k for f in filas for k in f))  # union en orden de aparicion
+    columnas = anadir_pct(filas, meta, nombre)  # union en orden de aparicion, con los % del pico
 
     md = tabla_md(filas, meta, columnas)
     with open(os.path.join(ejecucion, "tabla.md"), "w") as f:

@@ -1,7 +1,5 @@
-| dtype | M×N×K | Config. Triton (BM×BN×BK, warps, stages) | Triton (ms) | Triton (TFLOP/s) | cuBLAS (ms) | cuBLAS (TFLOP/s) | Triton/cuBLAS |
-|:---|:---|:---|---:|---:|---:|---:|---:|
-| fp16 | 8192×8192×8192 | 128×256×64, w8, s3 | 12.540 | 87.7 | 11.980 | 91.8 | 95.5% |
+| dtype | M | N | K | BLOCK_SIZE_M | BLOCK_SIZE_N | BLOCK_SIZE_K | GROUP_SIZE_M | num_warps | num_stages | autotune_s | triton_ms | triton_ms_p20 | triton_ms_p80 | triton_reloj_mhz | triton_potencia_w | triton_tflops | triton_pct_pico | triton_gbs | triton_reloj_sost_mhz | triton_potencia_sost_w | triton_potencia_reposo_w | triton_mj_llamada | triton_tflops_sost | triton_gflop_j | triton_gflop_j_din | cublas_ms | cublas_ms_p20 | cublas_ms_p80 | cublas_reloj_mhz | cublas_potencia_w | cublas_tflops | cublas_pct_pico | cublas_gbs | cublas_reloj_sost_mhz | cublas_potencia_sost_w | cublas_potencia_reposo_w | cublas_mj_llamada | cublas_tflops_sost | cublas_gflop_j | cublas_gflop_j_din | triton_mma | cublas_kernel |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| fp16 | 8192 | 8192 | 8192 | 128 | 256 | 64 | 8 | 8 | 3 | 14 | 12.5405 | 12.1143 | 12.6445 | 2411 | 111.6 | 87.68 | 71.4 | 32.1 | 2158 | 88.4 | 16.9 | 1078.39 | 90.13 | 1019.6 | 1260.6 | 11.9798 | 11.8714 | 12.5422 | 2151 | 88.2 | 91.78 | 74.7 | 33.6 | 2086 | 87.6 | 16.9 | 1046.03 | 92.08 | 1051.1 | 1302.4 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 | nvjet_sm121_hsh_mma_128x208x64_2_32x104x64_tmaAB_bz_NNNN |
 
 *NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20849, 2026-10-08T23:30:55. Mediana de triton.testing.do_bench.*
-
-Tensor cores (PTX Triton): `mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32`

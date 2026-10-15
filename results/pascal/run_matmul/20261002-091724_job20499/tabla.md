@@ -1,8 +1,6 @@
-| dtype | M×N×K | Config. Triton (BM×BN×BK, warps, stages) | Triton (ms) | Triton (TFLOP/s) | cuBLAS (ms) | cuBLAS (TFLOP/s) | Triton/cuBLAS |
-|:---|:---|:---|---:|---:|---:|---:|---:|
-| fp16 | 4096×4096×4096 | 128×64×32, w4, s3 | 0.657 | 209.1 | 0.670 | 205.2 | 101.9% |
-| fp16 | 8192×8192×8192 | 256×128×64, w8, s3 | 5.046 | 217.9 | 5.257 | 209.1 | 104.2% |
+| dtype | M | N | K | BLOCK_SIZE_M | BLOCK_SIZE_N | BLOCK_SIZE_K | GROUP_SIZE_M | num_warps | num_stages | autotune_s | triton_ms | triton_ms_p20 | triton_ms_p80 | triton_tflops | triton_pct_pico | triton_gbs | cublas_ms | cublas_ms_p20 | cublas_ms_p80 | cublas_tflops | cublas_pct_pico | cublas_gbs | triton_mma | cublas_kernel |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| fp16 | 4096 | 4096 | 4096 | 128 | 64 | 32 | 8 | 4 | 3 | 7.3 | 0.6574 | 0.6554 | 0.6625 | 209.06 | 99.8 | 153.1 | 0.6697 | 0.6687 | 0.6728 | 205.23 | 98 | 150.3 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 | void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_nn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_nn_align8::Params) |
+| fp16 | 8192 | 8192 | 8192 | 256 | 128 | 64 | 8 | 8 | 3 | 8.8 | 5.0463 | 5.0445 | 5.0483 | 217.89 | 104 | 79.8 | 5.2572 | 5.251 | 5.2623 | 209.14 | 99.8 | 76.6 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 | void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_nn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_nn_align8::Params) |
 
 *NVIDIA GeForce RTX 5090 (sm_120), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20499, 2026-10-02T09:17:24. Mediana de triton.testing.do_bench.*
-
-Tensor cores (PTX Triton): `mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32`

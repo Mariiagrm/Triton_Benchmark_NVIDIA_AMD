@@ -1,0 +1,164 @@
+{
+  "experimento": "run_pico_mma",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "21058",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "energia": false,
+    "energia_segundos": null,
+    "energia_descarte": null,
+    "fecha": "2026-10-14T13:38:01",
+    "comando": "/workspace/tfm/benchmarks/run_pico_mma.py"
+  },
+  "parametros": {
+    "variantes": [
+      "f16\u00b7f32acc",
+      "f16\u00b7f16acc",
+      "bf16\u00b7f32acc",
+      "tf32\u00b7f32acc",
+      "e4m3\u00b7f32acc",
+      "e4m3\u00b7f16acc",
+      "s8\u00b7s32acc",
+      "e2m1\u00b7f32acc",
+      "mxf8 e4m3",
+      "mxf4 e2m1",
+      "nvf4 e2m1"
+    ],
+    "warps": [
+      1,
+      4,
+      8,
+      16,
+      32
+    ],
+    "ilp": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "ms": 2.0
+  },
+  "resumen": {
+    "n_sm": 48,
+    "arquitectura": "sm_121a",
+    "reloj_max_mhz": 3003,
+    "pico": {
+      "f16\u00b7f32acc": {
+        "tflops": 122.83,
+        "warps_sm": 8,
+        "ilp": 1,
+        "reloj_mhz": 2496,
+        "potencia_w": 50.3,
+        "flop_ciclo_sm": 1025.2,
+        "sass": "HMMA.16816.F32"
+      },
+      "f16\u00b7f16acc": {
+        "tflops": 122.79,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2509,
+        "potencia_w": 68.2,
+        "flop_ciclo_sm": 1019.6,
+        "sass": "HMMA.16816.F16"
+      },
+      "bf16\u00b7f32acc": {
+        "tflops": 122.76,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2489,
+        "potencia_w": 78.9,
+        "flop_ciclo_sm": 1027.5,
+        "sass": "HMMA.16816.F32.BF16"
+      },
+      "tf32\u00b7f32acc": {
+        "tflops": 61.4,
+        "warps_sm": 8,
+        "ilp": 8,
+        "reloj_mhz": 2489,
+        "potencia_w": 36.2,
+        "flop_ciclo_sm": 513.9,
+        "sass": "HMMA.1688.F32.TF32"
+      },
+      "e4m3\u00b7f32acc": {
+        "tflops": 243.31,
+        "warps_sm": 8,
+        "ilp": 2,
+        "reloj_mhz": 2483,
+        "potencia_w": 43.7,
+        "flop_ciclo_sm": 2041.5,
+        "sass": "QMMA.16832.F32.E4M3.E4M3"
+      },
+      "e4m3\u00b7f16acc": {
+        "tflops": 243.53,
+        "warps_sm": 16,
+        "ilp": 2,
+        "reloj_mhz": 2476,
+        "potencia_w": 41.2,
+        "flop_ciclo_sm": 2049.1,
+        "sass": "QMMA.16832.F16.E4M3.E4M3"
+      },
+      "s8\u00b7s32acc": {
+        "tflops": 244.44,
+        "warps_sm": 16,
+        "ilp": 2,
+        "reloj_mhz": 2496,
+        "potencia_w": 66.7,
+        "flop_ciclo_sm": 2040.3,
+        "sass": "IMMA.16832.S8.S8"
+      },
+      "e2m1\u00b7f32acc": {
+        "tflops": 243.95,
+        "warps_sm": 8,
+        "ilp": 1,
+        "reloj_mhz": 2496,
+        "potencia_w": 44.7,
+        "flop_ciclo_sm": 2036.2,
+        "sass": "QMMA.16832.F32.E2M1.E2M1"
+      },
+      "mxf8 e4m3": {
+        "tflops": 242.89,
+        "warps_sm": 8,
+        "ilp": 2,
+        "reloj_mhz": 2470,
+        "potencia_w": 82.2,
+        "flop_ciclo_sm": 2048.7,
+        "sass": "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+      },
+      "mxf4 e2m1": {
+        "tflops": 487.18,
+        "warps_sm": 8,
+        "ilp": 4,
+        "reloj_mhz": 2483,
+        "potencia_w": 37.8,
+        "flop_ciclo_sm": 4087.6,
+        "sass": "OMMA.SF.16864.F32.E2M1.E2M1.E8"
+      },
+      "nvf4 e2m1": {
+        "tflops": 486.77,
+        "warps_sm": 16,
+        "ilp": 8,
+        "reloj_mhz": 2476,
+        "potencia_w": 76.6,
+        "flop_ciclo_sm": 4095.7,
+        "sass": "OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X"
+      }
+    },
+    "no_disponibles": {}
+  }
+}

@@ -1,7 +1,5 @@
-| dtype | M×N×K | Config. Triton (BM×BN×BK, warps, stages) | Triton (ms) | Triton (TFLOP/s) | cuBLAS (ms) | cuBLAS (TFLOP/s) | Triton/cuBLAS |
-|:---|:---|:---|---:|---:|---:|---:|---:|
-| fp16 | 8192×8192×8192 | 128×256×64, w8, s3 | 11.827 | 93.0 | 11.567 | 95.1 | 97.8% |
+| dtype | M | N | K | BLOCK_SIZE_M | BLOCK_SIZE_N | BLOCK_SIZE_K | GROUP_SIZE_M | num_warps | num_stages | autotune_s | triton_ms | triton_ms_p20 | triton_ms_p80 | triton_reloj_mhz | triton_potencia_w | triton_tflops | triton_pct_pico | triton_gbs | cublas_ms | cublas_ms_p20 | cublas_ms_p80 | cublas_reloj_mhz | cublas_potencia_w | cublas_tflops | cublas_pct_pico | cublas_gbs | triton_mma | cublas_kernel |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| fp16 | 8192 | 8192 | 8192 | 128 | 256 | 64 | 8 | 8 | 3 | 34.1 | 11.8272 | 11.7867 | 12.294 | 2411 | 19.6 | 92.96 | 75.7 | 34 | 11.5667 | 11.5382 | 12.2088 | 2281 | 66.2 | 95.06 | 77.4 | 34.8 | mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 | nvjet_sm121_hsh_mma_128x208x64_2_32x104x64_tmaAB_bz_NNNN |
 
 *NVIDIA GB10 (sm_121), torch 2.9.0a0+145a3a7bda.nv25.10, triton 3.8.0, CUDA 13.0; job 20841, 2026-10-08T16:05:41. Mediana de triton.testing.do_bench.*
-
-Tensor cores (PTX Triton): `mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32`

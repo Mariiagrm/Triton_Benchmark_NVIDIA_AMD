@@ -1,0 +1,8 @@
+kernel,precision,tflops,reloj_mhz,potencia_w,pico_mma_a_ese_reloj,pct_pico_mismo_reloj
+mma.sync f16·f32acc,fp16,119.45,2444.0,99.2,120.1,99.4
+mma.sync e4m3·f32acc,fp8,236.66,2418.0,99.0,237.7,99.6
+cuBLAS fp16,fp16,94.03,2125,89.8,104.4,90.0
+Triton fp16,fp16,89.8,2177.0,89.5,107.0,83.9
+Triton + TMA fp16,fp16,94.09,2086.0,89.8,102.5,91.8
+cuBLASLt FP8,fp8,184.62,2151.0,91.5,211.5,87.3
+Triton FP8,fp8,144.82,2158,91.4,212.1,68.3

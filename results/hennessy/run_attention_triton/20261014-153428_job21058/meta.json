@@ -1,0 +1,106 @@
+{
+  "experimento": "run_attention_triton",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "21058",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "energia": false,
+    "energia_segundos": null,
+    "energia_descarte": null,
+    "fecha": "2026-10-14T15:34:28",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_attention_triton.py"
+  },
+  "parametros": {
+    "batch": 4,
+    "heads": 32,
+    "seqlens": [
+      1024,
+      4096,
+      16384
+    ],
+    "head_dims": [
+      64,
+      128
+    ],
+    "causal": "ambos",
+    "dsl": "triton"
+  },
+  "resumen": {
+    "N1024_D64_nocausal": {
+      "triton_tflops": 81.63,
+      "sdpa_tflops": 79.49,
+      "triton_vs_sdpa": 1.0269
+    },
+    "N4096_D64_nocausal": {
+      "triton_tflops": 88.87,
+      "sdpa_tflops": 88.93,
+      "triton_vs_sdpa": 0.9993
+    },
+    "N16384_D64_nocausal": {
+      "triton_tflops": 87.65,
+      "sdpa_tflops": 85.63,
+      "triton_vs_sdpa": 1.0236
+    },
+    "N1024_D64_causal": {
+      "triton_tflops": 51.96,
+      "sdpa_tflops": 50.65,
+      "triton_vs_sdpa": 1.0259
+    },
+    "N4096_D64_causal": {
+      "triton_tflops": 86.73,
+      "sdpa_tflops": 84.8,
+      "triton_vs_sdpa": 1.0228
+    },
+    "N16384_D64_causal": {
+      "triton_tflops": 88.29,
+      "sdpa_tflops": 85.34,
+      "triton_vs_sdpa": 1.0346
+    },
+    "N1024_D128_nocausal": {
+      "triton_tflops": 75.98,
+      "sdpa_tflops": 67.04,
+      "triton_vs_sdpa": 1.1334
+    },
+    "N4096_D128_nocausal": {
+      "triton_tflops": 87.74,
+      "sdpa_tflops": 80.92,
+      "triton_vs_sdpa": 1.0843
+    },
+    "N16384_D128_nocausal": {
+      "triton_tflops": 88.27,
+      "sdpa_tflops": 82.98,
+      "triton_vs_sdpa": 1.0638
+    },
+    "N1024_D128_causal": {
+      "triton_tflops": 51.23,
+      "sdpa_tflops": 54.33,
+      "triton_vs_sdpa": 0.9429
+    },
+    "N4096_D128_causal": {
+      "triton_tflops": 80.56,
+      "sdpa_tflops": 80.81,
+      "triton_vs_sdpa": 0.9969
+    },
+    "N16384_D128_causal": {
+      "triton_tflops": 85.64,
+      "sdpa_tflops": 85.14,
+      "triton_vs_sdpa": 1.0059
+    },
+    "fallos": []
+  }
+}

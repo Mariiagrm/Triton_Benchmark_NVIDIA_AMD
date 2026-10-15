@@ -1,0 +1,106 @@
+{
+  "experimento": "run_attention_triton",
+  "contexto": {
+    "gpu": "NVIDIA GB10",
+    "sm": "121",
+    "torch": "2.9.0a0+145a3a7bda.nv25.10",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "helion": null,
+    "triton_utlx": "3.8.0.post1",
+    "python": "3.12.3",
+    "cublas_tf32": true,
+    "dsl": "triton-tlx",
+    "imagen": "tfm-triton-tlx:ngc-arm64@sha256:e4b1440115e90d0130f2e65298bf4bde6894510a2ce8536c8471ee44f0fd3027",
+    "maquina": "hennessy",
+    "host": "hennessy",
+    "driver_nvidia": "610.57.04",
+    "kernel_linux": "7.0.0-1019-nvidia",
+    "slurm_job": "21058",
+    "cache_fria": false,
+    "potencia_fuente": "instantanea",
+    "energia": false,
+    "energia_segundos": null,
+    "energia_descarte": null,
+    "fecha": "2026-10-14T16:04:32",
+    "comando": "/workspace/tfm/benchmarks/CBKernels/triton/run_attention_triton.py"
+  },
+  "parametros": {
+    "batch": 4,
+    "heads": 32,
+    "seqlens": [
+      1024,
+      4096,
+      16384
+    ],
+    "head_dims": [
+      64,
+      128
+    ],
+    "causal": "ambos",
+    "dsl": "triton"
+  },
+  "resumen": {
+    "N1024_D64_nocausal": {
+      "triton_tflops": 80.16,
+      "sdpa_tflops": 78.77,
+      "triton_vs_sdpa": 1.0176
+    },
+    "N4096_D64_nocausal": {
+      "triton_tflops": 40.92,
+      "sdpa_tflops": 40.79,
+      "triton_vs_sdpa": 1.0032
+    },
+    "N16384_D64_nocausal": {
+      "triton_tflops": 39.14,
+      "sdpa_tflops": 38.9,
+      "triton_vs_sdpa": 1.0062
+    },
+    "N1024_D64_causal": {
+      "triton_tflops": 51.8,
+      "sdpa_tflops": 49.91,
+      "triton_vs_sdpa": 1.0379
+    },
+    "N4096_D64_causal": {
+      "triton_tflops": 47.81,
+      "sdpa_tflops": 32.86,
+      "triton_vs_sdpa": 1.455
+    },
+    "N16384_D64_causal": {
+      "triton_tflops": 39.88,
+      "sdpa_tflops": 38.5,
+      "triton_vs_sdpa": 1.0358
+    },
+    "N1024_D128_nocausal": {
+      "triton_tflops": 71.62,
+      "sdpa_tflops": 59.29,
+      "triton_vs_sdpa": 1.208
+    },
+    "N4096_D128_nocausal": {
+      "triton_tflops": 29.59,
+      "sdpa_tflops": 35.53,
+      "triton_vs_sdpa": 0.8328
+    },
+    "N16384_D128_nocausal": {
+      "triton_tflops": 42.07,
+      "sdpa_tflops": 39.26,
+      "triton_vs_sdpa": 1.0716
+    },
+    "N1024_D128_causal": {
+      "triton_tflops": 48.47,
+      "sdpa_tflops": 11.29,
+      "triton_vs_sdpa": 4.2932
+    },
+    "N4096_D128_causal": {
+      "triton_tflops": 30.49,
+      "sdpa_tflops": 39.14,
+      "triton_vs_sdpa": 0.779
+    },
+    "N16384_D128_causal": {
+      "triton_tflops": 40.23,
+      "sdpa_tflops": 40.2,
+      "triton_vs_sdpa": 1.0007
+    },
+    "fallos": []
+  }
+}

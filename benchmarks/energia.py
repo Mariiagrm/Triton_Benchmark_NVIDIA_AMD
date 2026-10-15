@@ -26,6 +26,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import informe  # noqa: E402
 import resumen  # noqa: E402
+import fichas  # noqa: E402
 
 RAIZ = informe.RAIZ
 UNIDAD = {"CB": "GFLOP/J", "MB": "GB/J"}
@@ -123,8 +124,14 @@ def _lineas(c):
     """(valor principal, detalle, origen) de una celda."""
     rel = f" (×{c['vs_ref']:g} ref.)" if c["vs_ref"] else ""
     din = f" · {c['eficiencia_din']:g} {c['unidad']} dinámica" if c["eficiencia_din"] not in ("", None) else ""
+    # % del pico del rendimiento sostenido, con el mismo pico que el resumen.
+    if c["tipo"] == "CB":
+        pico = resumen.pico_cb(c["arquitectura"], c["columna"], resumen.picos_mma())[0]
+    else:
+        pico = (fichas.pico(c["arquitectura"], "GB/s") or (None,))[0]
+    pct = f" ({100 * c['rend_sost'] / pico:.0f} % del pico)" if pico and c["rend_sost"] not in ("", None) else ""
     detalle = (f"{c['potencia_w']:g} W (reposo {c['reposo_w']:g} W){din} · {c['rend_sost']:g} {c['unidad_rend']} "
-               f"sost. · {c['reloj_mhz']:g} MHz · {c['mj_llamada']:.4g} mJ/llamada · {c['tamano']}")
+               f"sost.{pct} · {c['reloj_mhz']:g} MHz · {c['mj_llamada']:.4g} mJ/llamada · {c['tamano']}")
     return f"{c['eficiencia']:g} {c['unidad']}{rel}", detalle, f"{c['maquina']}, {resumen._job(c)}"
 
 
@@ -138,7 +145,13 @@ def tabla_md(arq, celdas):
         for col in cols:
             c = de_fila.get(col)
             if c is None:
-                textos.append("—")
+                clase, texto = resumen.motivo(arq, fila, col)
+                if clase == "no aplica":
+                    textos.append("n/a")
+                    continue
+                if clase == "no medido":
+                    texto = "sin medida de energía (TFM_ENERGIA=1) en esta GPU"
+                textos.append(f"— *{clase}*: {texto}")
                 continue
             v, det, org = _lineas(c)
             textos.append(f"**{v}**<br>{det}<br>_{org}_")
@@ -147,7 +160,7 @@ def tabla_md(arq, celdas):
 
 
 def graficas(celdas, docs):
-    """Barras agrupadas de GFLOP/J (CB) y GB/J (MB), una faceta por arquitectura, como resumen.py."""
+    """Barras agrupadas de GFLOP/J (CB) y GB/J (MB), una imagen por arquitectura, como resumen.py."""
     try:
         import matplotlib.pyplot as plt
         import pandas as pd
@@ -164,22 +177,22 @@ def graficas(celdas, docs):
     specs = [("CB", "viridis", "Compute Bound (GFLOP/J)", "Eficiencia (GFLOP/J)", "energia_compute_bound", 45, 7, 1.3),
              ("MB", "magma", "Memory Bound (GB/J)", "Eficiencia (GB/J)", "energia_memory_bound", 20, 6, 1.2)]
     for tipo, paleta, titulo, ylab, nombre, rot, alto, aspecto in specs:
-        sub = df[df["tipo"] == tipo]
-        if sub.empty:
-            continue
-        cols = [c for c, _ in resumen.COLUMNAS if c in set(sub["columna"])]
-        dsls = [f for f in resumen.FILAS if f in set(sub["fila"])]
-        g = sns.catplot(data=sub, kind="bar", x="columna", y="eficiencia", hue="fila", col="arquitectura",
-                        order=cols, hue_order=dsls, height=alto, aspect=aspecto, palette=paleta)
-        g.set_axis_labels("Kernel (operación)", ylab)
-        g.set_titles("{col_name}")
-        for ax in g.axes.flat:
-            ax.tick_params(axis="x", rotation=rot)
-        g.fig.subplots_adjust(top=0.85, bottom=0.28)
-        g.fig.suptitle(f"Eficiencia energética sostenida — {titulo}", fontsize=18, fontweight="bold")
-        for ext in ("png", "pdf"):
-            g.savefig(os.path.join(figs, f"{nombre}.{ext}"), dpi=150)
-        plt.close(g.fig)
+        for arq in sorted(set(df["arquitectura"])):
+            sub = df[(df["tipo"] == tipo) & (df["arquitectura"] == arq)]
+            if sub.empty:
+                continue
+            cols = [c for c, _ in resumen.COLUMNAS if c in set(sub["columna"])]
+            dsls = [f for f in resumen.FILAS if f in set(sub["fila"])]
+            g = sns.catplot(data=sub, kind="bar", x="columna", y="eficiencia", hue="fila",
+                            order=cols, hue_order=dsls, height=alto, aspect=aspecto, palette=paleta)
+            g.set_axis_labels("Kernel (operación)", ylab)
+            g.ax.tick_params(axis="x", rotation=rot)
+            g.fig.subplots_adjust(top=0.85, bottom=0.28)
+            g.fig.suptitle(f"{arq} — Eficiencia energética sostenida — {titulo}", fontsize=18,
+                           fontweight="bold")
+            for ext in ("png", "pdf"):
+                g.savefig(os.path.join(figs, f"{nombre}_{resumen.slug(arq)}.{ext}"), dpi=150)
+            plt.close(g.fig)
 
 
 def generar():
@@ -203,12 +216,14 @@ def generar():
     nota = ("*Generado por `benchmarks/energia.py` a partir de las ejecuciones con `TFM_ENERGIA=1`. CB en GFLOP/J, "
             "MB en GB/J; «×» = eficiencia relativa a la referencia de la misma GPU; «dinámica» descuenta la potencia "
             "en reposo.*\n\n")
-    md = ["# Eficiencia energética por arquitectura\n\n", nota, METODO_MD,
-          "## Gráficas\n\n![Compute-bound](figuras/energia_compute_bound.png)\n\n"
-          "![Memory-bound](figuras/energia_memory_bound.png)\n\n"]
+    md = ["# Eficiencia energética por arquitectura\n\n", nota, METODO_MD]
     for arq in sorted({c["arquitectura"] for c in celdas}):
         de_arq = [c for c in celdas if c["arquitectura"] == arq]
+        tipos = {c["tipo"] for c in de_arq}
         md.append(tabla_md(arq, de_arq) + "\n")
+        md += [f"![{t}](figuras/energia_{n}_{resumen.slug(arq)}.png)\n\n"
+               for tipo, t, n in (("CB", "Compute-bound", "compute_bound"), ("MB", "Memory-bound", "memory_bound"))
+               if tipo in tipos]
     with open(os.path.join(docs, "energia.md"), "w") as fh:
         fh.write("".join(md))
     try:

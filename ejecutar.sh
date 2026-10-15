@@ -25,6 +25,20 @@
 #   ~/tfm_entorno/ejecutar.sh exp gluon rmsnorm    # solo el rmsnorm de Gluon
 #   ~/tfm_entorno/ejecutar.sh shell helion   # bash interactivo en el contenedor
 #
+# Dos nodos (GB10 unidos por el cable QSFP, RoCE): 'encolar dist' copia el codigo al otro
+# nodo (rsync, sin results/ ni logs/) y pide ambos en la cola hennessy-patterson (exclusiva;
+# con COLA=benchmark|test, un trabajo heterogeneo con la cola de cada nodo). El
+# nodo del repo es el rank 0 y guarda los resultados en results/<nodo0>-<nodo1>/:
+#   bash ~/hennessy/tfm_entorno/ejecutar.sh encolar dist run_dist_matmul [--sizes ...]
+#   NODO_PAR=patterson COLA=test bash ~/hennessy/tfm_entorno/ejecutar.sh encolar dist ...
+#   (la primera vez, REBUILD=1 delante: la imagen del otro nodo debe salir de este repo)
+#
+# TODO en las dos GPUs con UN solo trabajo: cada nodo ejecuta 'todo' a la vez (sus resultados en
+# results/<su nodo>/) y al final run_dist_matmul en los dos. Al terminar, 'traer' (desde el
+# login) copia los resultados del otro nodo a este repo y regenera las tablas:
+#   bash ~/hennessy/tfm_entorno/ejecutar.sh encolar ambos todo
+#   bash ~/hennessy/tfm_entorno/ejecutar.sh traer
+#
 # Comandos:
 #   encolar <cmd...>  envia '<cmd...>' a la cola Slurm del nodo del repo (ver arriba)
 #   imagen [dsl]      construye la imagen del DSL (por defecto todas) y la valida
@@ -36,6 +50,14 @@
 #   exp <alg> [args]  ejecuta los benchmarks de un algoritmo (run_<alg>.py, run_<alg>_*.py)
 #                     de TODOS los DSLs, cada uno en su imagen: 'exp matmul', 'exp rmsnorm'
 #   exp <dsl> <alg> [args]  solo los de ese algoritmo en ese DSL: 'exp helion matmul'
+#   dist <exp> [args] (dentro de un trabajo heterogeneo de 2 nodos, lo pone 'encolar dist')
+#                     ejecuta el benchmark con torchrun, un rank por nodo, NCCL por la red QSFP
+#   todo              en este nodo: todos los benchmarks de cada DSL (con su validacion),
+#                     run_pico_mma y run_sostenido; sigue aunque falle alguno
+#   ambos <cmd...>    (dentro de un trabajo heterogeneo, lo pone 'encolar ambos') '<cmd...>' a la
+#                     vez en los dos nodos; 'ambos todo' anade al final 'dist run_dist_matmul'
+#   traer             (desde el login) copia results/<otro nodo>*/ del otro nodo y regenera
+#                     results/*_metrics.csv y el resumen
 #   listar            lista los experimentos disponibles (run_*.py) y cuantos hay
 #   shell [dsl]       bash interactivo en el contenedor (solo con srun --pty)
 #
@@ -54,6 +76,12 @@
 #   TFM_CACHE_FRIA=1  caches de compilacion vacias y efimeras (en el /tmp del contenedor):
 #                     mide compilacion + autotuning en frio (t_compilacion_s, autotune_s).
 #                     Usar con TFM_MAQUINA=<nodo>-frio, que el resumen de rendimiento ignora
+#   NODO_PAR=...      'encolar dist|ambos', 'traer': el otro nodo (por defecto hennessy<->patterson)
+#   PARTICION_DOS=... 'encolar dist|ambos': cola con los dos nodos (por defecto <nodo>-<otro>)
+#   COLA=...          'encolar dist|ambos': benchmark | test -> heterogeneo con <nodo>-<COLA>
+#   RED_DIST=172.16.  'dist': prefijo de IP de la red entre nodos (interfaz del cable QSFP)
+#   NCCL_IB_HCA=...   'dist': dispositivos RoCE para NCCL (por defecto los detecta NCCL)
+#   NCCL_DEBUG=...    'dist': por defecto INFO (subsistemas INIT,NET: muestra si usa RoCE)
 #   TFM_DOCS=...      carpeta de documentos para la memoria (por defecto ../tfm/docs, fuera
 #                     del repositorio)
 #   TFM_ENERGIA=1     cada medida anade el regimen sostenido (potencia, J por llamada, GFLOP/J
@@ -102,9 +130,7 @@ mkdir -p "${DOCS}"
 # Envia este script a Slurm. El nodo sale de la ruta del repo: desde el login esta en
 # /machines/<nodo>/<ruta en el nodo>; si no, es el nodo actual. Asi la particion
 # (<nodo>-benchmark), el --chdir y el log apuntan a rutas validas DENTRO del nodo.
-encolar() {
-    [ $# -ge 1 ] || uso
-    local real nodo ruta
+nodo_del_repo() {
     real="$(realpath "${RAIZ}")"
     if [[ "${real}" =~ ^/machines/([^/]+)(/.*)$ ]]; then
         nodo="${BASH_REMATCH[1]}"
@@ -112,6 +138,16 @@ encolar() {
     else
         nodo="$(hostname -s)"
         ruta="${real}"
+    fi
+}
+
+encolar() {
+    [ $# -ge 1 ] || uso
+    local real nodo ruta
+    nodo_del_repo
+    if [ "$1" = "dist" ] || [ "$1" = "ambos" ]; then
+        encolar_dos "${nodo}" "${ruta}" "${real}" "$@"
+        return
     fi
     local particion="${PARTICION:-${nodo}-benchmark}"
     local nombre="tfm-$1"
@@ -122,6 +158,136 @@ encolar() {
         "${real}/ejecutar.sh" "$@"
     echo "Log: logs/${nombre}-<JOBID>.out   Cola: squeue -p ${particion}"
 }
+
+# El otro nodo del par (NODO_PAR o hennessy<->patterson). Los nodos no se ven entre si: copiar
+# codigo y resultados solo se puede desde el login, que ve ambos en /machines/<nodo>/.
+nodo_par() {
+    local otro="${NODO_PAR:-}"
+    if [ -z "${otro}" ]; then
+        case "$1" in hennessy) otro=patterson ;; patterson) otro=hennessy ;;
+            *) echo "ERROR: indica el otro nodo con NODO_PAR=<nodo>." >&2; exit 1 ;; esac
+    fi
+    if [ ! -d "/machines/${otro}${2%/*}" ] || [[ "$3" != /machines/* ]]; then
+        echo "ERROR: hay que lanzarlo desde el login, con el repo en /machines/<nodo>/." >&2
+        exit 1
+    fi
+    echo "${otro}"
+}
+
+# 'traer': results/<otro>*/ del repo del otro nodo -> este repo, y regenera las tablas consolidadas.
+traer() {
+    local real nodo ruta otro origen d
+    nodo_del_repo
+    otro="$(nodo_par "${nodo}" "${ruta}" "${real}")"
+    origen="/machines/${otro}${ruta}/results"
+    shopt -s nullglob
+    local dirs=("${origen}/${otro}"*/)
+    shopt -u nullglob
+    if [ ${#dirs[@]} -eq 0 ]; then
+        echo "== No hay resultados de ${otro} que traer (${origen}/${otro}*/) =="
+        return
+    fi
+    for d in "${dirs[@]}"; do
+        echo "== Trayendo ${otro}:${ruta}/results/$(basename "${d}")/ =="
+        rsync -a "${d}" "${real}/results/$(basename "${d}")/"
+    done
+    echo "== Regenerando results/*_metrics.csv y el resumen =="
+    (cd "${real}/benchmarks" && python3.11 -c '
+import informe, resumen
+for fam in sorted({informe.familia(e) for _, e, _ in informe.ultimas_ejecuciones()} - {None}):
+    informe.actualizar_metricas(fam)
+resumen.generar(mostrar="todas")')
+}
+
+# 'encolar dist|ambos': copia el codigo al otro nodo y pide los dos en un trabajo heterogeneo
+# (componente 0 = nodo del repo = rank 0; componente 1 = el otro nodo).
+encolar_dos() {
+    local nodo="$1" ruta="$2" real="$3"; shift 3
+    [ -n "${2:-}" ] || uso
+    local otro
+    otro="$(nodo_par "${nodo}" "${ruta}" "${real}")"
+    traer   # resultados de un trabajo anterior en el otro nodo, por si no se trajeron
+    echo "== Copiando el codigo a ${otro}:${ruta} (sin results/, logs/, .cache/, .git/) =="
+    mkdir -p "/machines/${otro}${ruta}"
+    rsync -a --delete --exclude /results/ --exclude /logs/ --exclude /.cache/ --exclude /.git/ \
+        "${real}/" "/machines/${otro}${ruta}/"
+    local nombre="$1-$(basename "$2" .py)" comun=() part p
+    comun=(-J "${nombre}" --chdir="${ruta}" -o "${ruta}/logs/%x-%j.out" -e "${ruta}/logs/%x-%j.out"
+           --export=ALL,TFM_NODO0="${nodo}")
+    # Cola con los dos nodos (hennessy-patterson, exclusiva) o, con COLA=benchmark|test o si no
+    # existe, un trabajo heterogeneo con las colas de cada nodo.
+    part="${PARTICION_DOS:-}"
+    if [ -z "${part}" ] && [ -z "${COLA:-}" ]; then
+        for p in "${nodo}-${otro}" "${otro}-${nodo}"; do
+            [ -n "$(sinfo -h -p "${p}" -o %P 2>/dev/null)" ] && { part="${p}"; break; }
+        done
+    fi
+    if [ -n "${part}" ]; then
+        echo "== Encolando '$*' en ${part} (2 nodos; repo en el nodo: ${ruta}) =="
+        sbatch "${comun[@]}" -p "${part}" -N 2 --ntasks-per-node=1 --cpus-per-task=14 \
+            "${real}/ejecutar.sh" "$@"
+    else
+        local cola="${COLA:-benchmark}" cpus=14
+        [ "${cola}" = "test" ] && cpus=2   # MaxCPUsPerNode=2 en las colas -test
+        echo "== Encolando '$*' en ${nodo}-${cola} + ${otro}-${cola} (heterogeneo; repo en el nodo: ${ruta}) =="
+        sbatch "${comun[@]}" -p "${nodo}-${cola}" --cpus-per-task="${cpus}" \
+            : -p "${otro}-${cola}" --cpus-per-task="${cpus}" "${real}/ejecutar.sh" "$@"
+    fi
+    echo "Log: logs/${nombre}-<JOBID>.out (en ${nodo})   Cola: squeue -u $(id -un)"
+}
+
+# Nodos de un trabajo de 2 nodos (cola hennessy-patterson o heterogeneo): NODOS=(rank0 rank1),
+# rank 0 = nodo del repo (TFM_NODO0, lo pone 'encolar').
+nodos_del_trabajo() {
+    local n0 n
+    if [ "${SLURM_HET_SIZE:-1}" -ge 2 ]; then
+        NODOS=("${SLURM_JOB_NODELIST_HET_GROUP_0}" "${SLURM_JOB_NODELIST_HET_GROUP_1}")
+    elif [ "${SLURM_JOB_NUM_NODES:-1}" -ge 2 ]; then
+        n0="${TFM_NODO0:-$(hostname -s)}"
+        NODOS=("${n0}")
+        for n in $(scontrol show hostnames "${SLURM_JOB_NODELIST}"); do
+            [ "${n}" != "${n0}" ] && NODOS+=("${n}")
+        done
+    else
+        echo "ERROR: hace falta un trabajo de 2 nodos: usa 'ejecutar.sh encolar dist|ambos ...'." >&2
+        exit 1
+    fi
+}
+
+# srun en el nodo del rank $1 (NODOS de nodos_del_trabajo).
+srun_en() {
+    local r="$1"; shift
+    if [ "${SLURM_HET_SIZE:-1}" -ge 2 ]; then
+        srun --het-group="${r}" "$@"
+    else
+        srun -N1 -n1 -w "${NODOS[r]}" "$@"
+    fi
+}
+
+# En un trabajo de 2 nodos: 'ejecutar.sh <args>' a la vez en ambos (un srun por
+# componente), salida con el nodo delante; '@R' en los args pasa a ser el rank (0 | 1).
+# Con --parar, si uno falla se para el otro (p. ej. un rank de torchrun esperaria al otro).
+en_los_dos() {
+    local parar=0 pids=() r p fallo=0
+    [ "$1" = "--parar" ] && { parar=1; shift; }
+    nodos_del_trabajo
+    for r in 0 1; do
+        ( srun_en "${r}" bash "${RAIZ}/ejecutar.sh" "${@//@R/${r}}" 2>&1 \
+            | sed -u "s/^/[${NODOS[r]}] /" ) &
+        pids+=($!)
+    done
+    if [ "${parar}" = 1 ] && ! wait -n; then
+        fallo=1
+        echo "== ERROR: un nodo ha fallado; se para el otro =="
+        pkill -TERM -P "$(IFS=,; echo "${pids[*]}")" 2>/dev/null || true   # los srun de cada nodo
+    fi
+    for p in "${pids[@]}"; do wait "${p}" || fallo=1; done
+    return "${fallo}"
+}
+
+# Interfaz e IP de la red entre nodos (cable QSFP): la que tiene una IPv4 que empieza por RED_DIST.
+iface_dist() { ip -o -4 addr show | awk -v red="${RED_DIST:-172.16.}" 'index($4, red) == 1 {print $2; exit}'; }
+ip_dist() { ip -o -4 addr show | awk -v red="${RED_DIST:-172.16.}" 'index($4, red) == 1 {sub("/.*", "", $4); print $4; exit}'; }
 
 uso() { sed -n '3,/^# ---/p' "${RAIZ}/ejecutar.sh" | sed '$d; s/^# \{0,1\}//'; exit "${1:-1}"; }
 
@@ -177,13 +343,39 @@ construir_imagen() {
 }
 
 asegurar_imagen() {
-    if [ "${REBUILD}" = "1" ] || ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
+    if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
         construir_imagen
+    elif [ "${REBUILD}" = "1" ] && ! construir_imagen; then
+        # P. ej. sin acceso a nvcr.io desde el nodo: mejor medir con la imagen que hay que no medir.
+        echo "AVISO: no se pudo reconstruir ${IMAGE}; se usa la existente" \
+             "($(docker image inspect -f '{{.Created}}' "${IMAGE}"))."
     fi
+}
+
+# Contenedores de trabajos anteriores que siguen vivos: si Slurm mata un trabajo (p. ej. NODE_FAIL
+# del otro nodo y reencolado), muere el cliente 'docker run' pero NO el contenedor, que sigue
+# usando la GPU y falsea las medidas del siguiente intento (job 21058: matmul a ~41 TFLOP/s
+# en vez de ~92; descartados/LEEME.md). Cada contenedor lleva la etiqueta tfm.job=<job>.<intento>;
+# se paran los que no son de este intento y cuyo trabajo ya no corre (o es un intento anterior).
+ETIQUETA_JOB="${SLURM_JOB_ID:-local}.${SLURM_RESTART_COUNT:-0}"
+limpiar_huerfanos() {
+    local c etiqueta job
+    command -v squeue >/dev/null 2>&1 || return 0
+    for c in $(docker ps -q --filter label=tfm.job 2>/dev/null); do
+        etiqueta="$(docker inspect -f '{{index .Config.Labels "tfm.job"}}' "${c}")"
+        job="${etiqueta%%.*}"
+        [ "${etiqueta}" = "${ETIQUETA_JOB}" ] && continue
+        [ "${job}" = "local" ] && continue
+        if [ "${job}" = "${SLURM_JOB_ID:-}" ] || [ -z "$(squeue -h -j "${job}" -t R 2>/dev/null)" ]; then
+            echo "AVISO: parando contenedor huerfano ${c} (tfm.job=${etiqueta}; este es ${ETIQUETA_JOB})"
+            docker rm -f "${c}" >/dev/null || true
+        fi
+    done
 }
 
 # La GPU debe estar libre para que las medidas sean fiables.
 estado_gpu() {
+    limpiar_huerfanos
     echo "== Estado de la GPU =="
     local salida
     # Si nvidia-smi no puede hablar con el driver, Docker tampoco podra usar la GPU: abortar ya.
@@ -216,7 +408,16 @@ en_contenedor() {
     local tty=() cache=/workspace/tfm/.cache
     [ "${TFM_CACHE_FRIA:-0}" = "1" ] && cache=/tmp/tfm-cache
     [ -t 0 ] && [ -t 1 ] && tty=(-it)
-    docker run --rm --gpus all ${tty[@]+"${tty[@]}"} \
+    # 'dist': red del host (NCCL ve el ConnectX-7), RDMA (/dev/infiniband, memoria bloqueable).
+    local red=()
+    if [ "${TFM_DIST:-0}" = "1" ]; then
+        red=(--network host --ipc host --ulimit memlock=-1 --ulimit stack=67108864
+             -e NCCL_SOCKET_IFNAME="${TFM_IFACE}" -e GLOO_SOCKET_IFNAME="${TFM_IFACE}"
+             -e NCCL_DEBUG="${NCCL_DEBUG:-INFO}" -e NCCL_DEBUG_SUBSYS="${NCCL_DEBUG_SUBSYS:-INIT,NET}")
+        [ -d /dev/infiniband ] && red+=(--device /dev/infiniband)
+        [ -n "${NCCL_IB_HCA:-}" ] && red+=(-e NCCL_IB_HCA="${NCCL_IB_HCA}")
+    fi
+    docker run --rm --gpus all ${tty[@]+"${tty[@]}"} ${red[@]+"${red[@]}"} --label tfm.job="${ETIQUETA_JOB}" \
         -v "${RAIZ}":/workspace/tfm -v "${DOCS}":/workspace/docs -e TFM_DOCS=/workspace/docs \
         -w /workspace/tfm \
         --user "$(id -u):$(id -g)" -e HOME=/tmp \
@@ -397,6 +598,82 @@ case "${COMANDO}" in
             echo "ERROR: han fallado: ${fallos[*]}"
             exit 1
         fi
+        ;;
+    dist)
+        # En un trabajo de 2 nodos: un 'srun' por nodo, cada uno lanza '_rango <r>' (contenedor +
+        # torchrun). Si un rank falla, se para el otro.
+        [ $# -ge 1 ] || uso
+        EXP="$(resolver_exp "$1")"
+        shift
+        usar_dsl "${DSL:-$(dsl_de_exp "${EXP}")}"
+        nodos_del_trabajo
+        # IP del rank 0 en la red QSFP (el script puede correr en el otro nodo del trabajo).
+        if [ "${NODOS[0]}" = "$(hostname -s)" ]; then
+            TFM_MASTER="$(ip_dist)"
+        else
+            TFM_MASTER="$(srun_en 0 bash "${RAIZ}/ejecutar.sh" _ip)"
+        fi
+        if [ -z "${TFM_MASTER}" ]; then
+            echo "ERROR: ${NODOS[0]} no tiene IP en la red entre nodos (RED_DIST=${RED_DIST:-172.16.})." >&2
+            exit 1
+        fi
+        export TFM_MASTER TFM_PUERTO="$((29500 + SLURM_JOB_ID % 1000))"
+        export TFM_MAQUINA="${TFM_MAQUINA:-${NODOS[0]}-${NODOS[1]}}"
+        cabecera "Experimento distribuido: ${EXP} $* | nodos ${NODOS[*]}"
+        en_los_dos --parar _rango @R "${EXP}" "$@" || { echo "ERROR: ${EXP} distribuido ha fallado"; exit 1; }
+        ;;
+    todo)
+        # Cada 'exp' valida su imagen antes de medir. run_pico_mma y run_sostenido usan la imagen
+        # triton-tlx, ya construida (REBUILD=0).
+        cabecera "Todo en $(hostname -s)"
+        fallos=()
+        for x in triton-tlx gluon helion cutlass run_pico_mma run_sostenido; do
+            reb="${REBUILD}"
+            [[ "${x}" == run_* ]] && reb=0
+            REBUILD="${reb}" bash "${RAIZ}/ejecutar.sh" exp "${x}" || fallos+=("${x}")
+        done
+        if [ ${#fallos[@]} -gt 0 ]; then
+            echo "ERROR: en $(hostname -s) han fallado: ${fallos[*]}"
+            exit 1
+        fi
+        ;;
+    ambos)
+        [ $# -ge 1 ] || uso
+        nodos_del_trabajo
+        cabecera "En los dos nodos: $* | ${NODOS[*]}"
+        fallo=0
+        en_los_dos "$@" || fallo=1
+        if [ "$1" = "todo" ]; then
+            REBUILD=0 bash "${RAIZ}/ejecutar.sh" dist run_dist_matmul || fallo=1
+        fi
+        echo "== Trae los resultados de ${NODOS[1]} desde el login:" \
+             "bash ~/${NODOS[0]}/$(basename "${RAIZ}")/ejecutar.sh traer =="
+        [ "${fallo}" = 0 ] || { echo "ERROR: ha fallado algo; busca 'ERROR' en el log"; exit 1; }
+        ;;
+    traer)
+        traer
+        exit 0
+        ;;
+    _ip)
+        ip_dist
+        exit 0
+        ;;
+    _rango)
+        # Interno ('dist'): rank $1 en este nodo.
+        RANGO="$1" EXP="$2"
+        shift 2
+        usar_dsl "${DSL:-$(dsl_de_exp "${EXP}")}"
+        export TFM_DIST=1 TFM_EXPERIMENTO="$(basename "${EXP}" .py)" TFM_IFACE="$(iface_dist)"
+        if [ -z "${TFM_IFACE}" ]; then
+            echo "ERROR: $(hostname -s) no tiene interfaz en la red entre nodos (RED_DIST=${RED_DIST:-172.16.})." >&2
+            exit 1
+        fi
+        echo "== Rank ${RANGO} en $(hostname -s): interfaz ${TFM_IFACE} ($(ip_dist)), master ${TFM_MASTER}:${TFM_PUERTO} =="
+        comprobar_docker
+        estado_gpu
+        asegurar_imagen
+        en_contenedor python -m torch.distributed.run --nnodes=2 --nproc_per_node=1 --node_rank="${RANGO}" \
+            --master_addr="${TFM_MASTER}" --master_port="${TFM_PUERTO}" "/workspace/tfm/${EXP}" "$@"
         ;;
     listar|experimentos|exps)
         listar_experimentos
